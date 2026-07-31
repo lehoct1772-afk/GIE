@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Geometric Intelligence Engine</title>
+  <meta name="description" content="Geometric Intelligence Engine — open research exploring the mathematical foundations of geometry.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0c10;
+      --fg: #e8eaed;
+      --muted: #8b919a;
+      --accent: #6ee7b7;
+      --accent-dim: rgba(110, 231, 183, 0.12);
+      --line: rgba(110, 231, 183, 0.25);
+    }
+
+    html, body {
+      height: 100%;
+    }
+
+    body {
+      font-family: "JetBrains Mono", ui-monospace, monospace;
+      background: var(--bg);
+      color: var(--fg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .grid {
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(var(--line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--line) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: radial-gradient(ellipse 70% 60% at 50% 50%, black 20%, transparent 75%);
+      pointer-events: none;
+    }
+
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      border: 1px solid var(--line);
+      pointer-events: none;
+      animation: pulse 8s ease-in-out infinite;
+    }
+
+    .orb:nth-child(1) {
+      width: min(80vw, 520px);
+      height: min(80vw, 520px);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .orb:nth-child(2) {
+      width: min(55vw, 360px);
+      height: min(55vw, 360px);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      animation-delay: -2s;
+      border-color: rgba(110, 231, 183, 0.15);
+    }
+
+    .orb:nth-child(3) {
+      width: min(30vw, 200px);
+      height: min(30vw, 200px);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      animation-delay: -4s;
+      background: var(--accent-dim);
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); }
+      50% { opacity: 1; transform: translate(-50%, -50%) scale(1.03); }
+    }
+
+    main {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 2rem 1.5rem;
+      max-width: 42rem;
+    }
+
+    h1 {
+      font-family: "Instrument Serif", Georgia, serif;
+      font-size: clamp(2.25rem, 6vw, 3.5rem);
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      margin-bottom: 1.75rem;
+    }
+
+    .status {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent);
+      border: 1px solid rgba(110, 231, 183, 0.35);
+      background: var(--accent-dim);
+      padding: 0.65rem 1.25rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .support {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      text-decoration: none;
+      color: var(--bg);
+      background: var(--accent);
+      padding: 0.85rem 1.75rem;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .support:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(110, 231, 183, 0.25);
+    }
+
+    .support:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 3px;
+    }
+
+    .support svg {
+      width: 1rem;
+      height: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="grid" aria-hidden="true"></div>
+  <div class="orb" aria-hidden="true"></div>
+  <div class="orb" aria-hidden="true"></div>
+  <div class="orb" aria-hidden="true"></div>
+
+  <main>
+    <h1>Geometric Intelligence Engine</h1>
+    <p class="status">SITE IS UNDER CONSTRUCTION</p>
+    <a class="support" href="https://github.com/lehoct1772-afk/GIE" target="_blank" rel="noopener noreferrer">
+      Support GIE
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M7 17L17 7"/><path d="M7 7h10v10"/>
+      </svg>
+    </a>
+  </main>
+</body>
+</html>
