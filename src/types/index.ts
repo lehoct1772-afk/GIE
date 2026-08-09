@@ -1,0 +1,106 @@
+export type ViewMode = 
+  | 'ORBIT_VIEW'
+  | 'GEOMETRIC_LAYERS'
+  | 'DATA_POINTS'
+  | 'SYMMETRY_MAP'
+  | 'FIBONACCI_SPIRAL'
+  | 'PRIME_PATTERNS'
+  | 'SACRED_GEOMETRY'
+  | 'MATH_VISUALIZER';
+
+export type NavTab = 
+  | 'HOME'
+  | 'ENGINE'
+  | 'PROJECTS'
+  | 'BLUEPRINT_LIBRARY'
+  | 'RESEARCH'
+  | 'DOCUMENTATION'
+  | 'PUBLIC_ACTIVITY'
+  | 'SUPPORT_GIE';
+
+export interface GeoNode {
+  id: string;
+  name: string;
+  lat: number;
+  lng: number;
+  latLabel: string;
+  lngLabel: string;
+  type: 'CORE' | 'HARMONIC' | 'BLUEPRINT' | 'SATELLITE';
+  intensity: number;
+  connections: string[]; // ids of connected nodes
+  formula: string;
+}
+
+export interface ActivityFeedItem {
+  id: string;
+  text: string;
+  timestamp: string;
+  timeAgo: string;
+  type: 'INFO' | 'DETECTED' | 'VERIFIED' | 'CONFIRMED' | 'ANALYZED';
+}
+
+export interface MathConstant {
+  symbol: string;
+  name: string;
+  value: string;
+  fullValue: string;
+  formula: string;
+  description: string;
+  geometricSignificance: string;
+}
+
+export interface DataStream {
+  id: string;
+  name: string;
+  value: string;
+  rawBytes: number;
+  percent: number;
+  color: string;
+}
+
+export interface ActiveUpload {
+  id: string;
+  filename: string;
+  status: 'Analyzing' | 'Queued' | 'Processing' | 'Complete';
+  progress: number;
+  fileType: 'image' | 'cad' | 'pdf' | 'blueprint';
+  size: string;
+  extractedNodes?: number;
+  symmetryScore?: number;
+}
+
+export interface BlueprintPreset {
+  id: string;
+  name: string;
+  category: string;
+  description: string;
+  ratio: string;
+  symmetryGroup: string;
+  formula: string;
+  complexity: string;
+  author: string;
+  svgPath: string;
+}
+
+export interface GlobeLayers {
+  continents: boolean;
+  countries: boolean;
+  coastlines: boolean;
+  rivers: boolean;
+  mountains: boolean;
+  bathymetry: boolean;
+  oceanTrenches: boolean;
+  volcanoes: boolean;
+  earthquakes: boolean;
+  tectonicPlates: boolean;
+  leyLines: boolean;
+  ancientSites: boolean;
+  cropCircles: boolean;
+  mathOverlays: boolean;
+  userUploads: boolean;
+  researchMarkers: boolean;
+}
+
+export type GISZoomLevel = 'GLOBAL' | 'REGIONAL' | 'GEOLOGICAL' | 'RESEARCH' | 'LOCAL';
+
+

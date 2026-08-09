@@ -1,37 +1,77 @@
-import { useRef } from "react";
-import { useFrame } from "@react-three/fiber";
-import * as THREE from "three";
+import { Html } from "@react-three/drei";
 
-export default function Globe() {
-  const globe = useRef<THREE.Mesh>(null!);
+const panelStyle = {
+  padding: "8px 12px",
+  border: "1px solid rgba(0,245,255,.65)",
+  borderRadius: "6px",
+  background: "rgba(0,12,20,.82)",
+  color: "#9ffcff",
+  fontFamily:
+    'Consolas, "Courier New", monospace',
+  fontSize: "11px",
+  lineHeight: "1.4",
+  whiteSpace: "nowrap" as const,
+  boxShadow:
+    "0 0 18px rgba(0,245,255,.25), inset 0 0 12px rgba(0,245,255,.08)",
+};
 
-  useFrame((state, delta) => {
-    if (!globe.current) return;
-
-    globe.current.rotation.y += delta * 0.08;
-    globe.current.rotation.x =
-      Math.sin(state.clock.elapsedTime * 0.15) * 0.03;
-  });
-
+export default function FormulaOverlay() {
   return (
-    <group>
-      <mesh ref={globe}>
-        <sphereGeometry args={[2.25, 128, 128]} />
+    <>
+      <Html position={[-1.65, 0.95, 0]} center>
+        <div style={panelStyle}>
+          <b style={{ color: "#00F5FF" }}>EARTH GRID</b>
+          <br />
+          Latitude / Longitude
+          <br />
+          φ • θ • r
+        </div>
+      </Html>
 
-        <meshPhysicalMaterial
-          color="#07131f"
-          emissive="#00d8ff"
-          emissiveIntensity={0.18}
-          metalness={0.9}
-          roughness={0.15}
-          clearcoat={1}
-          clearcoatRoughness={0}
-          transmission={0.05}
-          transparent
-          opacity={0.96}
-          wireframe
-        />
-      </mesh>
-    </group>
+      <Html position={[1.65, 0.82, 0]} center>
+        <div style={panelStyle}>
+          <b style={{ color: "#66FFFF" }}>GOLDEN RATIO</b>
+          <br />
+          φ = 1.61803398875
+          <br />
+          Fibonacci Harmonics
+        </div>
+      </Html>
+
+      <Html position={[-1.65, -0.15, 0]} center>
+        <div style={panelStyle}>
+          <b style={{ color: "#7AFFD7" }}>GEOMETRIC ENGINE</b>
+          <br />
+          Euclidean Space
+          <br />
+          x • y • z
+        </div>
+      </Html>
+
+      <Html position={[1.65, -0.32, 0]} center>
+        <div style={panelStyle}>
+          <b style={{ color: "#FFD54A" }}>FREQUENCY</b>
+          <br />
+          λ = c / f
+          <br />
+          Harmonic Resonance
+        </div>
+      </Html>
+
+      <Html position={[0, 1.55, 0]} center>
+        <div
+          style={{
+            color: "#00F5FF",
+            fontSize: "20px",
+            fontWeight: 700,
+            letterSpacing: "3px",
+            textShadow: "0 0 18px #00F5FF",
+            fontFamily: "Arial",
+          }}
+        >
+          G I E
+        </div>
+      </Html>
+    </>
   );
 }
