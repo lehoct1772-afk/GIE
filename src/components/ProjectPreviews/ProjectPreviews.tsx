@@ -98,7 +98,7 @@ const PreviewCard: React.FC<{ project: ProjectPreview }> = ({
           object-cover
           opacity-80
           transition
-          duration-500
+          duration-300
           group-hover:scale-[1.03]
           group-hover:opacity-100
         "
@@ -183,11 +183,10 @@ export const ProjectPreviews: React.FC = () => {
         absolute
         inset-0
         z-10
-        hidden
+        flex
         items-center
         justify-between
         px-[6.5rem]
-        xl:flex
       "
     >
       {/* LEFT THREE */}
