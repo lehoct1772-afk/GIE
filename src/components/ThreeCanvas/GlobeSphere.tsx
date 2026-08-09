@@ -1,11 +1,14 @@
-import React, { useMemo, useRef } from 'react';
-import { useFrame } from '@react-three/fiber';
-import * as THREE from 'three';
-import { GeoNode, GlobeLayers } from '../../types';
-import { GEO_NODES } from '../../data/mockData';
-import { createGISWorldTexture, createGISElevationBumpMap } from './worldTexture';
-import { geodeticToCartesian } from '../../services/gisEngine';
-import { Globe3DLayers } from './Globe3DLayers';
+import React, { useMemo, useRef } from "react";
+import { useFrame } from "@react-three/fiber";
+import * as THREE from "three";
+import { GeoNode, GlobeLayers } from "../../types";
+import { GEO_NODES } from "../../data/mockData";
+import {
+  createGISWorldTexture,
+  createGISElevationBumpMap,
+} from "./worldTexture";
+import { geodeticToCartesian } from "../../services/gisEngine";
+import { Globe3DLayers } from "./Globe3DLayers";
 
 interface GlobeSphereProps {
   viewMode: string;
@@ -16,23 +19,40 @@ interface GlobeSphereProps {
   layers?: GlobeLayers;
 }
 
-// Convert lat/long to 3D spherical coordinates using WGS84 Geodetic transform
-export function latLngToVector3(lat: number, lng: number, radius: number): THREE.Vector3 {
+export function latLngToVector3(
+  lat: number,
+  lng: number,
+  radius: number
+): THREE.Vector3 {
   return geodeticToCartesian(lat, lng, 0, radius);
 }
 
-// Create curved quadratic arc line points between two 3D vectors
-function createArcPoints(v1: THREE.Vector3, v2: THREE.Vector3, numPoints = 32): THREE.Vector3[] {
+function createArcPoints(
+  v1: THREE.Vector3,
+  v2: THREE.Vector3,
+  numPoints = 48
+): THREE.Vector3[] {
   const distance = v1.distanceTo(v2);
-  const mid = new THREE.Vector3().addVectors(v1, v2).multiplyScalar(0.5);
-  const midLength = mid.length();
-  mid.normalize().multiplyScalar(midLength + distance * 0.25);
 
-  const curve = new THREE.QuadraticBezierCurve3(v1, mid, v2);
+  const mid = new THREE.Vector3()
+    .addVectors(v1, v2)
+    .multiplyScalar(0.5);
+
+  const midLength = mid.length();
+
+  mid
+    .normalize()
+    .multiplyScalar(midLength + distance * 0.22);
+
+  const curve = new THREE.QuadraticBezierCurve3(
+    v1,
+    mid,
+    v2
+  );
+
   return curve.getPoints(numPoints);
 }
 
-// Default Layers fallback
 const DEFAULT_LAYERS: GlobeLayers = {
   continents: true,
   countries: false,
@@ -49,286 +69,726 @@ const DEFAULT_LAYERS: GlobeLayers = {
   cropCircles: false,
   mathOverlays: true,
   userUploads: false,
-  researchMarkers: false
+  researchMarkers: false,
 };
 
-// Single Pulsing Data Marker Component for Authentic GIE Dataset Nodes
 const PulsingDataMarker: React.FC<{
   position: THREE.Vector3;
   isSelected: boolean;
   type: string;
-  onClick: (e: any) => void;
-}> = ({ position, isSelected, type, onClick }) => {
-  const pulseRingRef = useRef<THREE.Mesh>(null);
+  onClick: (event: any) => void;
+}> = ({
+  position,
+  isSelected,
+  type,
+  onClick,
+}) => {
   const coreRef = useRef<THREE.Mesh>(null);
+  const haloRef = useRef<THREE.Mesh>(null);
+  const pulseRef = useRef<THREE.Mesh>(null);
 
-  const color = isSelected
-    ? '#ffb700'
-    : type === 'CORE'
-    ? '#00f0ff'
-    : type === 'HARMONIC'
-    ? '#00ff9d'
-    : '#00a8ff';
+  const color =
+    isSelected
+      ? "#ffd400"
+      : type === "CORE"
+      ? "#00ffff"
+      : type === "HARMONIC"
+      ? "#00ff88"
+      : "#00d9ff";
 
-  useFrame(({ clock }) => {
-    const elapsed = clock.getElapsedTime();
-    if (pulseRingRef.current) {
-      const t = (elapsed * 0.8) % 1;
-      pulseRingRef.current.scale.setScalar(0.8 + t * 1.8);
-      (pulseRingRef.current.material as THREE.MeshBasicMaterial).opacity = (1 - t) * 0.55;
-    }
-    if (coreRef.current) {
-      // Soft natural glisten & pulse (never flashes randomly)
-      const pulseOpacity = Math.sin(elapsed * 1.8) * 0.2 + 0.8;
-      (coreRef.current.material as THREE.MeshBasicMaterial).opacity = pulseOpacity;
-    }
-  });
+  const normal = useMemo(
+    () => position.clone().normalize(),
+    [position]
+  );
 
-  const normal = useMemo(() => position.clone().normalize(), [position]);
   const quaternion = useMemo(() => {
     const q = new THREE.Quaternion();
-    q.setFromUnitVectors(new THREE.Vector3(0, 0, 1), normal);
+
+    q.setFromUnitVectors(
+      new THREE.Vector3(0, 0, 1),
+      normal
+    );
+
     return q;
   }, [normal]);
 
+  useFrame(({ clock }) => {
+    const elapsed = clock.getElapsedTime();
+
+    if (coreRef.current) {
+      const material =
+        coreRef.current.material as THREE.MeshBasicMaterial;
+
+      material.opacity =
+        0.92 + Math.sin(elapsed * 2.1) * 0.08;
+
+      const scale =
+        1 + Math.sin(elapsed * 2.1) * 0.12;
+
+      coreRef.current.scale.setScalar(scale);
+    }
+
+    if (haloRef.current) {
+      const material =
+        haloRef.current.material as THREE.MeshBasicMaterial;
+
+      material.opacity =
+        0.38 + Math.sin(elapsed * 1.4) * 0.12;
+
+      const scale =
+        1.05 + Math.sin(elapsed * 1.4) * 0.1;
+
+      haloRef.current.scale.setScalar(scale);
+    }
+
+    if (pulseRef.current) {
+      const cycle = (elapsed * 0.5) % 1;
+
+      pulseRef.current.scale.setScalar(
+        0.8 + cycle * 2.25
+      );
+
+      const material =
+        pulseRef.current.material as THREE.MeshBasicMaterial;
+
+      material.opacity =
+        (1 - cycle) * 0.65;
+    }
+  });
+
   return (
     <group position={position}>
-      {/* Core Node Glisten */}
-      <mesh ref={coreRef} onClick={onClick}>
-        <sphereGeometry args={[isSelected ? 0.08 : 0.05, 16, 16]} />
-        <meshBasicMaterial color={color} transparent opacity={0.9} />
+      {/* BRIGHT NODE CORE */}
+      <mesh
+        ref={coreRef}
+        onClick={onClick}
+        renderOrder={30}
+      >
+        <sphereGeometry
+          args={[
+            isSelected ? 0.085 : 0.055,
+            20,
+            20,
+          ]}
+        />
+
+        <meshBasicMaterial
+          color={color}
+          transparent
+          opacity={1}
+          blending={THREE.AdditiveBlending}
+          depthWrite={false}
+          toneMapped={false}
+        />
       </mesh>
 
-      {/* Outer Halo Ring */}
-      <mesh>
-        <sphereGeometry args={[isSelected ? 0.12 : 0.08, 16, 16]} />
-        <meshBasicMaterial color={color} transparent opacity={0.3} wireframe />
+      {/* NODE GLOW */}
+      <mesh
+        ref={haloRef}
+        renderOrder={29}
+      >
+        <sphereGeometry
+          args={[
+            isSelected ? 0.15 : 0.105,
+            16,
+            16,
+          ]}
+        />
+
+        <meshBasicMaterial
+          color={color}
+          transparent
+          opacity={0.42}
+          blending={THREE.AdditiveBlending}
+          depthWrite={false}
+          toneMapped={false}
+        />
       </mesh>
 
-      {/* Pulsing Shockwave Marker */}
-      <mesh ref={pulseRingRef} quaternion={quaternion}>
-        <ringGeometry args={[0.06, 0.08, 24]} />
-        <meshBasicMaterial color={color} transparent opacity={0.5} side={THREE.DoubleSide} />
+      {/* EXPANDING NODE PULSE */}
+      <mesh
+        ref={pulseRef}
+        quaternion={quaternion}
+        renderOrder={31}
+      >
+        <ringGeometry
+          args={[0.06, 0.078, 32]}
+        />
+
+        <meshBasicMaterial
+          color={color}
+          transparent
+          opacity={0.6}
+          side={THREE.DoubleSide}
+          blending={THREE.AdditiveBlending}
+          depthWrite={false}
+          toneMapped={false}
+        />
       </mesh>
     </group>
   );
 };
 
-export const GlobeSphere: React.FC<GlobeSphereProps> = ({
+export const GlobeSphere: React.FC<
+  GlobeSphereProps
+> = ({
   selectedNodeId,
   onSelectNode,
   showNodes,
   showWireframe,
-  layers = DEFAULT_LAYERS
+  layers = DEFAULT_LAYERS,
 }) => {
-  const sphereGroupRef = useRef<THREE.Group>(null);
-  const ringsGroupRef = useRef<THREE.Group>(null);
-  const animatedGridRef = useRef<THREE.Group>(null);
+  const globeRef = useRef<THREE.Group>(null);
+  const goldRingRef = useRef<THREE.Group>(null);
 
-  // Globe radius - standard scale fitting screen frame
   const radius = 2.4;
 
-  // Generate GIS continent & features texture dynamically based on layers
   const continentTexture = useMemo(() => {
-    return createGISWorldTexture(layers);
+    const texture = createGISWorldTexture(layers);
+
+    texture.colorSpace = THREE.SRGBColorSpace;
+    texture.anisotropy = 8;
+    texture.needsUpdate = true;
+
+    return texture;
   }, [layers]);
 
-  // Generate SRTM/ETOPO1 elevation & bathymetry bump map for realistic terrain relief
   const elevationBumpMap = useMemo(() => {
     return createGISElevationBumpMap();
   }, []);
 
-  // Slow smooth globe rotation
-  useFrame((_, delta) => {
-    if (sphereGroupRef.current) {
-      sphereGroupRef.current.rotation.y += delta * 0.08;
-      sphereGroupRef.current.rotation.x = Math.sin(Date.now() * 0.0003) * 0.05;
+  void elevationBumpMap;
+
+  /*
+    KEEP EXISTING ROTATION.
+    THIS IS THE MOVEMENT WE ALREADY HAVE.
+  */
+  useFrame((state, delta) => {
+    const elapsed = state.clock.elapsedTime;
+
+    if (globeRef.current) {
+      globeRef.current.rotation.y += delta * 0.055;
+
+      globeRef.current.rotation.x =
+        Math.sin(elapsed * 0.18) * 0.025;
     }
-    if (ringsGroupRef.current) {
-      ringsGroupRef.current.rotation.y -= delta * 0.04;
-    }
-    if (animatedGridRef.current) {
-      animatedGridRef.current.rotation.y += delta * 0.12;
+
+    if (goldRingRef.current) {
+      goldRingRef.current.rotation.z +=
+        delta * 0.035;
     }
   });
 
-  // Node 3D positions for genuine GIE dataset nodes only
   const nodePositions = useMemo(() => {
-    return GEO_NODES.map(node => ({
+    return GEO_NODES.map((node) => ({
       ...node,
-      position: latLngToVector3(node.lat, node.lng, radius)
+
+      position: latLngToVector3(
+        node.lat,
+        node.lng,
+        radius * 1.025
+      ),
     }));
-  }, [radius]);
+  }, []);
 
   const nodeMap = useMemo(() => {
-    const map = new Map<string, THREE.Vector3>();
-    nodePositions.forEach(n => map.set(n.id, n.position));
+    const map =
+      new Map<string, THREE.Vector3>();
+
+    nodePositions.forEach((node) => {
+      map.set(node.id, node.position);
+    });
+
     return map;
   }, [nodePositions]);
 
-  // Real GIE Node connection arcs mapped directly from GEO_NODES connections
   const arcs = useMemo(() => {
-    const lines: { id: string; points: THREE.Vector3[]; isSelected: boolean }[] = [];
+    const lines: {
+      id: string;
+      points: THREE.Vector3[];
+      isSelected: boolean;
+    }[] = [];
+
     const addedPairs = new Set<string>();
 
-    GEO_NODES.forEach(sourceNode => {
-      sourceNode.connections.forEach(targetId => {
-        const pairKey = [sourceNode.id, targetId].sort().join('--');
-        if (!addedPairs.has(pairKey)) {
-          addedPairs.add(pairKey);
-          const sourcePos = nodeMap.get(sourceNode.id);
-          const targetPos = nodeMap.get(targetId);
-          if (sourcePos && targetPos) {
-            const points = createArcPoints(sourcePos, targetPos);
-            const isSelected = sourceNode.id === selectedNodeId || targetId === selectedNodeId;
-            lines.push({ id: pairKey, points, isSelected });
+    GEO_NODES.forEach((sourceNode) => {
+      sourceNode.connections.forEach(
+        (targetId) => {
+          const pairKey = [
+            sourceNode.id,
+            targetId,
+          ]
+            .sort()
+            .join("--");
+
+          if (addedPairs.has(pairKey)) {
+            return;
           }
+
+          addedPairs.add(pairKey);
+
+          const sourcePosition =
+            nodeMap.get(sourceNode.id);
+
+          const targetPosition =
+            nodeMap.get(targetId);
+
+          if (
+            !sourcePosition ||
+            !targetPosition
+          ) {
+            return;
+          }
+
+          lines.push({
+            id: pairKey,
+
+            points: createArcPoints(
+              sourcePosition,
+              targetPosition
+            ),
+
+            isSelected:
+              sourceNode.id === selectedNodeId ||
+              targetId === selectedNodeId,
+          });
         }
-      });
+      );
     });
 
     return lines;
   }, [nodeMap, selectedNodeId]);
 
-  // Latitude & longitude grid
-  const gridRings = useMemo(() => {
-    const rings: { points: THREE.Vector3[]; isEquator?: boolean }[] = [];
+  const latitudeLines = useMemo(() => {
+    const rings: {
+      points: THREE.Vector3[];
+      equator: boolean;
+    }[] = [];
 
-    // Latitude rings
-    const lats = [-30, 0, 30];
-    lats.forEach(lat => {
-      const points: THREE.Vector3[] = [];
-      const segs = 64;
-      for (let i = 0; i <= segs; i++) {
-        const lng = (i / segs) * 360 - 180;
-        points.push(latLngToVector3(lat, lng, radius * 1.002));
-      }
-      rings.push({ points, isEquator: lat === 0 });
-    });
+    const latitudes = [
+      -60,
+      -30,
+      0,
+      30,
+      60,
+    ];
 
-    // Longitude meridian rings
-    const lngs = [0, 60, 120];
-    lngs.forEach(lng => {
+    latitudes.forEach((lat) => {
       const points: THREE.Vector3[] = [];
-      const segs = 64;
-      for (let i = 0; i <= segs; i++) {
-        const lat = (i / segs) * 180 - 90;
-        points.push(latLngToVector3(lat, lng, radius * 1.002));
+
+      const segments = 128;
+
+      for (
+        let i = 0;
+        i <= segments;
+        i++
+      ) {
+        const lng =
+          (i / segments) * 360 - 180;
+
+        points.push(
+          latLngToVector3(
+            lat,
+            lng,
+            radius * 1.01
+          )
+        );
       }
-      rings.push({ points });
+
+      rings.push({
+        points,
+        equator: lat === 0,
+      });
     });
 
     return rings;
-  }, [radius]);
-
-  // Custom Fresnel Shader for Atmospheric Glowing Shell
-  const atmosphereMaterial = useMemo(() => {
-    return new THREE.ShaderMaterial({
-      vertexShader: `
-        varying vec3 vNormal;
-        void main() {
-          vNormal = normalize(normalMatrix * normal);
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-        }
-      `,
-      fragmentShader: `
-        varying vec3 vNormal;
-        void main() {
-          float intensity = pow(0.65 - dot(vNormal, vec3(0, 0, 1.0)), 2.2);
-          gl_FragColor = vec4(0.0, 0.94, 1.0, 1.0) * intensity * 0.95;
-        }
-      `,
-      blending: THREE.AdditiveBlending,
-      side: THREE.BackSide,
-      transparent: true
-    });
   }, []);
 
+  const longitudeLines = useMemo(() => {
+    const lines: THREE.Vector3[][] = [];
+
+    const longitudes = [
+      0,
+      30,
+      60,
+      90,
+      120,
+      150,
+    ];
+
+    longitudes.forEach((lng) => {
+      const points: THREE.Vector3[] = [];
+
+      const segments = 128;
+
+      for (
+        let i = 0;
+        i <= segments;
+        i++
+      ) {
+        const lat =
+          (i / segments) * 180 - 90;
+
+        points.push(
+          latLngToVector3(
+            lat,
+            lng,
+            radius * 1.01
+          )
+        );
+      }
+
+      lines.push(points);
+    });
+
+    return lines;
+  }, []);
+
+  /*
+    STRONGER CYAN ATMOSPHERE.
+  */
+  const atmosphereMaterial = useMemo(
+    () =>
+      new THREE.ShaderMaterial({
+        vertexShader: `
+          varying vec3 vNormal;
+
+          void main() {
+            vNormal =
+              normalize(normalMatrix * normal);
+
+            gl_Position =
+              projectionMatrix *
+              modelViewMatrix *
+              vec4(position, 1.0);
+          }
+        `,
+
+        fragmentShader: `
+          varying vec3 vNormal;
+
+          void main() {
+
+            float fresnel =
+              pow(
+                0.82 -
+                dot(
+                  vNormal,
+                  vec3(0.0, 0.0, 1.0)
+                ),
+                2.15
+              );
+
+            vec3 cyan =
+              vec3(
+                0.0,
+                1.0,
+                1.0
+              );
+
+            gl_FragColor =
+              vec4(
+                cyan,
+                fresnel * 0.78
+              );
+          }
+        `,
+
+        blending: THREE.AdditiveBlending,
+        side: THREE.BackSide,
+        transparent: true,
+        depthWrite: false,
+        toneMapped: false,
+      }),
+    []
+  );
+
   return (
-    <group ref={sphereGroupRef}>
-      {/* 1. Illuminated GIS Earth Globe Sphere */}
-      <mesh>
-        <sphereGeometry args={[radius, 64, 64]} />
-        <meshBasicMaterial
+    <group ref={globeRef}>
+
+      {/* ========================================
+          BRIGHT TRANSPARENT EARTH
+          ======================================== */}
+
+      <mesh renderOrder={1}>
+        <sphereGeometry
+          args={[radius, 96, 96]}
+        />
+
+        <meshPhongMaterial
           map={continentTexture}
           transparent
-          opacity={0.94}
+          opacity={0.88}
+          color="#d5ffff"
+          emissive="#007d92"
+          emissiveIntensity={0.72}
+          shininess={55}
+          depthWrite
+          toneMapped={false}
         />
       </mesh>
 
-      {/* 2. Glowing Atmospheric Shell */}
-      <mesh material={atmosphereMaterial}>
-        <sphereGeometry args={[radius * 1.12, 64, 64]} />
+      {/* ========================================
+          DARK GLASS CORE
+          ======================================== */}
+
+      <mesh renderOrder={0}>
+        <sphereGeometry
+          args={[
+            radius * 0.994,
+            64,
+            64,
+          ]}
+        />
+
+        <meshBasicMaterial
+          color="#001018"
+          transparent
+          opacity={0.25}
+          side={THREE.BackSide}
+          depthWrite={false}
+        />
       </mesh>
 
-      {/* 3. Outer Blueprint Wireframe */}
+      {/* ========================================
+          BRIGHT CYAN ATMOSPHERE
+          ======================================== */}
+
+      <mesh
+        material={atmosphereMaterial}
+        renderOrder={2}
+      >
+        <sphereGeometry
+          args={[
+            radius * 1.075,
+            64,
+            64,
+          ]}
+        />
+      </mesh>
+
+      {/* ========================================
+          BLUEPRINT WIREFRAME
+          ======================================== */}
+
       {showWireframe && (
-        <mesh>
-          <sphereGeometry args={[radius * 1.001, 24, 24]} />
+        <mesh renderOrder={3}>
+          <sphereGeometry
+            args={[
+              radius * 1.004,
+              32,
+              32,
+            ]}
+          />
+
           <meshBasicMaterial
-            color="#00f0ff"
+            color="#00ffff"
             wireframe
             transparent
-            opacity={0.08}
+            opacity={0.18}
+            blending={THREE.AdditiveBlending}
+            depthWrite={false}
+            toneMapped={false}
           />
         </mesh>
       )}
 
-      {/* 4. Latitude / Longitude Grid */}
-      <group ref={animatedGridRef}>
-        {gridRings.map((ring, idx) => {
-          const lineGeo = new THREE.BufferGeometry().setFromPoints(ring.points);
+      {/* ========================================
+          LATITUDE GRID
+          EQUATOR REMAINS GOLD
+          ======================================== */}
+
+      {latitudeLines.map(
+        (ring, index) => {
+          const geometry =
+            new THREE.BufferGeometry()
+              .setFromPoints(ring.points);
+
           return (
-            <line key={idx}>
-              <primitive object={lineGeo} />
+            <line
+              key={`lat-${index}`}
+              renderOrder={8}
+            >
+              <primitive
+                object={geometry}
+              />
+
               <lineBasicMaterial
-                color={ring.isEquator ? '#ffb700' : '#00f0ff'}
+                color={
+                  ring.equator
+                    ? "#ffd400"
+                    : "#00ffff"
+                }
                 transparent
-                opacity={ring.isEquator ? 0.55 : 0.22}
-                linewidth={ring.isEquator ? 2 : 1}
+                opacity={
+                  ring.equator
+                    ? 1
+                    : 0.72
+                }
+                blending={THREE.AdditiveBlending}
+                depthWrite={false}
+                toneMapped={false}
               />
             </line>
           );
-        })}
-      </group>
+        }
+      )}
 
-      {/* 5. Sleek Equatorial Harmonic Orbit Line */}
-      <group ref={ringsGroupRef}>
-        <mesh rotation={[Math.PI / 2, 0, 0]}>
-          <ringGeometry args={[radius * 1.22, radius * 1.23, 64]} />
-          <meshBasicMaterial color="#00ff9d" transparent opacity={0.3} side={THREE.DoubleSide} />
+      {/* ========================================
+          LONGITUDE GRID
+          ======================================== */}
+
+      {longitudeLines.map(
+        (points, index) => {
+          const geometry =
+            new THREE.BufferGeometry()
+              .setFromPoints(points);
+
+          return (
+            <line
+              key={`lng-${index}`}
+              renderOrder={8}
+            >
+              <primitive
+                object={geometry}
+              />
+
+              <lineBasicMaterial
+                color="#00ffff"
+                transparent
+                opacity={0.68}
+                blending={THREE.AdditiveBlending}
+                depthWrite={false}
+                toneMapped={false}
+              />
+            </line>
+          );
+        }
+      )}
+
+      {/* ========================================
+          GOLD EQUATOR / HARMONIC RING
+          ======================================== */}
+
+      <group ref={goldRingRef}>
+        <mesh
+          rotation={[
+            Math.PI / 2,
+            0,
+            0,
+          ]}
+          renderOrder={12}
+        >
+          <ringGeometry
+            args={[
+              radius * 1.16,
+              radius * 1.17,
+              128,
+            ]}
+          />
+
+          <meshBasicMaterial
+            color="#ffd400"
+            transparent
+            opacity={1}
+            side={THREE.DoubleSide}
+            blending={THREE.AdditiveBlending}
+            depthWrite={false}
+            toneMapped={false}
+          />
+        </mesh>
+
+        {/* GOLD OUTER GLOW */}
+        <mesh
+          rotation={[
+            Math.PI / 2,
+            0,
+            0,
+          ]}
+          renderOrder={11}
+        >
+          <ringGeometry
+            args={[
+              radius * 1.14,
+              radius * 1.19,
+              128,
+            ]}
+          />
+
+          <meshBasicMaterial
+            color="#ffb700"
+            transparent
+            opacity={0.22}
+            side={THREE.DoubleSide}
+            blending={THREE.AdditiveBlending}
+            depthWrite={false}
+            toneMapped={false}
+          />
         </mesh>
       </group>
 
-      {/* 6. Dynamic 3D Layer Overlays */}
-      <Globe3DLayers layers={layers} radius={radius} />
+      {/* ========================================
+          GIS / RESEARCH LAYERS
+          ======================================== */}
 
-      {/* 7. Glowing GIE Node Harmonic Relationship Arcs */}
-      {arcs.map(arc => {
-        const arcGeo = new THREE.BufferGeometry().setFromPoints(arc.points);
+      <Globe3DLayers
+        layers={layers}
+        radius={radius}
+      />
+
+      {/* ========================================
+          BRIGHT GIE CONNECTION ARCS
+          ======================================== */}
+
+      {arcs.map((arc) => {
+        const geometry =
+          new THREE.BufferGeometry()
+            .setFromPoints(arc.points);
+
         return (
-          <line key={arc.id}>
-            <primitive object={arcGeo} />
+          <line
+            key={arc.id}
+            renderOrder={14}
+          >
+            <primitive
+              object={geometry}
+            />
+
             <lineBasicMaterial
-              color={arc.isSelected ? '#ffb700' : '#00ff9d'}
+              color={
+                arc.isSelected
+                  ? "#ffd400"
+                  : "#00ff9d"
+              }
               transparent
-              opacity={arc.isSelected ? 0.95 : 0.5}
-              linewidth={arc.isSelected ? 2.5 : 1.2}
+              opacity={
+                arc.isSelected
+                  ? 1
+                  : 0.82
+              }
+              blending={THREE.AdditiveBlending}
+              depthWrite={false}
+              toneMapped={false}
             />
           </line>
         );
       })}
 
-      {/* 8. Pulsing Data Markers for GIE Geographic Dataset Nodes */}
+      {/* ========================================
+          BRIGHT PULSING GIE NODES
+          ======================================== */}
+
       {showNodes &&
-        nodePositions.map(node => (
+        nodePositions.map((node) => (
           <PulsingDataMarker
             key={node.id}
             position={node.position}
-            isSelected={node.id === selectedNodeId}
+            isSelected={
+              node.id === selectedNodeId
+            }
             type={node.type}
-            onClick={e => {
-              e.stopPropagation();
+            onClick={(event) => {
+              event.stopPropagation();
               onSelectNode(node);
             }}
           />

@@ -1,13 +1,11 @@
-import React, { useState } from 'react';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { OrbitControls } from '@react-three/drei';
-import { GlobeSphere } from './GlobeSphere';
-import { PlatonicSolids } from './PlatonicSolids';
-import { SacredGeometry3D } from './SacredGeometry3D';
-import { ParticleField } from './ParticleField';
-import { GeoNode, GlobeLayers, GISZoomLevel } from '../../types';
-import { GlobeLayerControl } from './GlobeLayerControl';
-import { GISZoomHUD } from './GISZoomHUD';
+import React, { useState } from "react";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { OrbitControls } from "@react-three/drei";
+import { GlobeSphere } from "./GlobeSphere";
+import { PlatonicSolids } from "./PlatonicSolids";
+import { SacredGeometry3D } from "./SacredGeometry3D";
+import { ParticleField } from "./ParticleField";
+import { GeoNode, GlobeLayers, GISZoomLevel } from "../../types";
 
 interface GlobeSceneProps {
   viewMode: string;
@@ -22,25 +20,17 @@ interface GlobeSceneProps {
   onResetLayers: () => void;
 }
 
-// Camera Distance Tracker Component inside Canvas
-function ZoomTracker({ onDistanceUpdate }: { onDistanceUpdate: (dist: number) => void }) {
+function ZoomTracker({
+  onDistanceUpdate,
+}: {
+  onDistanceUpdate: (dist: number) => void;
+}) {
   const { camera } = useThree();
+
   useFrame(() => {
     onDistanceUpdate(camera.position.length());
   });
-  return null;
-}
 
-// Smooth Continuous Camera Drift Component
-function CameraDriftController({ isFocusMode }: { isFocusMode: boolean }) {
-  useFrame((state) => {
-    if (!isFocusMode) {
-      const t = state.clock.getElapsedTime();
-      state.camera.position.x += Math.sin(t * 0.15) * 0.001;
-      state.camera.position.y += Math.cos(t * 0.12) * 0.001;
-      state.camera.lookAt(0, 0, 0);
-    }
-  });
   return null;
 }
 
@@ -53,40 +43,65 @@ export const GlobeScene: React.FC<GlobeSceneProps> = ({
   isFocusMode,
   onToggleFocusMode,
   layers,
-  onToggleLayer,
-  onResetLayers
 }) => {
-  const [cameraDistance, setCameraDistance] = useState(6.0);
+  const [cameraDistance, setCameraDistance] = useState(7.8);
 
-  // Compute Zoom Level based on camera distance
   const zoomLevel: GISZoomLevel =
     cameraDistance > 6.8
-      ? 'GLOBAL'
+      ? "GLOBAL"
       : cameraDistance > 5.4
-      ? 'REGIONAL'
+      ? "REGIONAL"
       : cameraDistance > 4.5
-      ? 'GEOLOGICAL'
+      ? "GEOLOGICAL"
       : cameraDistance > 3.8
-      ? 'RESEARCH'
-      : 'LOCAL';
+      ? "RESEARCH"
+      : "LOCAL";
+
+  void zoomLevel;
+
+  const handleDoubleClick = () => {
+    onToggleFocusMode(!isFocusMode);
+  };
 
   return (
     <div
-      className="w-full h-full relative"
-      onDoubleClick={() => onToggleFocusMode(false)}
+      className="relative h-full w-full"
+      onDoubleClick={handleDoubleClick}
     >
-      {/* 3D Canvas Scene */}
       <Canvas
-        camera={{ position: [0, 0, 7.8], fov: 42 }}
-        gl={{ antialias: true, alpha: true }}
-        style={{ background: 'transparent' }}
+        camera={{
+          position: [0, 0, 8.2],
+          fov: 42,
+        }}
+        gl={{
+          antialias: true,
+          alpha: true,
+          powerPreference: "high-performance",
+        }}
+        dpr={[1, 1.75]}
+        style={{
+          background: "transparent",
+        }}
       >
-        <ambientLight intensity={0.5} />
-        <directionalLight position={[10, 10, 10]} intensity={1.5} color="#00f0ff" />
-        <pointLight position={[-10, -10, -10]} intensity={0.9} color="#ffb700" />
+        <ambientLight intensity={0.42} />
 
-        <group scale={0.88}>
-          {/* 3D GIS Earth Sphere */}
+        <directionalLight
+          position={[8, 8, 10]}
+          intensity={1.15}
+          color="#00f0ff"
+        />
+
+        <pointLight
+          position={[-8, -6, -8]}
+          intensity={0.55}
+          color="#ffb700"
+        />
+
+        {/* BACKGROUND FIELD - STAYS BEHIND GLOBE */}
+        <ParticleField />
+
+        {/* MAIN GLOBE */}
+        <group scale={0.82}>
           <GlobeSphere
             viewMode={viewMode}
             selectedNodeId={selectedNodeId}
@@ -96,32 +111,34 @@ export const GlobeScene: React.FC<GlobeSceneProps> = ({
             layers={layers}
           />
 
-          {/* Floating Platonic Solids wireframes */}
-          <PlatonicSolids viewMode={viewMode} />
+          {/* ONLY SHOW THESE WHEN THEIR VIEW MODES REQUIRE THEM */}
+          {(viewMode === "SACRED_GEOMETRY" ||
+            viewMode === "GEOMETRIC_LAYERS" ||
+            viewMode === "ORBIT_VIEW") && (
+            <PlatonicSolids viewMode={viewMode} />
+          )}
 
-          {/* 3D Sacred Geometry Curves */}
-          <SacredGeometry3D viewMode={viewMode} />
+          {(viewMode === "FIBONACCI_SPIRAL" ||
+            viewMode === "SACRED_GEOMETRY" ||
+            viewMode === "GEOMETRIC_LAYERS") && (
+            <SacredGeometry3D viewMode={viewMode} />
+          )}
         </group>
 
-        {/* Background Multi-layer Stars */}
-        <ParticleField />
-
-        {/* Camera Drift Controller */}
-        <CameraDriftController isFocusMode={isFocusMode} />
-
-        {/* Zoom Distance Tracker */}
         <ZoomTracker onDistanceUpdate={setCameraDistance} />
 
-        {/* Interactive Controls */}
         <OrbitControls
-          enableZoom={true}
+          enableZoom
+          enableRotate
           enablePan={false}
-          minDistance={3.2}
-          maxDistance={9.5}
-          rotateSpeed={0.6}
-          autoRotate={viewMode === 'ORBIT_VIEW' && !isFocusMode}
-          autoRotateSpeed={0.5}
-          onStart={() => onToggleFocusMode(true)}
+          minDistance={4.2}
+          maxDistance={10}
+          rotateSpeed={0.5}
+          zoomSpeed={0.7}
+          dampingFactor={0.08}
+          enableDamping
+          autoRotate={viewMode === "ORBIT_VIEW" && !isFocusMode}
+          autoRotateSpeed={0.35}
         />
       </Canvas>
     </div>

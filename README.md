@@ -1,29 +1,20 @@
-# Geometric Intelligence Engine (GIE)
+<div align="center">
+<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
+</div>
 
-The Geometric Intelligence Engine (GIE) is an open-source research and software project dedicated to exploring the mathematical foundations of geometry through computation, visualization, and artificial intelligence.
+# Run and deploy your AI Studio app
 
-## Mission
+This contains everything you need to run your app locally.
 
-Develop a framework capable of discovering, modeling, and visualizing geometric relationships across natural and engineered systems.
+View your app in AI Studio: https://ai.studio/apps/04f3f931-036c-4d3a-8a30-c5d41d69d0cb
 
-## Current Status
+## Run Locally
 
-Project initialization.
+**Prerequisites:**  Node.js
 
-## Repository
 
-```
-GIE/
-├── docs/
-├── src/
-├── tests/
-├── examples/
-├── data/
-├── assets/
-├── scripts/
-└── tools/
-```
-
-## License
-
-MIT License# GIE
+1. Install dependencies:
+   `npm install`
+2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
+3. Run the app:
+   `npm run dev`

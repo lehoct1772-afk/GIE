@@ -3,151 +3,186 @@ import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 
 export const ParticleField: React.FC = () => {
-  const pointsRefFar = useRef<THREE.Points>(null);
-  const pointsRefNear = useRef<THREE.Points>(null);
+  const farRef = useRef<THREE.Points>(null);
+  const nodeRef = useRef<THREE.Points>(null);
+  const glowRef = useRef<THREE.Points>(null);
 
-  const countFar = 900;
-  const countNear = 300;
+  const farCount = 700;
+  const nodeCount = 150;
 
-  // Layer 1: Distant Background Stars
-  const [posFar, colFar] = useMemo(() => {
-    const pos = new Float32Array(countFar * 3);
-    const col = new Float32Array(countFar * 3);
+  const [farPositions, farColors] = useMemo(() => {
+    const positions = new Float32Array(farCount * 3);
+    const colors = new Float32Array(farCount * 3);
 
-    const colorCyan = new THREE.Color("#00f0ff");
-    const colorGold = new THREE.Color("#ffb700");
-    const colorWhite = new THREE.Color("#ffffff");
+    const cyan = new THREE.Color("#00eaff");
+    const white = new THREE.Color("#d8ffff");
+    const gold = new THREE.Color("#ffbf00");
 
-    for (let i = 0; i < countFar; i++) {
-      const r = 8 + Math.random() * 14;
-      const theta = Math.random() * Math.PI * 2;
-      const phi = Math.acos(2 * Math.random() - 1);
+    for (let i = 0; i < farCount; i++) {
+      positions[i * 3] =
+        (Math.random() - 0.5) * 18;
 
-      pos[i * 3] = r * Math.sin(phi) * Math.cos(theta);
-      pos[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
-      pos[i * 3 + 2] = r * Math.cos(phi);
+      positions[i * 3 + 1] =
+        (Math.random() - 0.5) * 10;
 
-      const rand = Math.random();
-      const c =
-        rand > 0.7
-          ? colorCyan
-          : rand > 0.4
-            ? colorWhite
-            : colorGold;
+      positions[i * 3 + 2] =
+        -4 - Math.random() * 6;
 
-      col[i * 3] = c.r;
-      col[i * 3 + 1] = c.g;
-      col[i * 3 + 2] = c.b;
+      const random = Math.random();
+
+      const color =
+        random > 0.9
+          ? gold
+          : random > 0.5
+          ? white
+          : cyan;
+
+      colors[i * 3] = color.r;
+      colors[i * 3 + 1] = color.g;
+      colors[i * 3 + 2] = color.b;
     }
 
-    return [pos, col];
+    return [positions, colors];
   }, []);
 
-  // Layer 2: Near Foreground Stars
-  const [posNear, colNear] = useMemo(() => {
-    const pos = new Float32Array(countNear * 3);
-    const col = new Float32Array(countNear * 3);
+  const [nodePositions, nodeColors] = useMemo(() => {
+    const positions = new Float32Array(nodeCount * 3);
+    const colors = new Float32Array(nodeCount * 3);
 
-    const colorCyan = new THREE.Color("#00f0ff");
-    const colorEmerald = new THREE.Color("#00ff9d");
+    const cyan = new THREE.Color("#00f5ff");
+    const brightCyan = new THREE.Color("#8cffff");
+    const emerald = new THREE.Color("#00ff9d");
+    const gold = new THREE.Color("#ffd000");
 
-    for (let i = 0; i < countNear; i++) {
-      const r = 4.5 + Math.random() * 4;
-      const theta = Math.random() * Math.PI * 2;
-      const phi = Math.acos(2 * Math.random() - 1);
+    for (let i = 0; i < nodeCount; i++) {
+      positions[i * 3] =
+        (Math.random() - 0.5) * 15;
 
-      pos[i * 3] = r * Math.sin(phi) * Math.cos(theta);
-      pos[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
-      pos[i * 3 + 2] = r * Math.cos(phi);
+      positions[i * 3 + 1] =
+        (Math.random() - 0.5) * 8;
 
-      const c =
-        Math.random() > 0.5
-          ? colorCyan
-          : colorEmerald;
+      positions[i * 3 + 2] =
+        -2.8 - Math.random() * 3.2;
 
-      col[i * 3] = c.r;
-      col[i * 3 + 1] = c.g;
-      col[i * 3 + 2] = c.b;
+      const random = Math.random();
+
+      const color =
+        random > 0.88
+          ? gold
+          : random > 0.65
+          ? emerald
+          : random > 0.35
+          ? brightCyan
+          : cyan;
+
+      colors[i * 3] = color.r;
+      colors[i * 3 + 1] = color.g;
+      colors[i * 3 + 2] = color.b;
     }
 
-    return [pos, col];
+    return [positions, colors];
   }, []);
 
-  // Independent automatic movement.
-  // NO pointer or mouse tracking.
   useFrame((state, delta) => {
-    const t = state.clock.elapsedTime;
+    const time = state.clock.elapsedTime;
 
-    if (pointsRefFar.current) {
-      pointsRefFar.current.rotation.y += delta * 0.015;
-      pointsRefFar.current.rotation.x =
-        Math.sin(t * 0.08) * 0.015;
-
-      pointsRefFar.current.position.x =
-        Math.sin(t * 0.05) * 0.08;
-
-      pointsRefFar.current.position.y =
-        Math.cos(t * 0.04) * 0.05;
+    if (farRef.current) {
+      farRef.current.rotation.y += delta * 0.001;
     }
 
-    if (pointsRefNear.current) {
-      pointsRefNear.current.rotation.y += delta * 0.03;
-      pointsRefNear.current.rotation.x =
-        Math.cos(t * 0.11) * 0.025;
+    if (nodeRef.current) {
+      const material =
+        nodeRef.current.material as THREE.PointsMaterial;
 
-      pointsRefNear.current.position.x =
-        Math.sin(t * 0.08) * 0.14;
+      material.opacity =
+        0.78 + Math.sin(time * 1.7) * 0.16;
+    }
 
-      pointsRefNear.current.position.y =
-        Math.cos(t * 0.07) * 0.09;
+    if (glowRef.current) {
+      const material =
+        glowRef.current.material as THREE.PointsMaterial;
+
+      material.opacity =
+        0.18 + Math.sin(time * 1.7) * 0.07;
     }
   });
 
   return (
     <group>
-      {/* Background Deep Starfield */}
-      <points ref={pointsRefFar}>
+      {/* DEEP BACKGROUND DATA FIELD */}
+      <points ref={farRef} renderOrder={-30}>
         <bufferGeometry>
           <bufferAttribute
             attach="attributes-position"
-            args={[posFar, 3]}
+            args={[farPositions, 3]}
           />
+
           <bufferAttribute
             attach="attributes-color"
-            args={[colFar, 3]}
+            args={[farColors, 3]}
           />
         </bufferGeometry>
 
         <pointsMaterial
-          size={0.035}
+          size={0.045}
           vertexColors
           transparent
-          opacity={0.6}
+          opacity={0.52}
           sizeAttenuation
           depthWrite={false}
+          depthTest
         />
       </points>
 
-      {/* Foreground Floating Particles */}
-      <points ref={pointsRefNear}>
+      {/* SOFT NODE GLOW */}
+      <points ref={glowRef} renderOrder={-20}>
         <bufferGeometry>
           <bufferAttribute
             attach="attributes-position"
-            args={[posNear, 3]}
+            args={[nodePositions, 3]}
           />
+
           <bufferAttribute
             attach="attributes-color"
-            args={[colNear, 3]}
+            args={[nodeColors, 3]}
           />
         </bufferGeometry>
 
         <pointsMaterial
-          size={0.055}
+          size={0.19}
           vertexColors
           transparent
-          opacity={0.75}
+          opacity={0.2}
           sizeAttenuation
           depthWrite={false}
+          depthTest
+          blending={THREE.AdditiveBlending}
+        />
+      </points>
+
+      {/* BRIGHT BACKGROUND NODES */}
+      <points ref={nodeRef} renderOrder={-10}>
+        <bufferGeometry>
+          <bufferAttribute
+            attach="attributes-position"
+            args={[nodePositions, 3]}
+          />
+
+          <bufferAttribute
+            attach="attributes-color"
+            args={[nodeColors, 3]}
+          />
+        </bufferGeometry>
+
+        <pointsMaterial
+          size={0.09}
+          vertexColors
+          transparent
+          opacity={0.85}
+          sizeAttenuation
+          depthWrite={false}
+          depthTest
+          blending={THREE.AdditiveBlending}
         />
       </points>
     </group>

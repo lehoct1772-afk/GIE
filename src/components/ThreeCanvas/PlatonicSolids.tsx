@@ -1,12 +1,14 @@
-import React, { useRef } from 'react';
-import { useFrame } from '@react-three/fiber';
-import * as THREE from 'three';
+import React, { useRef } from "react";
+import { useFrame } from "@react-three/fiber";
+import * as THREE from "three";
 
 interface PlatonicSolidsProps {
   viewMode: string;
 }
 
-export const PlatonicSolids: React.FC<PlatonicSolidsProps> = ({ viewMode }) => {
+export const PlatonicSolids: React.FC<PlatonicSolidsProps> = ({
+  viewMode,
+}) => {
   const icoRef = useRef<THREE.Mesh>(null);
   const dodecaRef = useRef<THREE.Mesh>(null);
   const octaRef = useRef<THREE.Mesh>(null);
@@ -14,70 +16,122 @@ export const PlatonicSolids: React.FC<PlatonicSolidsProps> = ({ viewMode }) => {
 
   useFrame((_, delta) => {
     if (icoRef.current) {
-      icoRef.current.rotation.x += delta * 0.15;
-      icoRef.current.rotation.y += delta * 0.25;
+      icoRef.current.rotation.x += delta * 0.05;
+      icoRef.current.rotation.y += delta * 0.08;
     }
+
     if (dodecaRef.current) {
-      dodecaRef.current.rotation.x -= delta * 0.1;
-      dodecaRef.current.rotation.z += delta * 0.18;
+      dodecaRef.current.rotation.x -= delta * 0.035;
+      dodecaRef.current.rotation.z += delta * 0.05;
     }
+
     if (octaRef.current) {
-      octaRef.current.rotation.y += delta * 0.2;
-      octaRef.current.rotation.z -= delta * 0.15;
+      octaRef.current.rotation.y += delta * 0.045;
+      octaRef.current.rotation.z -= delta * 0.035;
     }
+
     if (tetraRef.current) {
-      tetraRef.current.rotation.x += delta * 0.3;
-      tetraRef.current.rotation.y -= delta * 0.2;
+      tetraRef.current.rotation.x += delta * 0.055;
+      tetraRef.current.rotation.y -= delta * 0.04;
     }
   });
 
-  const isSacred = viewMode === 'SACRED_GEOMETRY' || viewMode === 'GEOMETRIC_LAYERS' || viewMode === 'ORBIT_VIEW';
+  /*
+    These geometries belong ONLY to the dedicated
+    sacred/geometric visualization modes.
+
+    They should not surround Gaia during the normal
+    Earth/interface view.
+  */
+
+  const showSacred =
+    viewMode === "SACRED_GEOMETRY" ||
+    viewMode === "GEOMETRIC_LAYERS";
+
+  const showOrbit =
+    viewMode === "ORBIT_VIEW";
+
+  if (!showSacred && !showOrbit) {
+    return null;
+  }
 
   return (
     <group>
-      {/* Central Blueprint Icosahedron (Water element / 20 faces) */}
-      <mesh ref={icoRef}>
-        <icosahedronGeometry args={[1.75, 0]} />
-        <meshBasicMaterial
-          color="#00f0ff"
-          wireframe
-          transparent
-          opacity={isSacred ? 0.35 : 0.15}
-        />
-      </mesh>
+      {/* ICOSAHEDRON */}
+      {showSacred && (
+        <mesh ref={icoRef}>
+          <icosahedronGeometry args={[1.72, 0]} />
 
-      {/* Concentric Dodecahedron (Ether element / 12 pentagonal faces) */}
-      <mesh ref={dodecaRef}>
-        <dodecahedronGeometry args={[2.2, 0]} />
-        <meshBasicMaterial
-          color="#ffb700"
-          wireframe
-          transparent
-          opacity={isSacred ? 0.28 : 0.1}
-        />
-      </mesh>
+          <meshBasicMaterial
+            color="#00f0ff"
+            wireframe
+            transparent
+            opacity={0.22}
+            depthWrite={false}
+          />
+        </mesh>
+      )}
 
-      {/* Outer Octahedron (Air element / 8 triangular faces) */}
-      <mesh ref={octaRef}>
-        <octahedronGeometry args={[3.2, 0]} />
-        <meshBasicMaterial
-          color="#00ff9d"
-          wireframe
-          transparent
-          opacity={isSacred ? 0.22 : 0.08}
-        />
-      </mesh>
+      {/* DODECAHEDRON */}
+      {showSacred && (
+        <mesh ref={dodecaRef}>
+          <dodecahedronGeometry args={[2.05, 0]} />
 
-      {/* Outer Tetrahedron Orbit */}
-      <mesh ref={tetraRef} position={[0, 0, 0]}>
-        <tetrahedronGeometry args={[4.1, 0]} />
-        <meshBasicMaterial
-          color="#bf5af2"
-          wireframe
-          transparent
-          opacity={0.12}
-        />
-      </mesh>
+          <meshBasicMaterial
+            color="#ffb700"
+            wireframe
+            transparent
+            opacity={0.16}
+            depthWrite={false}
+          />
+        </mesh>
+      )}
+
+      {/* OCTAHEDRON */}
+      {showSacred && (
+        <mesh ref={octaRef}>
+          <octahedronGeometry args={[2.35, 0]} />
+
+          <meshBasicMaterial
+            color="#00ff9d"
+            wireframe
+            transparent
+            opacity={0.13}
+            depthWrite={false}
+          />
+        </mesh>
+      )}
+
+      {/* TETRAHEDRON */}
+      {showSacred && (
+        <mesh ref={tetraRef}>
+          <tetrahedronGeometry args={[2.55, 0]} />
+
+          <meshBasicMaterial
+            color="#bf5af2"
+            wireframe
+            transparent
+            opacity={0.11}
+            depthWrite={false}
+          />
+        </mesh>
+      )}
+
+      {/* ORBIT MODE GETS ONLY A CLEAN ORBITAL GUIDE */}
+      {showOrbit && (
+        <mesh rotation={[Math.PI / 2.8, 0, 0]}>
+          <torusGeometry args={[2.15, 0.008, 8, 160]} />
+
+          <meshBasicMaterial
+            color="#00f0ff"
+            transparent
+            opacity={0.3}
+            blending={THREE.AdditiveBlending}
+            depthWrite={false}
+            toneMapped={false}
+          />
+        </mesh>
+      )}
     </group>
   );
 };
