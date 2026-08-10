@@ -178,6 +178,7 @@ const PulsingDataMarker: React.FC<{
           opacity={1}
           blending={THREE.AdditiveBlending}
           depthWrite={false}
+          depthTest={false}
           toneMapped={false}
         />
       </mesh>
@@ -201,6 +202,7 @@ const PulsingDataMarker: React.FC<{
           opacity={0.42}
           blending={THREE.AdditiveBlending}
           depthWrite={false}
+          depthTest={false}
           toneMapped={false}
         />
       </mesh>
@@ -222,6 +224,7 @@ const PulsingDataMarker: React.FC<{
           side={THREE.DoubleSide}
           blending={THREE.AdditiveBlending}
           depthWrite={false}
+          depthTest={false}
           toneMapped={false}
         />
       </mesh>
