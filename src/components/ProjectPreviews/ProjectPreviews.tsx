@@ -38,7 +38,7 @@ const PreviewCard = ({
 export const ProjectPreviews = () => {
   return (
     <>
-      <div className="pointer-events-auto absolute left-[11%] top-[155px] z-20 flex w-[250px] flex-col gap-[10px]">
+      <div className="pointer-events-auto absolute left-[11%] top-[125px] z-20 flex w-[250px] flex-col gap-[10px]">
         {leftProjects.map((project) => (
           <PreviewCard
             key={project.title}
@@ -48,7 +48,7 @@ export const ProjectPreviews = () => {
         ))}
       </div>
 
-      <div className="pointer-events-auto absolute right-[7%] top-[155px] z-20 flex w-[250px] flex-col gap-[10px]">
+      <div className="pointer-events-auto absolute right-[7%] top-[125px] z-20 flex w-[250px] flex-col gap-[10px]">
         {rightProjects.map((project) => (
           <PreviewCard
             key={project.title}
@@ -60,3 +60,5 @@ export const ProjectPreviews = () => {
     </>
   );
 };
+
+

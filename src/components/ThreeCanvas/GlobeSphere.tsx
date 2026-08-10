@@ -42,7 +42,7 @@ function createArcPoints(
 
   mid
     .normalize()
-    .multiplyScalar(midLength + distance * 0.22);
+    .multiplyScalar(midLength + distance * 0.10);
 
   const curve = new THREE.QuadraticBezierCurve3(
     v1,
@@ -177,7 +177,7 @@ const PulsingDataMarker: React.FC<{
           ]}
         />
 
-        <meshBasicMaterial
+        <meshStandardMaterial
           color={color}
           transparent
           opacity={1}
@@ -265,7 +265,7 @@ export const GlobeSphere: React.FC<
     return createGISElevationBumpMap();
   }, []);
 
-  void elevationBumpMap;
+
 
   /*
     KEEP EXISTING ROTATION.
@@ -277,8 +277,7 @@ export const GlobeSphere: React.FC<
     if (globeRef.current) {
       globeRef.current.rotation.y += delta * 0.055;
 
-      globeRef.current.rotation.x =
-        Math.sin(elapsed * 0.18) * 0.025;
+      globeRef.current.rotation.x = 0;
     }
 
     if (goldRingRef.current) {
@@ -525,6 +524,8 @@ export const GlobeSphere: React.FC<
 
         <meshBasicMaterial
           map={continentTexture}
+            bumpMap={elevationBumpMap}
+            bumpScale={0.035}
           color="#ffffff"
           transparent
           opacity={1}
@@ -689,8 +690,8 @@ export const GlobeSphere: React.FC<
         >
           <ringGeometry
             args={[
-              radius * 1.16,
-              radius * 1.17,
+              radius * 1.012,
+              radius * 1.018,
               128,
             ]}
           />
@@ -717,8 +718,8 @@ export const GlobeSphere: React.FC<
         >
           <ringGeometry
             args={[
-              radius * 1.14,
-              radius * 1.19,
+              radius * 1.006,
+              radius * 1.024,
               128,
             ]}
           />
@@ -805,6 +806,9 @@ export const GlobeSphere: React.FC<
     </group>
   );
 };
+
+
+
 
 
 
