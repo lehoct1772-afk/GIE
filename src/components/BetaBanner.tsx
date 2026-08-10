@@ -1,5 +1,5 @@
-import { Construction, GitBranch } from "lucide-react";
-import { BUILD_INFO, formatBuildTimestamp } from "@/lib/buildInfo";
+﻿import { Construction, GitBranch } from "lucide-react";
+import { BUILD_INFO, formatBuildTimestamp } from "../lib/buildInfo";
 
 export default function BetaBanner() {
   return (

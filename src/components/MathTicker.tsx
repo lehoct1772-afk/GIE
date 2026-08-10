@@ -1,4 +1,4 @@
-import { TICKER_ITEMS, type TickerItem } from "@/lib/tickerData";
+﻿import { TICKER_ITEMS, type TickerItem } from "../lib/tickerData";
 
 const CATEGORY_COLORS: Record<string, string> = {
   COORD: "text-cyan-300",

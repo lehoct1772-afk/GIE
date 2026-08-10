@@ -1,5 +1,5 @@
-import { Hexagon, Globe, BrainCircuit, BookOpen, Cpu } from "lucide-react";
-import { BUILD_INFO, formatBuildTimestamp } from "@/lib/buildInfo";
+﻿import { Hexagon, Globe, BrainCircuit, BookOpen, Cpu } from "lucide-react";
+import { BUILD_INFO, formatBuildTimestamp } from "../lib/buildInfo";
 
 const FOOTER_LINKS = [
   {
@@ -122,7 +122,7 @@ export default function Footer() {
 
             <div className="text-sm text-cyan-100/55">
 
-              © {new Date().getFullYear()} Geometric Intelligence Engine
+              Â© {new Date().getFullYear()} Geometric Intelligence Engine
 
             </div>
 
@@ -145,3 +145,4 @@ export default function Footer() {
     </footer>
 );
 }
+
