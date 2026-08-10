@@ -34,12 +34,12 @@ const PreviewCard: React.FC<{
   title: string;
   image: string;
 }> = ({ title, image }) => (
-  <div className="relative overflow-hidden rounded border border-cyan-400/40 bg-black/45 backdrop-blur-sm shadow-[0_0_18px_rgba(0,245,255,0.12)]">
-    <div className="h-[108px] w-full overflow-hidden bg-[#001018]">
+  <div className="overflow-hidden rounded-md border border-cyan-400/60 bg-[#001018]/90 shadow-[0_0_16px_rgba(0,245,255,0.12)]">
+    <div className="h-[92px] w-full overflow-hidden bg-black/40">
       <img
         src={image}
         alt={title}
-        className="h-full w-full object-cover opacity-90"
+        className="h-full w-full object-cover"
         draggable={false}
       />
     </div>
@@ -53,7 +53,7 @@ const PreviewCard: React.FC<{
 export const ProjectPreviews: React.FC = () => {
   return (
     <>
-      <div className="pointer-events-auto absolute left-[72px] top-[185px] z-20 flex w-[220px] flex-col gap-3">
+      <div className="pointer-events-auto absolute left-[156px] top-[185px] z-20 flex w-[220px] flex-col gap-3">
         {leftProjects.map((project) => (
           <PreviewCard
             key={project.title}
