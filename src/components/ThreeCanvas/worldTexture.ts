@@ -1,6 +1,8 @@
-import * as THREE from 'three';
+﻿import * as THREE from 'three';
 import { GlobeLayers } from '../../types';
 import { NaturalEarthDatasets } from '../../services/naturalEarthData';
+import { feature } from 'topojson-client';
+import countries110m from 'world-atlas/countries-110m.json';
 
 /**
  * High-Resolution GIS Equirectangular (WGS84 EPSG:4326) Earth Texture Compiler
@@ -10,6 +12,54 @@ import { NaturalEarthDatasets } from '../../services/naturalEarthData';
  * bathymetric ocean depth contours, country boundaries, and terrain shading.
  */
 
+
+type GeoPosition = [number, number];
+type GeoRing = GeoPosition[];
+type GeoPolygon = GeoRing[];
+type GeoMultiPolygon = GeoPolygon[];
+
+const WORLD_GEOMETRY = feature(
+  countries110m as any,
+  (countries110m as any).objects.countries
+) as any;
+
+function drawWorldAtlasPath(
+  ctx: CanvasRenderingContext2D,
+  toXY: (lng: number, lat: number) => [number, number]
+) {
+  const drawRing = (ring: GeoRing) => {
+    if (!ring || ring.length === 0) return;
+
+    const [sx, sy] = toXY(ring[0][0], ring[0][1]);
+    ctx.moveTo(sx, sy);
+
+    for (let i = 1; i < ring.length; i++) {
+      const [x, y] = toXY(ring[i][0], ring[i][1]);
+      ctx.lineTo(x, y);
+    }
+
+    ctx.closePath();
+  };
+
+  for (const item of WORLD_GEOMETRY.features ?? []) {
+    const geometry = item.geometry;
+    if (!geometry) continue;
+
+    if (geometry.type === 'Polygon') {
+      for (const ring of geometry.coordinates as GeoPolygon) {
+        drawRing(ring);
+      }
+    }
+
+    if (geometry.type === 'MultiPolygon') {
+      for (const polygon of geometry.coordinates as GeoMultiPolygon) {
+        for (const ring of polygon) {
+          drawRing(ring);
+        }
+      }
+    }
+  }
+}
 export function createGISWorldTexture(layers: GlobeLayers): THREE.CanvasTexture {
   const canvas = document.createElement('canvas');
   canvas.width = 4096;
@@ -63,38 +113,29 @@ export function createGISWorldTexture(layers: GlobeLayers): THREE.CanvasTexture 
 
   // 3. WGS84 Natural Earth Continents & Islands Fill
   if (layers.continents) {
-    NaturalEarthDatasets.CONTINENTS.forEach(feature => {
-      const coords = feature.coordinates;
-      if (coords.length === 0) return;
+    ctx.save();
+    ctx.beginPath();
 
-      ctx.beginPath();
-      const [startX, startY] = toXY(coords[0][0], coords[0][1]);
-      ctx.moveTo(startX, startY);
-      for (let i = 1; i < coords.length; i++) {
-        const [ptX, ptY] = toXY(coords[i][0], coords[i][1]);
-        ctx.lineTo(ptX, ptY);
-      }
-      ctx.closePath();
+    drawWorldAtlasPath(ctx, toXY);
 
-      // Professional Scientific Landmass Fill
-      const landGrad = ctx.createLinearGradient(0, 0, width, height);
-      landGrad.addColorStop(0, 'rgba(0, 220, 255, 0.18)');
-      landGrad.addColorStop(0.5, 'rgba(0, 255, 170, 0.15)');
-      landGrad.addColorStop(1, 'rgba(0, 150, 255, 0.18)');
-      ctx.fillStyle = landGrad;
-      ctx.fill();
+    const landGrad = ctx.createLinearGradient(0, 0, width, height);
+    landGrad.addColorStop(0, '#062838');
+    landGrad.addColorStop(0.45, '#084354');
+    landGrad.addColorStop(1, '#031e2d');
 
-      // Precision Vector Coastline Outline
-      if (layers.coastlines) {
-        ctx.strokeStyle = '#00f0ff';
-        ctx.lineWidth = 3.2;
-        ctx.shadowColor = '#00f0ff';
-        ctx.shadowBlur = 8;
-        ctx.stroke();
-        ctx.shadowBlur = 0;
-      }
-    });
+    ctx.fillStyle = landGrad;
+    ctx.fill('evenodd');
+
+    ctx.strokeStyle = 'rgba(0, 245, 255, 0.88)';
+    ctx.lineWidth = 1.15;
+    ctx.shadowColor = '#00f5ff';
+    ctx.shadowBlur = 4;
+    ctx.stroke();
+
+    ctx.shadowBlur = 0;
+    ctx.restore();
   }
+
 
   // 4. Country Administrative Boundaries (WGS84 Borders)
   if (layers.countries) {
@@ -286,3 +327,4 @@ export function createGISElevationBumpMap(): THREE.CanvasTexture {
   texture.wrapT = THREE.ClampToEdgeWrapping;
   return texture;
 }
+
