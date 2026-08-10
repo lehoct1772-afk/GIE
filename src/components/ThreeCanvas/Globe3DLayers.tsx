@@ -1,4 +1,4 @@
-import React, { useMemo, useRef } from "react";
+﻿import React, { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { GlobeLayers } from "../../types";
@@ -203,7 +203,7 @@ export const Globe3DLayers: React.FC<
 
   /* ---------------------------------------------------------
      MAGNETIC SHELLS
-     Keep the field controlled — no giant spaghetti cage.
+     Keep the field controlled â€” no giant spaghetti cage.
      --------------------------------------------------------- */
 
   const magneticFieldLines = useMemo(() => {
@@ -330,7 +330,7 @@ export const Globe3DLayers: React.FC<
                   .setFromPoints(points);
 
               return (
-                <line
+                <primitive object={new THREE.Line()}
                   key={`mag-${index}`}
                   renderOrder={18}
                   userData={{
@@ -358,7 +358,7 @@ export const Globe3DLayers: React.FC<
                     depthWrite={false}
                     toneMapped={false}
                   />
-                </line>
+                </primitive>
               );
             }
           )}
@@ -491,7 +491,7 @@ export const Globe3DLayers: React.FC<
                 .setFromPoints(points);
 
             return (
-              <line
+              <primitive object={new THREE.Line()}
                 key={`ley-${index}`}
                 renderOrder={13}
                 userData={{
@@ -513,7 +513,7 @@ export const Globe3DLayers: React.FC<
                   depthWrite={false}
                   toneMapped={false}
                 />
-              </line>
+              </primitive>
             );
           }
         )}
@@ -530,7 +530,7 @@ export const Globe3DLayers: React.FC<
                 .setFromPoints(points);
 
             return (
-              <line
+              <primitive object={new THREE.Line()}
                 key={`plate-${index}`}
                 userData={{
                   layer:
@@ -548,7 +548,7 @@ export const Globe3DLayers: React.FC<
                   depthWrite={false}
                   toneMapped={false}
                 />
-              </line>
+              </primitive>
             );
           }
         )}

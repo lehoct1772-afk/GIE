@@ -99,6 +99,11 @@ export interface GlobeLayers {
   mathOverlays: boolean;
   userUploads: boolean;
   researchMarkers: boolean;
+  latitudeLongitude: boolean;
+  connectionArcs: boolean;
+  harmonicRing: boolean;
+  gieNodes: boolean;
+  globeWireframe: boolean;
 }
 
 export type GISZoomLevel = 'GLOBAL' | 'REGIONAL' | 'GEOLOGICAL' | 'RESEARCH' | 'LOCAL';

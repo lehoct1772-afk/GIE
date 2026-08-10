@@ -15,7 +15,7 @@ const LEFT_PROJECTS: ProjectPreview[] = [
     id: "architectural",
     number: "01",
     title: "ARCHITECTURAL BLUEPRINT",
-    image: "/images/architectural-blueprint.jpg",
+    image: "/images/architectural-blueprint.svg",
     description:
       "Explore architectural geometry, dimensions, relationships, and structural patterns.",
   },
@@ -23,7 +23,7 @@ const LEFT_PROJECTS: ProjectPreview[] = [
     id: "city",
     number: "02",
     title: "CITY / INFRASTRUCTURE BLUEPRINT",
-    image: "/images/city-infrastructure.jpg",
+    image: "/images/city-infrastructure.svg",
     description:
       "Explore infrastructure layouts, spatial relationships, networks, and geometric organization.",
   },
@@ -31,7 +31,7 @@ const LEFT_PROJECTS: ProjectPreview[] = [
     id: "crop-circle",
     number: "03",
     title: "CROP-CIRCLE SITE ANALYSIS",
-    image: "/images/crop-circle-analysis.jpg",
+    image: "/images/crop-circle-analysis.svg",
     description:
       "Explore geometric construction, measurements, symmetry, sequences, and mathematical relationships.",
   },
@@ -42,7 +42,7 @@ const RIGHT_PROJECTS: ProjectPreview[] = [
     id: "geometric",
     number: "04",
     title: "GEOMETRIC RECONSTRUCTION",
-    image: "/images/geometric-reconstruction.jpg",
+    image: "/images/geometric-reconstruction.svg",
     description:
       "Reconstruct geometric forms and examine the mathematical relationships used to create them.",
   },
@@ -50,7 +50,7 @@ const RIGHT_PROJECTS: ProjectPreview[] = [
     id: "terrain",
     number: "05",
     title: "TERRAIN / EARTH MAPPING",
-    image: "/images/terrain-mapping.jpg",
+    image: "/images/terrain-mapping.svg",
     description:
       "Explore terrain, geographic positioning, Earth geometry, mapping layers, and spatial relationships.",
   },
@@ -58,7 +58,7 @@ const RIGHT_PROJECTS: ProjectPreview[] = [
     id: "engineering",
     number: "06",
     title: "ENGINEERING / STRUCTURAL ANALYSIS",
-    image: "/images/structural-analysis.jpg",
+    image: "/images/structural-analysis.svg",
     description:
       "Explore structural geometry, measurements, components, and engineering relationships.",
   },

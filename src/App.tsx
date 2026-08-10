@@ -44,6 +44,11 @@ const INITIAL_LAYERS: GlobeLayers = {
   mathOverlays: true,
   userUploads: false,
   researchMarkers: false,
+  latitudeLongitude: false,
+  connectionArcs: true,
+  harmonicRing: false,
+  gieNodes: true,
+  globeWireframe: false,
 };
 
 export default function App() {
@@ -179,8 +184,8 @@ export default function App() {
                 soundManager.playClick();
                 setSelectedNode(node);
               }}
-              showNodes={viewMode !== 'GEOMETRIC_LAYERS'}
-              showWireframe={viewMode !== 'DATA_POINTS'}
+              showNodes={layers.gieNodes}
+              showWireframe={layers.globeWireframe}
               isFocusMode={isFocusMode}
               onToggleFocusMode={handleToggleFocusMode}
               layers={layers}

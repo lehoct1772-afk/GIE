@@ -11,6 +11,10 @@ interface GlobeLayerControlProps {
 
 const CATEGORIES: { title: string; keys: (keyof GlobeLayers)[] }[] = [
   {
+    title: 'GIE DISPLAY OVERLAYS',
+    keys: ['gieNodes', 'connectionArcs', 'harmonicRing', 'latitudeLongitude', 'globeWireframe']
+  },
+  {
     title: 'GEOGRAPHY & BOUNDARIES',
     keys: ['continents', 'coastlines', 'countries', 'rivers', 'mountains']
   },
@@ -40,7 +44,12 @@ const LAYER_LABELS: Record<keyof GlobeLayers, string> = {
   cropCircles: 'Crop Circle Sites',
   mathOverlays: 'Mathematical Grid',
   userUploads: 'User Datasets',
-  researchMarkers: 'Research Papers'
+  researchMarkers: 'Research Papers',
+  latitudeLongitude: 'Latitude / Longitude Grid',
+  connectionArcs: 'GIE Connection Lines',
+  harmonicRing: 'Gold Harmonic Ring',
+  gieNodes: 'GIE Nodes',
+  globeWireframe: 'Blueprint Wireframe'
 };
 
 export const GlobeLayerControl: React.FC<GlobeLayerControlProps> = ({
@@ -69,7 +78,7 @@ export const GlobeLayerControl: React.FC<GlobeLayerControlProps> = ({
               GLOBE LAYERS
             </span>
             <span className="text-[9px] px-1.5 py-0.5 bg-cyan-950 border border-cyan-500/40 text-emerald-400 rounded-full font-semibold">
-              {activeCount}/16
+              {activeCount}/{Object.keys(layers).length}
             </span>
           </div>
           {isOpen ? (

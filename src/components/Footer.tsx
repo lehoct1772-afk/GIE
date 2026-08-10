@@ -1,4 +1,4 @@
-import { Hexagimport { Hexagon, Globe, BrainCircuit, BookOpen, Cpu } from "lucide-react";
+import { Hexagon, Globe, BrainCircuit, BookOpen, Cpu } from "lucide-react";
 import { BUILD_INFO, formatBuildTimestamp } from "@/lib/buildInfo";
 
 const FOOTER_LINKS = [
@@ -143,4 +143,5 @@ export default function Footer() {
       </div>
 
     </footer>
+);
 }

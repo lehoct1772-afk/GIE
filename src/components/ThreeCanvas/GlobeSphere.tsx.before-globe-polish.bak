@@ -70,11 +70,6 @@ const DEFAULT_LAYERS: GlobeLayers = {
   mathOverlays: true,
   userUploads: false,
   researchMarkers: false,
-  latitudeLongitude: false,
-  connectionArcs: true,
-  harmonicRing: false,
-  gieNodes: true,
-  globeWireframe: false,
 };
 
 const PulsingDataMarker: React.FC<{
@@ -605,14 +600,14 @@ export const GlobeSphere: React.FC<
           EQUATOR REMAINS GOLD
           ======================================== */}
 
-      {layers.latitudeLongitude && latitudeLines.map(
+      {latitudeLines.map(
         (ring, index) => {
           const geometry =
             new THREE.BufferGeometry()
               .setFromPoints(ring.points);
 
           return (
-            <primitive object={new THREE.Line()}
+            <line
               key={`lat-${index}`}
               renderOrder={8}
             >
@@ -636,7 +631,7 @@ export const GlobeSphere: React.FC<
                 depthWrite={false}
                 toneMapped={false}
               />
-            </primitive>
+            </line>
           );
         }
       )}
@@ -645,14 +640,14 @@ export const GlobeSphere: React.FC<
           LONGITUDE GRID
           ======================================== */}
 
-      {layers.latitudeLongitude && longitudeLines.map(
+      {longitudeLines.map(
         (points, index) => {
           const geometry =
             new THREE.BufferGeometry()
               .setFromPoints(points);
 
           return (
-            <primitive object={new THREE.Line()}
+            <line
               key={`lng-${index}`}
               renderOrder={8}
             >
@@ -668,7 +663,7 @@ export const GlobeSphere: React.FC<
                 depthWrite={false}
                 toneMapped={false}
               />
-            </primitive>
+            </line>
           );
         }
       )}
@@ -677,7 +672,6 @@ export const GlobeSphere: React.FC<
           GOLD EQUATOR / HARMONIC RING
           ======================================== */}
 
-      {layers.harmonicRing && (
       <group ref={goldRingRef}>
         <mesh
           rotation={[
@@ -734,7 +728,6 @@ export const GlobeSphere: React.FC<
           />
         </mesh>
       </group>
-      )}
 
       {/* ========================================
           GIS / RESEARCH LAYERS
@@ -749,13 +742,13 @@ export const GlobeSphere: React.FC<
           BRIGHT GIE CONNECTION ARCS
           ======================================== */}
 
-      {layers.connectionArcs && arcs.map((arc) => {
+      {arcs.map((arc) => {
         const geometry =
           new THREE.BufferGeometry()
             .setFromPoints(arc.points);
 
         return (
-          <primitive object={new THREE.Line()}
+          <line
             key={arc.id}
             renderOrder={14}
           >
@@ -779,7 +772,7 @@ export const GlobeSphere: React.FC<
               depthWrite={false}
               toneMapped={false}
             />
-          </primitive>
+          </line>
         );
       })}
 
@@ -805,6 +798,4 @@ export const GlobeSphere: React.FC<
     </group>
   );
 };
-
-
 
