@@ -1,4 +1,4 @@
-import React, { useMemo, useRef } from "react";
+﻿import React, { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { GeoNode, GlobeLayers } from "../../types";
@@ -518,15 +518,14 @@ export const GlobeSphere: React.FC<
           args={[radius, 96, 96]}
         />
 
-        <meshPhongMaterial
+        <meshBasicMaterial
           map={continentTexture}
+          color="#ffffff"
           transparent
-          opacity={0.88}
-          color="#d5ffff"
-          emissive="#007d92"
-          emissiveIntensity={0.72}
-          shininess={55}
-          depthWrite
+          opacity={1}
+          side={THREE.FrontSide}
+          depthWrite={true}
+          depthTest={true}
           toneMapped={false}
         />
       </mesh>
@@ -799,3 +798,4 @@ export const GlobeSphere: React.FC<
     </group>
   );
 };
+
