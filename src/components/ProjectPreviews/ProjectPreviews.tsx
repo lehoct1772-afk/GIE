@@ -19,8 +19,8 @@ const PreviewCard = ({
   title: string;
   image: string;
 }) => (
-  <div className="w-full overflow-hidden rounded-md border border-cyan-400/55 bg-[#001018]/90 shadow-[0_0_16px_rgba(0,245,255,0.14)]">
-    <div className="h-[104px] w-full overflow-hidden">
+  <div className="w-full overflow-hidden rounded-md border border-cyan-400/55 bg-[#001018]/90">
+    <div className="h-[92px] w-full overflow-hidden">
       <img
         src={image}
         alt={title}
@@ -29,7 +29,7 @@ const PreviewCard = ({
       />
     </div>
 
-    <div className="border-t border-cyan-400/30 px-2 py-[7px] text-center font-mono text-[9px] tracking-[0.11em] text-cyan-100">
+    <div className="border-t border-cyan-400/30 px-2 py-[5px] text-center font-mono text-[9px] tracking-[0.11em] text-cyan-100">
       {title}
     </div>
   </div>
@@ -38,7 +38,7 @@ const PreviewCard = ({
 export const ProjectPreviews = () => {
   return (
     <>
-      <div className="pointer-events-auto absolute left-[11%] top-[170px] z-20 flex w-[250px] flex-col gap-[12px]">
+      <div className="pointer-events-auto absolute left-[11%] top-[155px] z-20 flex w-[250px] flex-col gap-[10px]">
         {leftProjects.map((project) => (
           <PreviewCard
             key={project.title}
@@ -48,7 +48,7 @@ export const ProjectPreviews = () => {
         ))}
       </div>
 
-      <div className="pointer-events-auto absolute right-[7%] top-[170px] z-20 flex w-[250px] flex-col gap-[12px]">
+      <div className="pointer-events-auto absolute right-[7%] top-[155px] z-20 flex w-[250px] flex-col gap-[10px]">
         {rightProjects.map((project) => (
           <PreviewCard
             key={project.title}
