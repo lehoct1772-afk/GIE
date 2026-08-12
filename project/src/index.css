@@ -1,0 +1,35 @@
+@import "tailwindcss";
+
+@layer utilities {
+  .clip-cyber {
+    clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+  }
+}
+
+/* Custom dark blueprint scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #020710;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #00f0ff33;
+  border-radius: 3px;
+  border: 1px solid #00f0ff66;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #00f0ff88;
+}
+
+/* Base body background */
+body {
+  background-color: #020710;
+  color: #e2e8f0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  overflow-x: hidden;
+}

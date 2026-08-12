@@ -45,9 +45,9 @@ const INITIAL_LAYERS: GlobeLayers = {
   mathOverlays: true,
   userUploads: false,
   researchMarkers: false,
-  latitudeLongitude: true,
+  latitudeLongitude: false,
   connectionArcs: true,
-  harmonicRing: true,
+  harmonicRing: false,
   gieNodes: true,
   globeWireframe: false,
 };
@@ -69,7 +69,7 @@ export default function App() {
   const [isBlueprintLibraryOpen, setIsBlueprintLibraryOpen] = useState(false);
   const [isMathVisualizerOpen, setIsMathVisualizerOpen] = useState(false);
   const [isActivityLogOpen, setIsActivityLogOpen] = useState(false);
-  const [isCropBlueprintOpen, setIsCropBlueprintOpen] = useState(false);
+  const [isCropCircleBlueprintOpen, setIsCropCircleBlueprintOpen] = useState(false);
   const [selectedConstant, setSelectedConstant] =
     useState<MathConstant | null>(null);
 
@@ -172,7 +172,6 @@ export default function App() {
       {/* HOME */}
       {activeTab === 'HOME' ? (
         <main className="relative z-10 flex flex-1 flex-col justify-between overflow-hidden">
-          <div className="pointer-events-none absolute left-1/2 top-1 z-30 -translate-x-1/2 rounded border border-amber-400/45 bg-[#07101a]/70 px-3 py-1 font-mono text-[9px] font-bold tracking-[0.28em] text-amber-300 shadow-[0_0_12px_rgba(255,183,0,.18)] backdrop-blur-sm">SITE IS UNDER CONSTRUCTION</div>
 
           {/* LIVE 3D GLOBE */}
           <div className="absolute inset-0 z-0 flex items-center justify-center">
@@ -205,7 +204,9 @@ export default function App() {
                 : 'opacity-100'
             }`}
           >
-            <ProjectPreviews onNavigate={setActiveTab} onOpenCropBlueprint={() => setIsCropBlueprintOpen(true)} />
+            <ProjectPreviews
+              onOpenCropCircleBlueprint={() => setIsCropCircleBlueprintOpen(true)}
+            />
           </div>
 
           {/* LEFT + RIGHT TOOLBARS */}
@@ -268,31 +269,6 @@ export default function App() {
               />
             </div>
           </div>
-
-          <div className={`absolute bottom-0 left-0 right-0 z-20 h-[58px] border-t border-cyan-400/45 bg-[#020a12]/92 font-mono backdrop-blur-md transition-opacity ${isFocusMode ? 'pointer-events-none opacity-0' : 'opacity-100'}`}>
-            <div className="grid h-full grid-cols-7 divide-x divide-cyan-400/20">
-              {[
-                ['⚛', 'φ 1.6180339887…', 'GOLDEN RATIO', 'text-cyan-300'],
-                ['◉', '34 55 89 144 233', 'FIBONACCI SEQUENCE', 'text-lime-300'],
-                ['◇', '3.1415926535…', 'PI (π)', 'text-fuchsia-300'],
-                ['△', '7', 'PLATONIC SOLIDS', 'text-cyan-300'],
-                ['✣', '108', 'SACRED NUMBER', 'text-yellow-300'],
-                ['◎', '432 Hz', 'HARMONIC FREQUENCY', 'text-lime-300'],
-              ].map(([icon, value, label, color]) => (
-                <div key={label} className="flex min-w-0 items-center justify-center gap-3 px-3">
-                  <span className={`text-xl ${color}`}>{icon}</span>
-                  <div className="min-w-0">
-                    <div className={`truncate text-[12px] font-bold ${color}`}>{value}</div>
-                    <div className={`truncate text-[8px] font-bold tracking-[0.08em] ${color}`}>{label}</div>
-                  </div>
-                </div>
-              ))}
-              <div className="flex flex-col items-center justify-center text-cyan-300">
-                <div className="text-[16px] font-bold tabular-nums">GIE ONLINE</div>
-                <div className="text-[8px] tracking-[0.16em] text-cyan-200/75">LIVE ENGINE</div>
-              </div>
-            </div>
-          </div>
         </main>
       ) : (
         /* OTHER SITE PAGES */
@@ -318,7 +294,7 @@ export default function App() {
         onMouseEnter={() =>
           soundManager.playHover()
         }
-        className={`fixed bottom-[70px] right-4 z-40 flex cursor-pointer items-center space-x-2 rounded-lg border px-3.5 py-2 font-mono text-xs font-bold uppercase tracking-widest backdrop-blur-md transition-all ${
+        className={`fixed bottom-4 right-4 z-40 flex cursor-pointer items-center space-x-2 rounded-lg border px-3.5 py-2 font-mono text-xs font-bold uppercase tracking-widest backdrop-blur-md transition-all ${
           activeTab === 'SUPPORT_GIE'
             ? 'scale-105 border-amber-300 bg-amber-500 text-slate-950 shadow-[0_0_20px_rgba(255,183,0,0.8)]'
             : 'border-amber-400/80 bg-amber-500/20 text-amber-300 shadow-[0_0_15px_rgba(255,183,0,0.35)] hover:bg-amber-500/40 hover:shadow-[0_0_25px_rgba(255,183,0,0.75)]'
@@ -358,13 +334,17 @@ export default function App() {
         }
       />
 
+      <CropCircleBlueprintModal
+        isOpen={isCropCircleBlueprintOpen}
+        onClose={() => setIsCropCircleBlueprintOpen(false)}
+      />
+
       <ConstantDetailModal
         constant={selectedConstant}
         onClose={() =>
           setSelectedConstant(null)
         }
       />
-    <CropCircleBlueprintModal isOpen={isCropBlueprintOpen} onClose={() => setIsCropBlueprintOpen(false)} />
-      </div>
+    </div>
   );
 }

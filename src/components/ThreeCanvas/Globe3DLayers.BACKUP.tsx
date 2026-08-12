@@ -1,4 +1,4 @@
-import React, { useMemo, useRef } from "react";
+﻿import React, { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { GlobeLayers } from "../../types";
@@ -212,17 +212,15 @@ export const Globe3DLayers: React.FC<
       major: boolean;
     }[] = [];
 
-    // Keep the geomagnetic arches tight to the globe like the approved
-    // homepage reference. These are intentionally low-altitude shells.
     const shells = [
-      1.045,
-      1.065,
-      1.085,
-      1.11,
-      1.14,
+      1.38,
+      1.52,
+      1.68,
+      1.86,
+      2.06,
     ];
 
-    const rotations = 7;
+    const rotations = 10;
 
     shells.forEach((shell, shellIndex) => {
       for (
@@ -347,12 +345,12 @@ export const Globe3DLayers: React.FC<
                   <lineBasicMaterial
                     color={
                       major
-                        ? "#a855f7"
-                        : "#5b5cff"
+                        ? "#c45cff"
+                        : "#7048ff"
                     }
                     transparent
                     opacity={
-                      major ? 0.72 : 0.38
+                      major ? 0.95 : 0.67
                     }
                     blending={
                       THREE.AdditiveBlending
@@ -710,4 +708,3 @@ export const Globe3DLayers: React.FC<
     </group>
   );
 };
-

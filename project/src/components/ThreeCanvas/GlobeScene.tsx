@@ -44,7 +44,7 @@ export const GlobeScene: React.FC<GlobeSceneProps> = ({
   onToggleFocusMode,
   layers,
 }) => {
-  const [cameraDistance, setCameraDistance] = useState(8.0);
+  const [cameraDistance, setCameraDistance] = useState(7.1);
 
   const zoomLevel: GISZoomLevel =
     cameraDistance > 6.8
@@ -70,7 +70,7 @@ export const GlobeScene: React.FC<GlobeSceneProps> = ({
     >
       <Canvas
         camera={{
-          position: [0, 0, 8.0],
+          position: [0, 0, 7.15],
           fov: 42,
         }}
         gl={{

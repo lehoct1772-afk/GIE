@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+﻿import * as THREE from 'three';
 import { GlobeLayers } from '../../types';
 import { NaturalEarthDatasets } from '../../services/naturalEarthData';
 import { feature } from 'topojson-client';
@@ -84,9 +84,9 @@ export function createGISWorldTexture(layers: GlobeLayers): THREE.CanvasTexture 
     width / 2, height / 2, 100,
     width / 2, height / 2, width / 1.4
   );
-  oceanGrad.addColorStop(0, '#06335a');
-  oceanGrad.addColorStop(0.45, '#021d3d');
-  oceanGrad.addColorStop(1, '#010816');
+  oceanGrad.addColorStop(0, '#020d1c');
+  oceanGrad.addColorStop(0.5, '#010814');
+  oceanGrad.addColorStop(1, '#00040a');
   ctx.fillStyle = oceanGrad;
   ctx.fillRect(0, 0, width, height);
 
@@ -118,52 +118,16 @@ export function createGISWorldTexture(layers: GlobeLayers): THREE.CanvasTexture 
 
     drawWorldAtlasPath(ctx, toXY);
 
-    // Satellite-style land palette: sandy highlands + green lowlands.
-    // The world path is used as a clipping mask so the terrain color is
-    // unmistakably visible instead of reading as a dark blueprint outline.
-    ctx.save();
-    ctx.clip('evenodd');
-
     const landGrad = ctx.createLinearGradient(0, 0, width, height);
-    landGrad.addColorStop(0.00, '#c69a5a');
-    landGrad.addColorStop(0.18, '#7f9b58');
-    landGrad.addColorStop(0.36, '#4f7d4c');
-    landGrad.addColorStop(0.54, '#b58a51');
-    landGrad.addColorStop(0.72, '#5f874f');
-    landGrad.addColorStop(0.88, '#a97b48');
-    landGrad.addColorStop(1.00, '#d0ad6e');
+    landGrad.addColorStop(0, '#062838');
+    landGrad.addColorStop(0.45, '#084354');
+    landGrad.addColorStop(1, '#031e2d');
+
     ctx.fillStyle = landGrad;
-    ctx.fillRect(0, 0, width, height);
+    ctx.fill('evenodd');
 
-    // Broad biome variation gives the continents the sandy/green natural
-    // appearance used by the approved homepage reference.
-    const biome = ctx.createRadialGradient(
-      width * 0.48, height * 0.46, width * 0.03,
-      width * 0.48, height * 0.46, width * 0.42
-    );
-    biome.addColorStop(0.00, 'rgba(58, 119, 67, 0.90)');
-    biome.addColorStop(0.34, 'rgba(91, 128, 68, 0.82)');
-    biome.addColorStop(0.62, 'rgba(183, 139, 73, 0.80)');
-    biome.addColorStop(1.00, 'rgba(213, 172, 101, 0.78)');
-    ctx.fillStyle = biome;
-    ctx.fillRect(0, 0, width, height);
-
-    // Soft terrain grain; deterministic so every build looks identical.
-    ctx.globalAlpha = 0.18;
-    for (let i = 0; i < 1500; i++) {
-      const x = (i * 1543) % width;
-      const y = (i * 887) % height;
-      const r = 5 + ((i * 37) % 22);
-      ctx.fillStyle = i % 3 === 0 ? '#e3c287' : i % 3 === 1 ? '#345f3d' : '#80603a';
-      ctx.beginPath();
-      ctx.arc(x, y, r, 0, Math.PI * 2);
-      ctx.fill();
-    }
-    ctx.globalAlpha = 1;
-    ctx.restore();
-
-    ctx.strokeStyle = 'rgba(0, 245, 255, 0.78)';
-    ctx.lineWidth = 1.35;
+    ctx.strokeStyle = 'rgba(0, 245, 255, 0.88)';
+    ctx.lineWidth = 1.15;
     ctx.shadowColor = '#00f5ff';
     ctx.shadowBlur = 4;
     ctx.stroke();
@@ -363,5 +327,4 @@ export function createGISElevationBumpMap(): THREE.CanvasTexture {
   texture.wrapT = THREE.ClampToEdgeWrapping;
   return texture;
 }
-
 

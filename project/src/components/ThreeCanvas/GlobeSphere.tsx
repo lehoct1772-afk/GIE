@@ -1,4 +1,4 @@
-import React, { useMemo, useRef } from "react";
+﻿import React, { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { GeoNode, GlobeLayers } from "../../types";
@@ -60,38 +60,6 @@ function arcColor(id: string): string {
   for (let i = 0; i < id.length; i += 1) hash = (hash * 31 + id.charCodeAt(i)) >>> 0;
   return ARC_COLORS[hash % ARC_COLORS.length];
 }
-
-
-const VISUAL_NETWORK_COORDS: Array<[number, number]> = [
-  [64,-150],[55,-120],[48,-90],[40,-74],[32,-110],[25,-98],[18,-80],[8,-74],[-5,-78],[-18,-70],[-34,-58],[-50,-72],
-  [58,-20],[51,0],[45,15],[36,31],[29,45],[22,60],[31,78],[40,95],[35,120],[44,140],[35,155],[18,138],
-  [8,105],[-6,112],[-18,130],[-34,151],[-12,50],[-25,28],[-34,18],[-8,20],[5,10],[16,-4],[25,-15],[38,-8]
-];
-
-const NETWORK_COLORS = ["#00f5ff", "#00ff75", "#ffd400", "#a855f7", "#ff7a00", "#38bdf8"] as const;
-
-const VisualNetworkMarker: React.FC<{ position: THREE.Vector3; color: string; phase: number }> = ({ position, color, phase }) => {
-  const ref = useRef<THREE.Mesh>(null);
-  const glow = useRef<THREE.Mesh>(null);
-  useFrame(({ clock }) => {
-    const t = clock.elapsedTime + phase;
-    const pulse = 0.90 + Math.sin(t * 2.2) * 0.18;
-    ref.current?.scale.setScalar(pulse);
-    glow.current?.scale.setScalar(1.05 + Math.sin(t * 1.6) * 0.22);
-  });
-  return (
-    <group position={position}>
-      <mesh ref={glow} renderOrder={27}>
-        <sphereGeometry args={[0.115, 14, 14]} />
-        <meshBasicMaterial color={color} transparent opacity={0.34} blending={THREE.AdditiveBlending} depthWrite={false} depthTest={false} toneMapped={false} />
-      </mesh>
-      <mesh ref={ref} renderOrder={28}>
-        <sphereGeometry args={[0.052, 16, 16]} />
-        <meshBasicMaterial color={color} transparent opacity={0.98} blending={THREE.AdditiveBlending} depthWrite={false} depthTest={false} toneMapped={false} />
-      </mesh>
-    </group>
-  );
-};
 
 const DEFAULT_LAYERS: GlobeLayers = {
   continents: true,
@@ -406,36 +374,6 @@ export const GlobeSphere: React.FC<
     return lines;
   }, [nodeMap, selectedNodeId]);
 
-  const visualNetworkNodes = useMemo(() =>
-    VISUAL_NETWORK_COORDS.map(([lat, lng], index) => ({
-      id: `visual-${index}`,
-      position: latLngToVector3(lat, lng, radius * 1.028),
-      color: NETWORK_COLORS[index % NETWORK_COLORS.length],
-      phase: index * 0.37,
-    })), []);
-
-  const visualNetworkArcs = useMemo(() => {
-    const links: Array<{ id: string; points: THREE.Vector3[]; color: string }> = [];
-    const pairs = new Set<string>();
-    const connect = (a: number, b: number) => {
-      if (a === b) return;
-      const aa = Math.min(a,b), bb = Math.max(a,b);
-      const key = `${aa}-${bb}`;
-      if (pairs.has(key)) return;
-      pairs.add(key);
-      const p1 = visualNetworkNodes[a].position;
-      const p2 = visualNetworkNodes[b].position;
-      if (p1.distanceTo(p2) > radius * 3.25) return;
-      links.push({ id: key, points: createArcPoints(p1, p2, 28), color: NETWORK_COLORS[(a+b) % NETWORK_COLORS.length] });
-    };
-    visualNetworkNodes.forEach((_, i) => {
-      connect(i, (i + 1) % visualNetworkNodes.length);
-      connect(i, (i + 5) % visualNetworkNodes.length);
-      if (i % 2 === 0) connect(i, (i + 11) % visualNetworkNodes.length);
-    });
-    return links;
-  }, [visualNetworkNodes]);
-
   const latitudeLines = useMemo(() => {
     const rings: {
       points: THREE.Vector3[];
@@ -596,11 +534,10 @@ export const GlobeSphere: React.FC<
           map={continentTexture}
           bumpMap={elevationBumpMap}
           bumpScale={0.045}
-          roughness={0.82}
-          metalness={0.02}
-          emissive="#17351f"
-          emissiveMap={continentTexture}
-          emissiveIntensity={0.34}
+          roughness={0.72}
+          metalness={0.08}
+          emissive="#001c25"
+          emissiveIntensity={0.45}
           color="#ffffff"
           transparent
           opacity={1}
@@ -820,20 +757,6 @@ export const GlobeSphere: React.FC<
         layers={layers}
         radius={radius}
       />
-
-      {/* DENSE GLOBAL GIE NETWORK — visual layer tied to the rotating Earth */}
-      {layers.connectionArcs && visualNetworkArcs.map((arc) => {
-        const geometry = new THREE.BufferGeometry().setFromPoints(arc.points);
-        return (
-          <primitive object={new THREE.Line()} key={`net-${arc.id}`} renderOrder={13}>
-            <primitive object={geometry} />
-            <lineBasicMaterial color={arc.color} transparent opacity={0.72} blending={THREE.AdditiveBlending} depthWrite={false} toneMapped={false} />
-          </primitive>
-        );
-      })}
-      {showNodes && visualNetworkNodes.map((node) => (
-        <VisualNetworkMarker key={node.id} position={node.position} color={node.color} phase={node.phase} />
-      ))}
 
       {/* ========================================
           BRIGHT GIE CONNECTION ARCS
