@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @license
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -140,7 +140,7 @@ export default function App() {
       {isFocusMode && (
         <div className="absolute left-1/2 top-3 z-40 flex -translate-x-1/2 items-center space-x-3 rounded-full border border-amber-400/80 bg-amber-950/90 px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider text-amber-200 shadow-[0_0_20px_rgba(255,183,0,0.4)] backdrop-blur-md">
           <span>
-            [ FOCUS MODE ACTIVE ] • DOUBLE-CLICK GLOBE TO RESTORE INTERFACE
+            [ FOCUS MODE ACTIVE ] â€¢ DOUBLE-CLICK GLOBE TO RESTORE INTERFACE
           </span>
 
           <button
@@ -175,7 +175,7 @@ export default function App() {
           <div className="pointer-events-none absolute left-1/2 top-1 z-30 -translate-x-1/2 rounded border border-amber-400/45 bg-[#07101a]/70 px-3 py-1 font-mono text-[9px] font-bold tracking-[0.28em] text-amber-300 shadow-[0_0_12px_rgba(255,183,0,.18)] backdrop-blur-sm">SITE IS UNDER CONSTRUCTION</div>
 
           {/* LIVE 3D GLOBE */}
-          <div className="absolute inset-0 z-0 flex items-center justify-center">
+          <div className="absolute inset-x-0 bottom-[58px] top-0 z-0 flex items-center justify-center">
             <GlobeScene
               viewMode={viewMode}
               selectedNodeId={
@@ -210,7 +210,7 @@ export default function App() {
 
           {/* LEFT + RIGHT TOOLBARS */}
           <div
-            className={`pointer-events-none absolute inset-0 z-20 flex items-start justify-between p-1.5 transition-opacity duration-500 md:p-2 ${
+            className={`pointer-events-none absolute inset-x-0 bottom-[58px] top-2 z-20 flex items-start justify-between p-1.5 transition-opacity duration-500 md:p-2 ${
               isFocusMode
                 ? 'opacity-0'
                 : 'opacity-100'
@@ -272,12 +272,12 @@ export default function App() {
           <div className={`absolute bottom-0 left-0 right-0 z-20 h-[58px] border-t border-cyan-400/45 bg-[#020a12]/92 font-mono backdrop-blur-md transition-opacity ${isFocusMode ? 'pointer-events-none opacity-0' : 'opacity-100'}`}>
             <div className="grid h-full grid-cols-7 divide-x divide-cyan-400/20">
               {[
-                ['⚛', 'φ 1.6180339887…', 'GOLDEN RATIO', 'text-cyan-300'],
-                ['◉', '34 55 89 144 233', 'FIBONACCI SEQUENCE', 'text-lime-300'],
-                ['◇', '3.1415926535…', 'PI (π)', 'text-fuchsia-300'],
-                ['△', '7', 'PLATONIC SOLIDS', 'text-cyan-300'],
-                ['✣', '108', 'SACRED NUMBER', 'text-yellow-300'],
-                ['◎', '432 Hz', 'HARMONIC FREQUENCY', 'text-lime-300'],
+                ['âš›', 'Ï† 1.6180339887â€¦', 'GOLDEN RATIO', 'text-cyan-300'],
+                ['â—‰', '34 55 89 144 233', 'FIBONACCI SEQUENCE', 'text-lime-300'],
+                ['â—‡', '3.1415926535â€¦', 'PI (Ï€)', 'text-fuchsia-300'],
+                ['â–³', '7', 'PLATONIC SOLIDS', 'text-cyan-300'],
+                ['âœ£', '108', 'SACRED NUMBER', 'text-yellow-300'],
+                ['â—Ž', '432 Hz', 'HARMONIC FREQUENCY', 'text-lime-300'],
               ].map(([icon, value, label, color]) => (
                 <div key={label} className="flex min-w-0 items-center justify-center gap-3 px-3">
                   <span className={`text-xl ${color}`}>{icon}</span>

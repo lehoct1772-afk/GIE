@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { ViewMode, GlobeLayers, MathConstant } from '../../types';
 import { soundManager } from '../../utils/audio';
 import {
@@ -386,10 +386,10 @@ onClick={() => toggleCategory(cat.id)}
                   {cat.id === 'documents' && (
                     <div className="space-y-1 text-[8px]">
                       <div className="p-1.5 bg-slate-900/80 border border-slate-700/50 rounded text-slate-300">
-                        📄 GIE_Geodesic_Axioms.pdf
+                        ðŸ“„ GIE_Geodesic_Axioms.pdf
                       </div>
                       <div className="p-1.5 bg-slate-900/80 border border-slate-700/50 rounded text-slate-300">
-                        📐 Sacred_Geometry_Blueprint.svg
+                        ðŸ“ Sacred_Geometry_Blueprint.svg
                       </div>
                     </div>
                   )}
@@ -411,7 +411,7 @@ onClick={() => toggleCategory(cat.id)}
                         )}
                       </button>
                       <div className="text-[8px] text-slate-500 px-1">
-                        Status: ONLINE • Latency: 12ms
+                        Status: ONLINE â€¢ Latency: 12ms
                       </div>
                     </div>
                   )}
@@ -429,3 +429,4 @@ onClick={() => toggleCategory(cat.id)}
     </div>
   );
 };
+

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { soundManager } from '../../utils/audio';
 import { MathConstant } from '../../types';
 import {
@@ -76,7 +76,7 @@ export const CompactRightToolbar: React.FC<CompactRightToolbarProps> = ({
     <div
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className={`transition-all duration-300 ease-in-out font-mono select-none z-30 pointer-events-auto h-[calc(100vh-110px)] max-h-[720px] flex flex-col bg-slate-950/90 border border-cyan-500/30 rounded-l-lg backdrop-blur-md shadow-[0_0_25px_rgba(0,240,255,0.15)] ${
+      className={`transition-all duration-300 ease-in-out font-mono select-none z-30 pointer-events-auto h-[calc(100vh-190px)] max-h-[650px] flex flex-col bg-slate-950/90 border border-cyan-500/30 rounded-l-lg backdrop-blur-md shadow-[0_0_25px_rgba(0,240,255,0.15)] ${
         isExpanded ? 'w-56 md:w-60' : 'w-12 md:w-14'
       }`}
     >
@@ -183,3 +183,4 @@ export const CompactRightToolbar: React.FC<CompactRightToolbarProps> = ({
     </div>
   );
 };
+
