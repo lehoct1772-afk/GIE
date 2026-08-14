@@ -1,4 +1,4 @@
-﻿import React, { useState } from "react";
+import React, { useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import { GlobeSphere } from "./GlobeSphere";
@@ -44,7 +44,7 @@ export const GlobeScene: React.FC<GlobeSceneProps> = ({
   onToggleFocusMode,
   layers,
 }) => {
-  const [cameraDistance, setCameraDistance] = useState(9.0);
+  const [cameraDistance, setCameraDistance] = useState(8.0);
 
   const zoomLevel: GISZoomLevel =
     cameraDistance > 6.8
@@ -70,7 +70,7 @@ export const GlobeScene: React.FC<GlobeSceneProps> = ({
     >
       <Canvas
         camera={{
-          position: [0, 0, 9.0],
+          position: [0, 0, 8.0],
           fov: 42,
         }}
         gl={{
@@ -132,7 +132,7 @@ export const GlobeScene: React.FC<GlobeSceneProps> = ({
           enableRotate
           enablePan={false}
           minDistance={3.8}
-          maxDistance={12}
+          maxDistance={10}
           rotateSpeed={0.5}
           zoomSpeed={0.7}
           dampingFactor={0.08}
@@ -144,4 +144,3 @@ export const GlobeScene: React.FC<GlobeSceneProps> = ({
     </div>
   );
 };
-

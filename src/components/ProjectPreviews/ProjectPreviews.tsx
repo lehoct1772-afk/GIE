@@ -11,15 +11,45 @@ type Project = {
 };
 
 const leftProjects: Project[] = [
-  { number: "01", title: "ARCHITECTURAL BLUEPRINT", image: "/images/architectural-blueprint.svg", target: "BLUEPRINT_LIBRARY" },
-  { number: "02", title: "CITY / INFRASTRUCTURE BLUEPRINT", image: "/images/city-infrastructure.svg", target: "PROJECTS" },
-  { number: "03", title: "CROP-CIRCLE SITE ANALYSIS", image: "/images/crop-circle-analysis.svg", target: "RESEARCH" },
+  {
+    number: "01",
+    title: "ARCHITECTURAL BLUEPRINT",
+    image: "/images/architectural-blueprint.svg",
+    target: "BLUEPRINT_LIBRARY",
+  },
+  {
+    number: "02",
+    title: "CITY / INFRASTRUCTURE BLUEPRINT",
+    image: "/images/city-infrastructure.svg",
+    target: "PROJECTS",
+  },
+  {
+    number: "03",
+    title: "CROP-CIRCLE SITE ANALYSIS",
+    image: "/images/crop-circle-analysis.svg",
+    target: "RESEARCH",
+  },
 ];
 
 const rightProjects: Project[] = [
-  { number: "04", title: "GEOMETRIC RECONSTRUCTION", image: "/images/geometric-reconstruction.svg", target: "ENGINE" },
-  { number: "05", title: "TERRAIN / EARTH MAPPING", image: "/images/terrain-mapping.svg", target: "RESEARCH" },
-  { number: "06", title: "ENGINEERING / STRUCTURAL ANALYSIS", image: "/images/structural-analysis.svg", target: "PROJECTS" },
+  {
+    number: "04",
+    title: "GEOMETRIC RECONSTRUCTION",
+    image: "/images/geometric-reconstruction.svg",
+    target: "ENGINE",
+  },
+  {
+    number: "05",
+    title: "TERRAIN / EARTH MAPPING",
+    image: "/images/terrain-mapping.svg",
+    target: "RESEARCH",
+  },
+  {
+    number: "06",
+    title: "ENGINEERING / STRUCTURAL ANALYSIS",
+    image: "/images/structural-analysis.svg",
+    target: "PROJECTS",
+  },
 ];
 
 function PreviewCard({
@@ -37,23 +67,51 @@ function PreviewCard({
         onActivate();
       }}
       onMouseEnter={() => soundManager.playHover()}
-      className="group relative h-[132px] w-full overflow-hidden rounded-[6px] border border-cyan-400/70 bg-[#020914]/90 text-left shadow-[0_0_16px_rgba(0,245,255,.16)] backdrop-blur-sm transition hover:border-cyan-200 hover:shadow-[0_0_22px_rgba(0,245,255,.3)]"
+      className="
+        group
+        relative
+        h-[112px]
+        w-full
+        overflow-hidden
+        rounded-[5px]
+        border
+        border-cyan-400/55
+        bg-[#020914]/82
+        text-left
+        shadow-[0_0_14px_rgba(0,245,255,.12)]
+        backdrop-blur-sm
+        transition-all
+        duration-200
+        hover:border-cyan-200
+        hover:bg-[#03101a]/92
+        hover:shadow-[0_0_20px_rgba(0,245,255,.26)]
+      "
     >
-      <div className="absolute left-2 top-2 h-9 w-9 overflow-hidden rounded border border-cyan-400/35 bg-cyan-950/25 opacity-75">
-        <img src={project.image} alt="" draggable={false} className="h-full w-full object-cover" />
+      {/* BLUEPRINT PREVIEW */}
+      <div className="absolute bottom-2 left-2 top-2 w-[94px] overflow-hidden rounded-[3px] border border-cyan-400/25 bg-[#03101a]">
+        <img
+          src={project.image}
+          alt=""
+          draggable={false}
+          className="h-full w-full object-cover opacity-80 transition-opacity group-hover:opacity-100"
+        />
       </div>
-      <div className="absolute left-[10px] top-[10px] flex h-8 w-8 items-center justify-center rounded-full border border-cyan-300 bg-[#001018]/90 font-mono text-[10px] font-bold text-cyan-200 shadow-[0_0_10px_rgba(0,245,255,.45)]">
+
+      {/* PROJECT NUMBER */}
+      <div className="absolute left-[82px] top-[8px] flex h-[30px] w-[30px] items-center justify-center rounded-full border border-cyan-300/80 bg-[#001018] font-mono text-[10px] font-bold text-cyan-200 shadow-[0_0_8px_rgba(0,245,255,.35)]">
         {project.number}
       </div>
-      <div className="absolute left-[54px] right-8 top-[12px] font-mono text-[12px] font-bold leading-[1.35] tracking-[0.02em] text-slate-100">
+
+      {/* TITLE */}
+      <div className="absolute bottom-3 left-[116px] right-9 top-3 flex items-center font-mono text-[12px] font-bold leading-[1.35] tracking-[0.035em] text-slate-100">
         {project.title}
       </div>
-      <ExternalLink className="absolute right-2 top-2 h-4 w-4 text-cyan-300" />
-      <div className="absolute bottom-[34px] left-0 right-0 border-t border-cyan-400/25" />
-      <div className="absolute bottom-0 left-0 right-0 flex h-[34px] items-center px-3 font-mono text-[9px] font-bold tracking-[0.04em] text-cyan-300">
-        {project.title}
-      </div>
-      <div className="absolute bottom-2 right-2 h-[3px] w-8 bg-cyan-300 shadow-[0_0_8px_#00f5ff]" />
+
+      {/* OPEN ICON */}
+      <ExternalLink className="absolute right-3 top-3 h-4 w-4 text-cyan-300/80 transition-colors group-hover:text-cyan-100" />
+
+      {/* ACCENT */}
+      <div className="absolute bottom-2 right-3 h-[2px] w-8 bg-cyan-300/80 shadow-[0_0_7px_#00f5ff]" />
     </button>
   );
 }
@@ -64,30 +122,58 @@ export const ProjectPreviews = ({
 }: {
   onNavigate: (tab: NavTab) => void;
   onOpenCropBlueprint?: () => void;
-}) => (
-  <>
-    <div className="pointer-events-auto absolute left-[6.2%] top-[112px] z-20 flex w-[18vw] min-w-[260px] max-w-[370px] flex-col gap-[14px]">
-      {leftProjects.map((p) => (
-        <PreviewCard
-          key={p.number}
-          project={p}
-          onActivate={
-            p.number === "03" && onOpenCropBlueprint
-              ? onOpenCropBlueprint
-              : () => onNavigate(p.target)
-          }
-        />
-      ))}
-    </div>
+}) => {
+  return (
+    <>
+      {/* LEFT THREE CARDS */}
+      <div
+        className="
+          pointer-events-auto
+          absolute
+          left-[5.2%]
+          top-[55px]
+          z-20
+          flex
+          w-[320px]
+          flex-col
+          gap-[14px]
+        "
+      >
+        {leftProjects.map((p) => (
+          <PreviewCard
+            key={p.number}
+            project={p}
+            onActivate={
+              p.number === "03" && onOpenCropBlueprint
+                ? onOpenCropBlueprint
+                : () => onNavigate(p.target)
+            }
+          />
+        ))}
+      </div>
 
-    <div className="pointer-events-auto absolute right-[6.2%] top-[112px] z-20 flex w-[18vw] min-w-[260px] max-w-[370px] flex-col gap-[14px]">
-      {rightProjects.map((p) => (
-        <PreviewCard
-          key={p.number}
-          project={p}
-          onActivate={() => onNavigate(p.target)}
-        />
-      ))}
-    </div>
-  </>
-);
+      {/* RIGHT THREE CARDS */}
+      <div
+        className="
+          pointer-events-auto
+          absolute
+          right-[5.2%]
+          top-[55px]
+          z-20
+          flex
+          w-[320px]
+          flex-col
+          gap-[14px]
+        "
+      >
+        {rightProjects.map((p) => (
+          <PreviewCard
+            key={p.number}
+            project={p}
+            onActivate={() => onNavigate(p.target)}
+          />
+        ))}
+      </div>
+    </>
+  );
+};

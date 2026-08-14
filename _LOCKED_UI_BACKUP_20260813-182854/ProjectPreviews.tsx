@@ -124,6 +124,7 @@ export const ProjectPreviews = ({
 }) => {
   return (
     <>
+      {/* LEFT THREE CARDS */}
       <div
         className="
           pointer-events-auto
@@ -150,6 +151,7 @@ export const ProjectPreviews = ({
         ))}
       </div>
 
+      {/* RIGHT THREE CARDS */}
       <div
         className="
           pointer-events-auto
