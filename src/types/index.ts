@@ -108,4 +108,22 @@ export interface GlobeLayers {
 
 export type GISZoomLevel = 'GLOBAL' | 'REGIONAL' | 'GEOLOGICAL' | 'RESEARCH' | 'LOCAL';
 
-
+export interface CityInfrastructureBlueprint {
+  id: string;
+  name: string;
+  city: string;
+  country: string;
+  description: string;
+  areaSqKm: number;
+  roadNetworkKm: number;
+  buildingCount: number;
+  keyLandmarks: string[];
+  formula: string;
+  complexity: string;
+  author: string;
+  svgPath: string;
+  associatedProjectIds: string[];
+  zoomLevel: GISZoomLevel;
+  createdAt: string;
+  updatedAt: string;
+}
