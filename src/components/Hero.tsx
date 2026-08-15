@@ -292,6 +292,42 @@ export default function Hero() {
           </a>
 
           <a
+            href="#geometry"
+            className="group inline-flex items-center justify-center gap-2 rounded-xl bg-cyan-500 px-6 py-3.5 text-base font-bold text-graphite-950 transition-all hover:bg-cyan-400 glow-cyan"
+          >
+            <Move3D className="h-5 w-5 fill-graphite-950" />
+            Geometry
+            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+          </a>
+
+          <a
+            href="#projects"
+            className="group inline-flex items-center justify-center gap-2 rounded-xl bg-cyan-500 px-6 py-3.5 text-base font-bold text-graphite-950 transition-all hover:bg-cyan-400 glow-cyan"
+          >
+            <FolderOpen className="h-5 w-5 fill-graphite-950" />
+            Projects
+            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+          </a>
+
+          <a
+            href="#documentation"
+            className="group inline-flex items-center justify-center gap-2 rounded-xl bg-cyan-500 px-6 py-3.5 text-base font-bold text-graphite-950 transition-all hover:bg-cyan-400 glow-cyan"
+          >
+            <BookOpen className="h-5 w-5 fill-graphite-950" />
+            Documentation
+            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+          </a>
+
+          <a
+            href="#research"
+            className="group inline-flex items-center justify-center gap-2 rounded-xl bg-cyan-500 px-6 py-3.5 text-base font-bold text-graphite-950 transition-all hover:bg-cyan-400 glow-cyan"
+          >
+            <Compass className="h-5 w-5 fill-graphite-950" />
+            Research
+            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+          </a>
+
+          <a
             href="#support"
             className="inline-flex items-center justify-center gap-2 rounded-xl border border-graphite-600 bg-graphite-800/50 px-6 py-3.5 text-base font-semibold text-zinc-200 transition-all hover:border-emerald-500/40 hover:text-emerald-300"
           >
