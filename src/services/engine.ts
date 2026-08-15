@@ -5,12 +5,15 @@ export interface EngineState {
   lastCalculation: MathConstant | null;
   uptime: number;
   errorState: string | null;
+  reconstructionActive: boolean;
+  targetGeometry: string | null;
 }
 
 export interface EngineLaunchConfig {
   mode?: ViewMode;
   focusArea?: 'GLOBAL' | 'REGIONAL' | 'GEOLOGICAL' | 'RESEARCH' | 'LOCAL';
   autoSync?: boolean;
+  reconstruct?: boolean;
 }
 
 export interface EngineStatus {
@@ -20,6 +23,8 @@ export interface EngineStatus {
   activeStreams: DataStream[];
   recentActivity: ActivityFeedItem[];
   timestamp: string;
+  reconstructionActive: boolean;
+  targetGeometry: string | null;
 }
 
 export const engineState: EngineState = {
@@ -29,6 +34,8 @@ export const engineState: EngineState = {
   lastCalculation: null,
   uptime: 0,
   errorState: null,
+  reconstructionActive: false,
+  targetGeometry: null,
 };
 
 export const engineStart = (config: EngineLaunchConfig = {}): void => {
@@ -37,18 +44,17 @@ export const engineStart = (config: EngineLaunchConfig = {}): void => {
   engineState.isRunning = true;
   engineState.mode = config.mode || 'ORBIT_VIEW';
   engineState.uptime = Date.now();
+  engineState.reconstructionActive = !!config.reconstruct;
+  engineState.targetGeometry = config.reconstruct ? 'GEOMETRIC_RECONSTRUCTION' : null;
 
   // Generate initial activity entry
   const activityEntry: ActivityFeedItem = {
     id: 'engine-launch-' + Date.now(),
-    text: 'Geometry Engine activated',
+    text: 'Geometry Engine activated' + (engineState.reconstructionActive ? ' with reconstruction' : ''),
     timestamp: new Date().toISOString(),
     timeAgo: 'just now',
     type: 'INFO',
   };
-
-  // Could trigger existing activity logging infrastructure here
-  // without modifying existing components
 };
 
 export const engineStop = (): void => {
@@ -56,6 +62,8 @@ export const engineStop = (): void => {
 
   engineState.isRunning = false;
   engineState.uptime = 0;
+  engineState.reconstructionActive = false;
+  engineState.targetGeometry = null;
 
   const activityEntry: ActivityFeedItem = {
     id: 'engine-shutdown-' + Date.now(),
@@ -78,5 +86,7 @@ export const engineGetStatus = (): EngineStatus => {
     activeStreams: [],
     recentActivity: [],
     timestamp: new Date().toISOString(),
+    reconstructionActive: engineState.reconstructionActive,
+    targetGeometry: engineState.targetGeometry,
   };
 };
