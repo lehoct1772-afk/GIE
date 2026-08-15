@@ -52,7 +52,6 @@ function Section({ id, icon: Icon, eyebrow, title, description, status, children
           </div>
           {status && <StatusBadge status={status} />}
         </div>
-        {children}
       </div>
     </section>
   );
@@ -189,7 +188,7 @@ export default function Sections() {
         icon={Compass}
         eyebrow="Open Inquiry"
         title="Research"
-        description="An open geometric research workspace for exploring patterns, testing hypotheses, and collaborating on reconstruction — with every conversation and analysis preserved as part of the permanent record."
+        description="An open geometric research workspace for exploring patterns, testing hypotheses, and collaborating on reconstruction — including crop-circle site analysis — with every conversation and analysis preserved as part of the permanent record."
         status="Planned"
       />
 
