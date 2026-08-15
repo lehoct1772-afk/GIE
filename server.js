@@ -197,18 +197,46 @@ app.post('/api/v1/support/contact', (req, res) => {
   res.json({ ok: true, id });
 });
 
-// Donations placeholder: create payment intent stub (no real provider)
-app.post('/api/v1/donations/create-intent', (req, res) => {
-  const { amount, donorEmail } = req.body || {};
+// Donations: support for real providers (Stripe) or fallback stub
+app.post('/api/v1/donations/create-intent', async (req, res) => {
+  const { amount, currency = 'usd', donorEmail } = req.body || {};
   if (!amount) return res.status(400).json({ ok: false, error: { message: 'amount required' } });
 
+  const provider = (process.env.PAYMENT_PROVIDER || '').toLowerCase();
+
+  if (provider === 'stripe' && process.env.PAYMENT_API_KEY) {
+    try {
+      // Use Stripe SDK when configured. Do NOT log secrets.
+      // amount expected as number or string representing major units (e.g., 10.00)
+      const Stripe = require('stripe');
+      const stripe = Stripe(process.env.PAYMENT_API_KEY);
+
+      const minorUnits = Math.round(Number(amount) * 100);
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: minorUnits,
+        currency,
+        receipt_email: donorEmail || undefined,
+        metadata: { source: 'GIE-website-backend' }
+      });
+
+      donationRecords.unshift({ id: paymentIntent.id, amount, donorEmail: donorEmail || null, timestamp: new Date().toISOString(), status: paymentIntent.status });
+      if (donationRecords.length > 500) donationRecords.pop();
+
+      return res.json({ ok: true, clientSecret: paymentIntent.client_secret, paymentIntentId: paymentIntent.id, note: 'Stripe PaymentIntent created (server-side).' });
+    } catch (err) {
+      console.error('STRIPE_CREATE_ERROR', err && err.message ? err.message : err);
+      return res.status(502).json({ ok: false, error: { message: 'payment_provider_error' } });
+    }
+  }
+
+  // Fallback stub when no provider configured
   const paymentIntentId = 'pi_stub_' + Date.now();
   const clientSecret = 'cs_stub_' + Date.now() + '_' + paymentIntentId;
 
   donationRecords.unshift({ id: paymentIntentId, amount, donorEmail: donorEmail || null, timestamp: new Date().toISOString(), status: 'pending' });
   if (donationRecords.length > 500) donationRecords.pop();
 
-  res.json({ ok: true, clientSecret, paymentIntentId, note: 'This is a placeholder. No charges were made.' });
+  res.json({ ok: true, clientSecret, paymentIntentId, note: 'No payment provider configured; returning client-side stub. No charges were made.' });
 });
 
 // Generic 404
