@@ -1,3 +1,133 @@
+
+Today 2:04 AM
+
+Pasted text(20260816-070423).txt
+Document
+
+Generated image
+
+
+Edit
+
+
+
+GIE-CURRENT-WEBSITE.zip
+Zip Archive
+
+a73405c5-8d0f-4e29-9fc0-373c50450e2f.png
+i am really really really angry i thought you implementedthe code i gave you to fix this
+
+4002c46f-d2ad-4f7a-bc25-59826c438036.png
+
+114e6fd2-9054-4f5d-9e09-bd2923512885.png
+HOW DO YOU FUCK THAT U WHEN I GAVE YOU EVERYTHING      WOW
+
+
+frontend.docx
+Document
+
+aeb1f12c-eb34-45be-8797-9867829a0af6.png
+
+b6e23ad7-bbc6-47f2-a2ac-9a5008eeb3fc.png
+
+ef42515a-2783-4cb3-8b00-f4d11b13bdba.png
+
+485a6ef9-2fea-42c2-b3b1-3efff20b9b1d.png
+
+
+3070e9b1-d0bf-4e73-97a1-abacefd9b503.tsx
+TypeScript
+
+97f33905-19c5-4169-88fd-54ea856058b0.png
+
+178baa99-994d-437f-b618-debd8b655c9b.png
+
+c8e6f263-a48f-44ed-8a40-1624ebd626de.png
+
+438fddf2-96bb-46e2-8ccd-a36645f00156.png
+
+7cd0a198-b86b-47af-9b3c-d5cc0e734949.png
+
+4a38fd05-7510-4921-a0c9-0421f52c5a51.png
+
+fcb14089-62c2-4e91-af54-017bd3915d02.png
+
+b7a43fe1-c423-4d5b-bfaf-259dbddc78c9.png
+
+65597414-22b6-433f-9262-5df011981f09.png
+
+6ba55ebb-e372-4dd8-b978-3ce525430209.png
+
+0640825c-c607-4396-ac8e-1fd5fef0931e.png
+
+6fe72b1c-2451-4e51-9043-238c04749db9.png
+
+
+Pasted code(20260816-110011).ts
+TypeScript
+
+Found it. The arches are already in this GlobeSphere.tsx. We do not need to invent another arch component.
+
+The file defines 10 fixed pole-to-pole shield arches at longitudes -162 through 162, with the crown lifted above the globe. 
+
+ It also renders them only when layers.connectionArcs is true. 
+
+
+And your default configuration already has:
+
+connectionArcs: true,
+
+
+The problem
+The arches currently use:
+
+depthTest={true}
+That allows the Earth to hide most of each arch. Combined with how close the arches hug the sphere (1.018 → 1.075 × radius), that's why you're only seeing pieces instead of the strong static shield we want. 
+
+
+We're not touching the globe, continents, nodes, camera, rotation, or anything else.
+
+Change only this around line 888:
+
+depthTest={true}
+to:
+
+depthTest={false}
+Then build:
+
+cd "C:\Users\larry\OneDrive\Desktop\GIE AI ZIP 2\GIE Website\project"; npm run build
+That is the first correction I want because it preserves the arch geometry you already built and makes the complete ten-arch shield visible instead of redesigning it.
+
+
+wheres my code for sphere
+
+You already gave me the full GlobeSphere code — the 923-line file. 
+
+
+If you mean “give me the corrected GlobeSphere.tsx back as a downloadable file”, yes. I’ll take this exact file you supplied, make only the arch visibility correction, and hand the complete .tsx back to you.
+
+
+i deleted by accident
+
+No problem — I still have the complete file you uploaded. I recovered it and applied only the arch visibility correction we just identified. Your uploaded sphere already contains the ten static arches. 
+
+
+Download recovered GlobeSphere.tsx
+Put it back here:
+
+src\components\ThreeCanvas\GlobeSphere.tsx
+Nothing else in your sphere code was intentionally redesigned. 
+
+
+GlobeSphere.tsx
+Code
+
+
+Library
+/
+GlobeSphere.tsx
+
+
 import React, { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
@@ -190,14 +320,14 @@ const PulsingDataMarker: React.FC<{
       const cycle = (elapsed * 0.5) % 1;
 
       pulseRef.current.scale.setScalar(
-        0.8 + cycle * 2.25
+        0.82 + cycle * 1.65
       );
 
       const material =
         pulseRef.current.material as THREE.MeshBasicMaterial;
 
       material.opacity =
-        (1 - cycle) * 0.65;
+        (1 - cycle) * 0.42;
     }
   });
 
@@ -211,7 +341,7 @@ const PulsingDataMarker: React.FC<{
       >
         <sphereGeometry
           args={[
-            isSelected ? 0.085 : 0.055,
+            isSelected ? 0.046 : 0.026,
             20,
             20,
           ]}
@@ -235,7 +365,7 @@ const PulsingDataMarker: React.FC<{
       >
         <sphereGeometry
           args={[
-            isSelected ? 0.15 : 0.105,
+            isSelected ? 0.072 : 0.047,
             16,
             16,
           ]}
@@ -259,7 +389,7 @@ const PulsingDataMarker: React.FC<{
         renderOrder={31}
       >
         <ringGeometry
-          args={[0.06, 0.078, 32]}
+          args={[0.042, 0.052, 32]}
         />
 
         <meshBasicMaterial
@@ -436,6 +566,51 @@ export const GlobeSphere: React.FC<
     return links;
   }, [visualNetworkNodes]);
 
+  // Ten fixed pole-to-pole shield arches. Each arch is a stationary raised
+  // meridian shield anchored at the poles. The geometry does not animate; it
+  // rotates only with the globe group. Existing GIE nodes are the only nodes.
+  const staticShieldArches = useMemo(() => {
+    const poleRadius = radius * 1.018;
+    const crownRadius = radius * 1.075;
+    const samples = 160;
+    const longitudes = [-162, -126, -90, -54, -18, 18, 54, 90, 126, 162];
+
+    return longitudes.flatMap((lng, archIndex) => {
+      const baseColor = ARC_COLORS[archIndex % ARC_COLORS.length];
+      const sampled: THREE.Vector3[] = [];
+
+      for (let i = 0; i <= samples; i += 1) {
+        const t = i / samples;
+        const lat = -90 + t * 180;
+        // Raised shield crown: flush at both poles, highest at the equator.
+        const lift = Math.sin(Math.PI * t);
+        const r = poleRadius + (crownRadius - poleRadius) * lift;
+        sampled.push(latLngToVector3(lat, lng, r));
+      }
+
+      return sampled.slice(0, -1).map((point, i) => {
+        const next = sampled[i + 1];
+        const midpoint = point.clone().add(next).multiplyScalar(0.5);
+        let color = baseColor;
+        let nearest = Number.POSITIVE_INFINITY;
+
+        nodePositions.forEach((node) => {
+          const d = midpoint.distanceTo(node.position);
+          if (d < 0.30 && d < nearest) {
+            nearest = d;
+            color = arcColor(node.id);
+          }
+        });
+
+        return {
+          id: `static-shield-arch-${archIndex + 1}-${i}`,
+          points: [point, next],
+          color,
+        };
+      });
+    });
+  }, [nodePositions]);
+
   const latitudeLines = useMemo(() => {
     const rings: {
       points: THREE.Vector3[];
@@ -595,12 +770,11 @@ export const GlobeSphere: React.FC<
         <meshStandardMaterial
           map={continentTexture}
           bumpMap={elevationBumpMap}
-          bumpScale={0.045}
-          roughness={0.82}
-          metalness={0.02}
-          emissive="#17351f"
-          emissiveMap={continentTexture}
-          emissiveIntensity={0.34}
+          bumpScale={0.060}
+          roughness={0.72}
+          metalness={0.0}
+          emissive="#07131a"
+          emissiveIntensity={0.10}
           color="#ffffff"
           transparent
           opacity={1}
@@ -627,7 +801,7 @@ export const GlobeSphere: React.FC<
         <meshBasicMaterial
           color="#001018"
           transparent
-          opacity={0.25}
+          opacity={0.48}
           side={THREE.BackSide}
           depthWrite={false}
         />
@@ -643,7 +817,7 @@ export const GlobeSphere: React.FC<
       >
         <sphereGeometry
           args={[
-            radius * 1.075,
+            radius * 1.055,
             64,
             64,
           ]}
@@ -821,52 +995,27 @@ export const GlobeSphere: React.FC<
         radius={radius}
       />
 
-      {/* DENSE GLOBAL GIE NETWORK — visual layer tied to the rotating Earth */}
-      {layers.connectionArcs && visualNetworkArcs.map((arc) => {
-        const geometry = new THREE.BufferGeometry().setFromPoints(arc.points);
-        return (
-          <primitive object={new THREE.Line()} key={`net-${arc.id}`} renderOrder={13}>
-            <primitive object={geometry} />
-            <lineBasicMaterial color={arc.color} transparent opacity={0.72} blending={THREE.AdditiveBlending} depthWrite={false} toneMapped={false} />
-          </primitive>
-        );
-      })}
-      {showNodes && visualNetworkNodes.map((node) => (
-        <VisualNetworkMarker key={node.id} position={node.position} color={node.color} phase={node.phase} />
-      ))}
-
       {/* ========================================
-          BRIGHT GIE CONNECTION ARCS
+          TEN STATIC POLE-TO-POLE SHIELD ARCHES
           ======================================== */}
 
-      {layers.connectionArcs && arcs.map((arc) => {
-        const geometry =
-          new THREE.BufferGeometry()
-            .setFromPoints(arc.points);
+      {layers.connectionArcs && staticShieldArches.map((arc) => {
+        const geometry = new THREE.BufferGeometry().setFromPoints(arc.points);
 
         return (
-          <primitive object={new THREE.Line()}
+          <primitive
+            object={new THREE.Line()}
             key={arc.id}
             renderOrder={14}
           >
-            <primitive
-              object={geometry}
-            />
-
+            <primitive object={geometry} />
             <lineBasicMaterial
-              color={
-                arc.isSelected
-                  ? "#ffffff"
-                  : arcColor(arc.id)
-              }
+              color={arc.color}
               transparent
-              opacity={
-                arc.isSelected
-                  ? 1
-                  : 0.82
-              }
+              opacity={0.90}
               blending={THREE.AdditiveBlending}
               depthWrite={false}
+              depthTest={false}
               toneMapped={false}
             />
           </primitive>

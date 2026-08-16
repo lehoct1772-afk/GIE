@@ -23,43 +23,41 @@ const WORLD_GEOMETRY = feature(
   (countries110m as any).objects.countries
 ) as any;
 
-function drawWorldAtlasPath(
-  ctx: CanvasRenderingContext2D,
-  toXY: (lng: number, lat: number) => [number, number]
+function forEachWorldPolygon(
+  callback: (rings: GeoPolygon) => void
 ) {
-  const drawRing = (ring: GeoRing) => {
-    if (!ring || ring.length === 0) return;
-
-    const [sx, sy] = toXY(ring[0][0], ring[0][1]);
-    ctx.moveTo(sx, sy);
-
-    for (let i = 1; i < ring.length; i++) {
-      const [x, y] = toXY(ring[i][0], ring[i][1]);
-      ctx.lineTo(x, y);
-    }
-
-    ctx.closePath();
-  };
-
   for (const item of WORLD_GEOMETRY.features ?? []) {
     const geometry = item.geometry;
     if (!geometry) continue;
 
     if (geometry.type === 'Polygon') {
-      for (const ring of geometry.coordinates as GeoPolygon) {
-        drawRing(ring);
-      }
-    }
-
-    if (geometry.type === 'MultiPolygon') {
+      callback(geometry.coordinates as GeoPolygon);
+    } else if (geometry.type === 'MultiPolygon') {
       for (const polygon of geometry.coordinates as GeoMultiPolygon) {
-        for (const ring of polygon) {
-          drawRing(ring);
-        }
+        callback(polygon);
       }
     }
   }
 }
+
+function tracePolygon(
+  ctx: CanvasRenderingContext2D,
+  rings: GeoPolygon,
+  toXY: (lng: number, lat: number) => [number, number]
+) {
+  ctx.beginPath();
+  for (const ring of rings) {
+    if (!ring?.length) continue;
+    const [sx, sy] = toXY(ring[0][0], ring[0][1]);
+    ctx.moveTo(sx, sy);
+    for (let i = 1; i < ring.length; i += 1) {
+      const [x, y] = toXY(ring[i][0], ring[i][1]);
+      ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+  }
+}
+
 export function createGISWorldTexture(layers: GlobeLayers): THREE.CanvasTexture {
   const canvas = document.createElement('canvas');
   canvas.width = 4096;
@@ -112,66 +110,46 @@ export function createGISWorldTexture(layers: GlobeLayers): THREE.CanvasTexture 
   }
 
   // 3. WGS84 Natural Earth Continents & Islands Fill
+  // Draw every country polygon independently. This avoids a single giant
+  // compound clipping path swallowing the land fill at the antimeridian.
   if (layers.continents) {
-    ctx.save();
-    ctx.beginPath();
-
-    drawWorldAtlasPath(ctx, toXY);
-
-    // Satellite-style land palette: sandy highlands + green lowlands.
-    // The world path is used as a clipping mask so the terrain color is
-    // unmistakably visible instead of reading as a dark blueprint outline.
-    ctx.save();
-    ctx.clip('evenodd');
-
     const landGrad = ctx.createLinearGradient(0, 0, width, height);
-    landGrad.addColorStop(0.00, '#c69a5a');
-    landGrad.addColorStop(0.18, '#7f9b58');
-    landGrad.addColorStop(0.36, '#4f7d4c');
-    landGrad.addColorStop(0.54, '#b58a51');
-    landGrad.addColorStop(0.72, '#5f874f');
-    landGrad.addColorStop(0.88, '#a97b48');
-    landGrad.addColorStop(1.00, '#d0ad6e');
-    ctx.fillStyle = landGrad;
-    ctx.fillRect(0, 0, width, height);
+    landGrad.addColorStop(0.00, '#c29a62');
+    landGrad.addColorStop(0.22, '#6f9458');
+    landGrad.addColorStop(0.45, '#3f7748');
+    landGrad.addColorStop(0.67, '#8b7048');
+    landGrad.addColorStop(0.84, '#537f4c');
+    landGrad.addColorStop(1.00, '#b98b55');
 
-    // Broad biome variation gives the continents the sandy/green natural
-    // appearance used by the approved homepage reference.
-    const biome = ctx.createRadialGradient(
-      width * 0.48, height * 0.46, width * 0.03,
-      width * 0.48, height * 0.46, width * 0.42
-    );
-    biome.addColorStop(0.00, 'rgba(58, 119, 67, 0.90)');
-    biome.addColorStop(0.34, 'rgba(91, 128, 68, 0.82)');
-    biome.addColorStop(0.62, 'rgba(183, 139, 73, 0.80)');
-    biome.addColorStop(1.00, 'rgba(213, 172, 101, 0.78)');
-    ctx.fillStyle = biome;
-    ctx.fillRect(0, 0, width, height);
+    forEachWorldPolygon((rings) => {
+      tracePolygon(ctx, rings, toXY);
+      ctx.fillStyle = landGrad;
+      ctx.fill('evenodd');
+      ctx.strokeStyle = 'rgba(74, 205, 177, 0.72)';
+      ctx.lineWidth = 1.0;
+      ctx.stroke();
+    });
 
-    // Soft terrain grain; deterministic so every build looks identical.
-    ctx.globalAlpha = 0.18;
-    for (let i = 0; i < 1500; i++) {
-      const x = (i * 1543) % width;
-      const y = (i * 887) % height;
-      const r = 5 + ((i * 37) % 22);
-      ctx.fillStyle = i % 3 === 0 ? '#e3c287' : i % 3 === 1 ? '#345f3d' : '#80603a';
-      ctx.beginPath();
-      ctx.arc(x, y, r, 0, Math.PI * 2);
-      ctx.fill();
-    }
-    ctx.globalAlpha = 1;
-    ctx.restore();
-
-    ctx.strokeStyle = 'rgba(0, 245, 255, 0.78)';
-    ctx.lineWidth = 1.35;
-    ctx.shadowColor = '#00f5ff';
-    ctx.shadowBlur = 4;
-    ctx.stroke();
-
-    ctx.shadowBlur = 0;
+    // Deterministic low-contrast terrain mottling, clipped per polygon.
+    ctx.save();
+    forEachWorldPolygon((rings) => {
+      tracePolygon(ctx, rings, toXY);
+      ctx.save();
+      ctx.clip('evenodd');
+      ctx.globalAlpha = 0.11;
+      for (let i = 0; i < 220; i += 1) {
+        const x = (i * 1543) % width;
+        const y = (i * 887) % height;
+        const r = 12 + ((i * 37) % 38);
+        ctx.fillStyle = i % 2 ? '#d6b77b' : '#244f35';
+        ctx.beginPath();
+        ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+    });
     ctx.restore();
   }
-
 
   // 4. Country Administrative Boundaries (WGS84 Borders)
   if (layers.countries) {

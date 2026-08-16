@@ -44,7 +44,7 @@ export const GlobeScene: React.FC<GlobeSceneProps> = ({
   onToggleFocusMode,
   layers,
 }) => {
-  const [cameraDistance, setCameraDistance] = useState(8.0);
+  const [cameraDistance, setCameraDistance] = useState(9.1);
 
   const zoomLevel: GISZoomLevel =
     cameraDistance > 6.8
@@ -70,7 +70,7 @@ export const GlobeScene: React.FC<GlobeSceneProps> = ({
     >
       <Canvas
         camera={{
-          position: [0, 0, 8.0],
+          position: [0, 0, 9.1],
           fov: 42,
         }}
         gl={{
@@ -83,17 +83,17 @@ export const GlobeScene: React.FC<GlobeSceneProps> = ({
           background: "transparent",
         }}
       >
-        <ambientLight intensity={0.42} />
+        <ambientLight intensity={0.82} />
 
         <directionalLight
           position={[8, 8, 10]}
-          intensity={1.15}
+          intensity={1.18}
           color="#00f0ff"
         />
 
         <pointLight
           position={[-8, -6, -8]}
-          intensity={0.55}
+          intensity={0.24}
           color="#ffb700"
         />
 
@@ -113,8 +113,7 @@ export const GlobeScene: React.FC<GlobeSceneProps> = ({
 
           {/* ONLY SHOW THESE WHEN THEIR VIEW MODES REQUIRE THEM */}
           {(viewMode === "SACRED_GEOMETRY" ||
-            viewMode === "GEOMETRIC_LAYERS" ||
-            viewMode === "ORBIT_VIEW") && (
+            viewMode === "GEOMETRIC_LAYERS") && (
             <PlatonicSolids viewMode={viewMode} />
           )}
 

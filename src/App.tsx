@@ -1,34 +1,27 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
+import React, { useState } from 'react';
+import { NavTab, ViewMode, GeoNode, MathConstant, GlobeLayers } from './types';
+import { Header } from './components/Header';
+import { GlobeScene } from './components/ThreeCanvas/GlobeScene';
+import { ProjectPreviews } from './components/ProjectPreviews/ProjectPreviews';
+import { Heart } from 'lucide-react';
 
-import React, { useState } from "react";
-import {
-  NavTab,
-  ViewMode,
-  GeoNode,
-  MathConstant,
-  GlobeLayers,
-} from "./types";
+// Side Controls & Dock
+import { CompactLeftToolbar } from './components/Sidebars/CompactLeftToolbar';
+import { CompactRightToolbar } from './components/Sidebars/CompactRightToolbar';
 
-import { Header } from "./components/Header";
-import { GlobeScene } from "./components/ThreeCanvas/GlobeScene";
-import { ProjectPreviews } from "./components/ProjectPreviews/ProjectPreviews";
-import { Heart } from "lucide-react";
+// Modals
+import { LaunchEngineModal } from './components/Modals/LaunchEngineModal';
+import { BlueprintLibraryModal } from './components/Modals/BlueprintLibraryModal';
+import { MathVisualizerModal } from './components/Modals/MathVisualizerModal';
+import { ActivityLogModal } from './components/Modals/ActivityLogModal';
+import { ConstantDetailModal } from './components/Modals/ConstantDetailModal';
+import { CropCircleBlueprintModal } from './components/Modals/CropCircleBlueprintModal';
 
-import { CompactLeftToolbar } from "./components/Sidebars/CompactLeftToolbar";
-import { CompactRightToolbar } from "./components/Sidebars/CompactRightToolbar";
+// Views
+import { TabViews } from './components/Views/TabViews';
 
-import { LaunchEngineModal } from "./components/Modals/LaunchEngineModal";
-import { BlueprintLibraryModal } from "./components/Modals/BlueprintLibraryModal";
-import { MathVisualizerModal } from "./components/Modals/MathVisualizerModal";
-import { ActivityLogModal } from "./components/Modals/ActivityLogModal";
-import { ConstantDetailModal } from "./components/Modals/ConstantDetailModal";
-import { CropCircleBlueprintModal } from "./components/Modals/CropCircleBlueprintModal";
-
-import { TabViews } from "./components/Views/TabViews";
-import { soundManager } from "./utils/audio";
+// Audio
+import { soundManager } from './utils/audio';
 
 const INITIAL_LAYERS: GlobeLayers = {
   continents: true,
@@ -47,29 +40,31 @@ const INITIAL_LAYERS: GlobeLayers = {
   mathOverlays: true,
   userUploads: false,
   researchMarkers: false,
-  latitudeLongitude: true,
+  latitudeLongitude: false,
   connectionArcs: true,
-  harmonicRing: true,
+  harmonicRing: false,
   gieNodes: true,
   globeWireframe: false,
 };
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<NavTab>("HOME");
-  const [viewMode, setViewMode] = useState<ViewMode>("ORBIT_VIEW");
+  const [activeTab, setActiveTab] = useState<NavTab>('HOME');
+  const [viewMode, setViewMode] = useState<ViewMode>('ORBIT_VIEW');
   const [selectedNode, setSelectedNode] = useState<GeoNode | null>(null);
   const [audioEnabled, setAudioEnabled] = useState(false);
 
+  // Focus Mode State
   const [isFocusMode, setIsFocusMode] = useState(false);
 
+  // Globe Layers State
   const [layers, setLayers] = useState(INITIAL_LAYERS);
 
+  // Modals State
   const [isLaunchEngineOpen, setIsLaunchEngineOpen] = useState(false);
   const [isBlueprintLibraryOpen, setIsBlueprintLibraryOpen] = useState(false);
   const [isMathVisualizerOpen, setIsMathVisualizerOpen] = useState(false);
   const [isActivityLogOpen, setIsActivityLogOpen] = useState(false);
-  const [isCropBlueprintOpen, setIsCropBlueprintOpen] = useState(false);
-
+  const [isCropCircleBlueprintOpen, setIsCropCircleBlueprintOpen] = useState(false);
   const [selectedConstant, setSelectedConstant] =
     useState<MathConstant | null>(null);
 
@@ -87,11 +82,11 @@ export default function App() {
   const handleSelectMode = (mode: ViewMode) => {
     setViewMode(mode);
 
-    if (mode === "MATH_VISUALIZER") {
+    if (mode === 'MATH_VISUALIZER') {
       setIsMathVisualizerOpen(true);
     } else if (
-      mode === "SACRED_GEOMETRY" ||
-      mode === "GEOMETRIC_LAYERS"
+      mode === 'SACRED_GEOMETRY' ||
+      mode === 'GEOMETRIC_LAYERS'
     ) {
       soundManager.playScan();
     }
@@ -109,7 +104,10 @@ export default function App() {
   };
 
   const handleToggleFocusMode = (focus?: boolean) => {
-    const next = focus !== undefined ? focus : !isFocusMode;
+    const next =
+      focus !== undefined
+        ? focus
+        : !isFocusMode;
 
     setIsFocusMode(next);
 
@@ -120,6 +118,7 @@ export default function App() {
 
   return (
     <div className="relative flex h-screen w-screen flex-col overflow-hidden bg-[#020611] text-white">
+
       {/* FINE CYBER GRID BACKGROUND */}
       <div
         className="pointer-events-none absolute inset-0 z-0 opacity-30"
@@ -128,7 +127,7 @@ export default function App() {
             linear-gradient(rgba(0,245,255,0.08) 1px, transparent 1px),
             linear-gradient(90deg, rgba(0,245,255,0.08) 1px, transparent 1px)
           `,
-          backgroundSize: "32px 32px",
+          backgroundSize: '32px 32px',
         }}
       />
 
@@ -140,7 +139,6 @@ export default function App() {
           </span>
 
           <button
-            type="button"
             onClick={() => setIsFocusMode(false)}
             className="cursor-pointer rounded bg-amber-500 px-2 py-0.5 font-bold text-slate-950 transition-colors hover:bg-amber-400"
           >
@@ -153,8 +151,8 @@ export default function App() {
       <div
         className={`z-30 transition-opacity duration-500 ${
           isFocusMode
-            ? "pointer-events-none opacity-0"
-            : "opacity-100"
+            ? 'pointer-events-none opacity-0'
+            : 'opacity-100'
         }`}
       >
         <Header
@@ -167,18 +165,18 @@ export default function App() {
       </div>
 
       {/* HOME */}
-      {activeTab === "HOME" ? (
+      {activeTab === 'HOME' ? (
         <main className="relative z-10 flex flex-1 flex-col justify-between overflow-hidden">
-          {/* UNDER CONSTRUCTION */}
-          <div className="pointer-events-none absolute left-1/2 top-1 z-30 -translate-x-1/2 rounded border border-amber-400/45 bg-[#07101a]/70 px-3 py-1 font-mono text-[9px] font-bold tracking-[0.28em] text-amber-300 shadow-[0_0_12px_rgba(255,183,0,.18)] backdrop-blur-sm">
-            SITE IS UNDER CONSTRUCTION
-          </div>
 
           {/* LIVE 3D GLOBE */}
           <div className="absolute inset-0 z-0 flex items-center justify-center">
             <GlobeScene
               viewMode={viewMode}
-              selectedNodeId={selectedNode ? selectedNode.id : null}
+              selectedNodeId={
+                selectedNode
+                  ? selectedNode.id
+                  : null
+              }
               onSelectNode={(node) => {
                 soundManager.playClick();
                 setSelectedNode(node);
@@ -197,28 +195,30 @@ export default function App() {
           <div
             className={`transition-opacity duration-500 ${
               isFocusMode
-                ? "pointer-events-none opacity-0"
-                : "opacity-100"
+                ? 'pointer-events-none opacity-0'
+                : 'opacity-100'
             }`}
           >
             <ProjectPreviews
               onNavigate={setActiveTab}
-              onOpenCropBlueprint={() => setIsCropBlueprintOpen(true)}
+              onOpenCropCircleBlueprint={() => setIsCropCircleBlueprintOpen(true)}
             />
           </div>
 
           {/* LEFT + RIGHT TOOLBARS */}
           <div
-            className={`pointer-events-none absolute inset-x-0 top-0 z-20 flex items-start justify-between px-2 pt-1 transition-opacity duration-500 ${
-              isFocusMode ? "opacity-0" : "opacity-100"
+            className={`pointer-events-none absolute inset-0 z-20 flex items-start justify-between p-1.5 transition-opacity duration-500 md:p-2 ${
+              isFocusMode
+                ? 'opacity-0'
+                : 'opacity-100'
             }`}
           >
             {/* LEFT TOOLBAR */}
             <div
               className={
                 isFocusMode
-                  ? "pointer-events-none"
-                  : "pointer-events-auto origin-top-left"
+                  ? 'pointer-events-none'
+                  : 'pointer-events-auto'
               }
             >
               <CompactLeftToolbar
@@ -238,7 +238,9 @@ export default function App() {
                 }
                 audioEnabled={audioEnabled}
                 onToggleAudio={handleToggleAudio}
-                onSelectConstant={(c) => setSelectedConstant(c)}
+                onSelectConstant={(c) =>
+                  setSelectedConstant(c)
+                }
               />
             </div>
 
@@ -246,80 +248,32 @@ export default function App() {
             <div
               className={
                 isFocusMode
-                  ? "pointer-events-none"
-                  : "pointer-events-auto origin-top-right"
+                  ? 'pointer-events-none'
+                  : 'pointer-events-auto'
               }
             >
               <CompactRightToolbar
                 onOpenActivityLog={() =>
                   setIsActivityLogOpen(true)
                 }
-                onSelectConstant={(c) => setSelectedConstant(c)}
+                onSelectConstant={(c) =>
+                  setSelectedConstant(c)
+                }
                 onOpenMathVisualizer={() =>
                   setIsMathVisualizerOpen(true)
                 }
               />
             </div>
           </div>
-
-          {/* BOTTOM MATHEMATICAL STATUS BAR */}
-          <div
-            className={`absolute bottom-0 left-0 right-0 z-20 h-[54px] border-t border-cyan-400/45 bg-[#020a12]/92 font-mono backdrop-blur-md transition-opacity ${
-              isFocusMode
-                ? "pointer-events-none opacity-0"
-                : "opacity-100"
-            }`}
-          >
-            <div className="grid h-full grid-cols-7 divide-x divide-cyan-400/20">
-              {[
-                ["⚛", "φ 1.6180339887…", "GOLDEN RATIO", "text-cyan-300"],
-                ["◉", "34 55 89 144 233", "FIBONACCI SEQUENCE", "text-lime-300"],
-                ["◇", "3.1415926535…", "PI (π)", "text-fuchsia-300"],
-                ["△", "7", "PLATONIC SOLIDS", "text-cyan-300"],
-                ["✣", "108", "SACRED NUMBER", "text-yellow-300"],
-                ["◎", "432 Hz", "HARMONIC FREQUENCY", "text-lime-300"],
-              ].map(([icon, value, label, color]) => (
-                <div
-                  key={label}
-                  className="flex min-w-0 items-center justify-center gap-2 px-2"
-                >
-                  <span className={`text-[16px] ${color}`}>
-                    {icon}
-                  </span>
-
-                  <div className="min-w-0">
-                    <div
-                      className={`truncate text-[12px] font-bold ${color}`}
-                    >
-                      {value}
-                    </div>
-
-                    <div
-                      className={`truncate text-[8px] font-bold tracking-[0.07em] ${color}`}
-                    >
-                      {label}
-                    </div>
-                  </div>
-                </div>
-              ))}
-
-              <div className="flex flex-col items-center justify-center text-cyan-300">
-                <div className="text-[14px] font-bold tabular-nums">
-                  GIE ONLINE
-                </div>
-
-                <div className="text-[8px] tracking-[0.14em] text-cyan-200/75">
-                  LIVE ENGINE
-                </div>
-              </div>
-            </div>
-          </div>
         </main>
       ) : (
+        /* OTHER SITE PAGES */
         <main className="z-10 flex-1 overflow-hidden">
           <TabViews
             activeTab={activeTab}
-            onLaunchEngine={() => setIsLaunchEngineOpen(true)}
+            onLaunchEngine={() =>
+              setIsLaunchEngineOpen(true)
+            }
             onOpenBlueprintLibrary={() =>
               setIsBlueprintLibraryOpen(true)
             }
@@ -329,16 +283,17 @@ export default function App() {
 
       {/* SUPPORT / DONATE */}
       <button
-        type="button"
         onClick={() => {
           soundManager.playChime();
-          setActiveTab("SUPPORT_GIE");
+          setActiveTab('SUPPORT_GIE');
         }}
-        onMouseEnter={() => soundManager.playHover()}
-        className={`fixed bottom-[54px] right-4 z-40 flex cursor-pointer items-center space-x-2 rounded-lg border px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-widest backdrop-blur-md transition-all ${
-          activeTab === "SUPPORT_GIE"
-            ? "scale-105 border-amber-300 bg-amber-500 text-slate-950 shadow-[0_0_20px_rgba(255,183,0,0.8)]"
-            : "border-amber-400/80 bg-amber-500/20 text-amber-300 shadow-[0_0_15px_rgba(255,183,0,0.35)] hover:bg-amber-500/40 hover:shadow-[0_0_25px_rgba(255,183,0,0.75)]"
+        onMouseEnter={() =>
+          soundManager.playHover()
+        }
+        className={`fixed bottom-4 right-4 z-40 flex cursor-pointer items-center space-x-2 rounded-lg border px-3.5 py-2 font-mono text-xs font-bold uppercase tracking-widest backdrop-blur-md transition-all ${
+          activeTab === 'SUPPORT_GIE'
+            ? 'scale-105 border-amber-300 bg-amber-500 text-slate-950 shadow-[0_0_20px_rgba(255,183,0,0.8)]'
+            : 'border-amber-400/80 bg-amber-500/20 text-amber-300 shadow-[0_0_15px_rgba(255,183,0,0.35)] hover:bg-amber-500/40 hover:shadow-[0_0_25px_rgba(255,183,0,0.75)]'
         }`}
         title="Support GIE / Donate"
       >
@@ -349,32 +304,42 @@ export default function App() {
       {/* MODALS */}
       <LaunchEngineModal
         isOpen={isLaunchEngineOpen}
-        onClose={() => setIsLaunchEngineOpen(false)}
+        onClose={() =>
+          setIsLaunchEngineOpen(false)
+        }
       />
 
       <BlueprintLibraryModal
         isOpen={isBlueprintLibraryOpen}
-        onClose={() => setIsBlueprintLibraryOpen(false)}
+        onClose={() =>
+          setIsBlueprintLibraryOpen(false)
+        }
       />
 
       <MathVisualizerModal
         isOpen={isMathVisualizerOpen}
-        onClose={() => setIsMathVisualizerOpen(false)}
+        onClose={() =>
+          setIsMathVisualizerOpen(false)
+        }
       />
 
       <ActivityLogModal
         isOpen={isActivityLogOpen}
-        onClose={() => setIsActivityLogOpen(false)}
+        onClose={() =>
+          setIsActivityLogOpen(false)
+        }
+      />
+
+      <CropCircleBlueprintModal
+        isOpen={isCropCircleBlueprintOpen}
+        onClose={() => setIsCropCircleBlueprintOpen(false)}
       />
 
       <ConstantDetailModal
         constant={selectedConstant}
-        onClose={() => setSelectedConstant(null)}
-      />
-
-      <CropCircleBlueprintModal
-        isOpen={isCropBlueprintOpen}
-        onClose={() => setIsCropBlueprintOpen(false)}
+        onClose={() =>
+          setSelectedConstant(null)
+        }
       />
     </div>
   );
