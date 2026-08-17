@@ -1,134 +1,4 @@
-
-Today 2:04 AM
-
-Pasted text(20260816-070423).txt
-Document
-
-Generated image
-
-
-Edit
-
-
-
-GIE-CURRENT-WEBSITE.zip
-Zip Archive
-
-a73405c5-8d0f-4e29-9fc0-373c50450e2f.png
-i am really really really angry i thought you implementedthe code i gave you to fix this
-
-4002c46f-d2ad-4f7a-bc25-59826c438036.png
-
-114e6fd2-9054-4f5d-9e09-bd2923512885.png
-HOW DO YOU FUCK THAT U WHEN I GAVE YOU EVERYTHING      WOW
-
-
-frontend.docx
-Document
-
-aeb1f12c-eb34-45be-8797-9867829a0af6.png
-
-b6e23ad7-bbc6-47f2-a2ac-9a5008eeb3fc.png
-
-ef42515a-2783-4cb3-8b00-f4d11b13bdba.png
-
-485a6ef9-2fea-42c2-b3b1-3efff20b9b1d.png
-
-
-3070e9b1-d0bf-4e73-97a1-abacefd9b503.tsx
-TypeScript
-
-97f33905-19c5-4169-88fd-54ea856058b0.png
-
-178baa99-994d-437f-b618-debd8b655c9b.png
-
-c8e6f263-a48f-44ed-8a40-1624ebd626de.png
-
-438fddf2-96bb-46e2-8ccd-a36645f00156.png
-
-7cd0a198-b86b-47af-9b3c-d5cc0e734949.png
-
-4a38fd05-7510-4921-a0c9-0421f52c5a51.png
-
-fcb14089-62c2-4e91-af54-017bd3915d02.png
-
-b7a43fe1-c423-4d5b-bfaf-259dbddc78c9.png
-
-65597414-22b6-433f-9262-5df011981f09.png
-
-6ba55ebb-e372-4dd8-b978-3ce525430209.png
-
-0640825c-c607-4396-ac8e-1fd5fef0931e.png
-
-6fe72b1c-2451-4e51-9043-238c04749db9.png
-
-
-Pasted code(20260816-110011).ts
-TypeScript
-
-Found it. The arches are already in this GlobeSphere.tsx. We do not need to invent another arch component.
-
-The file defines 10 fixed pole-to-pole shield arches at longitudes -162 through 162, with the crown lifted above the globe. 
-
- It also renders them only when layers.connectionArcs is true. 
-
-
-And your default configuration already has:
-
-connectionArcs: true,
-
-
-The problem
-The arches currently use:
-
-depthTest={true}
-That allows the Earth to hide most of each arch. Combined with how close the arches hug the sphere (1.018 → 1.075 × radius), that's why you're only seeing pieces instead of the strong static shield we want. 
-
-
-We're not touching the globe, continents, nodes, camera, rotation, or anything else.
-
-Change only this around line 888:
-
-depthTest={true}
-to:
-
-depthTest={false}
-Then build:
-
-cd "C:\Users\larry\OneDrive\Desktop\GIE AI ZIP 2\GIE Website\project"; npm run build
-That is the first correction I want because it preserves the arch geometry you already built and makes the complete ten-arch shield visible instead of redesigning it.
-
-
-wheres my code for sphere
-
-You already gave me the full GlobeSphere code — the 923-line file. 
-
-
-If you mean “give me the corrected GlobeSphere.tsx back as a downloadable file”, yes. I’ll take this exact file you supplied, make only the arch visibility correction, and hand the complete .tsx back to you.
-
-
-i deleted by accident
-
-No problem — I still have the complete file you uploaded. I recovered it and applied only the arch visibility correction we just identified. Your uploaded sphere already contains the ten static arches. 
-
-
-Download recovered GlobeSphere.tsx
-Put it back here:
-
-src\components\ThreeCanvas\GlobeSphere.tsx
-Nothing else in your sphere code was intentionally redesigned. 
-
-
-GlobeSphere.tsx
-Code
-
-
-Library
-/
-GlobeSphere.tsx
-
-
-import React, { useMemo, useRef } from "react";
+﻿import React, { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { GeoNode, GlobeLayers } from "../../types";
@@ -1044,6 +914,9 @@ export const GlobeSphere: React.FC<
     </group>
   );
 };
+
+
+
 
 
 
