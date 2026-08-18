@@ -1,9 +1,10 @@
-import React from 'react';
+﻿import React from 'react';
+import { MilkHillResearch } from "./MilkHillResearch";
 import { NavTab } from '../../types';
 import { BLUEPRINT_PRESETS, MATH_CONSTANTS } from '../../data/mockData';
 import { soundManager } from '../../utils/audio';
 import { BookOpen, Cpu, Layers, FileText, Globe, Heart, Search, ArrowRight, ShieldCheck, Sparkles } from 'lucide-react';
-
+import { milkHillPdfs } from "../../milkHillPdfs";
 interface TabViewsProps {
   activeTab: NavTab;
   onLaunchEngine: () => void;
@@ -91,7 +92,7 @@ export const TabViews: React.FC<TabViewsProps> = ({
                   <h4 className="text-sm font-bold text-cyan-200">{proj.title}</h4>
                   <div className="text-[10px] text-slate-400 mt-1 flex space-x-3">
                     <span>{proj.nodes}</span>
-                    <span>•</span>
+                    <span>â€¢</span>
                     <span className="text-emerald-400">{proj.accuracy} Fit</span>
                   </div>
                 </div>
@@ -137,40 +138,77 @@ export const TabViews: React.FC<TabViewsProps> = ({
           </div>
         </div>
       )}
-
       {/* RESEARCH TAB */}
       {activeTab === 'RESEARCH' && (
-        <div className="max-w-5xl mx-auto space-y-6">
+        <div className="max-w-6xl mx-auto space-y-6">
           <div className="border-b border-cyan-500/30 pb-4">
             <h1 className="text-3xl font-bold text-cyan-300 flex items-center space-x-3">
               <FileText className="w-8 h-8 text-cyan-400" />
-              <span>MATHEMATICAL RESEARCH & PROOFS</span>
+              <span>MILK HILL 2001 — RESEARCH RECORD</span>
             </h1>
-            <p className="text-xs text-slate-400 mt-1">Formal mathematical papers published by the GIE Research Collective</p>
+            <p className="text-xs text-slate-400 mt-2">
+              Complete GIE mathematical research archive and supporting evidence.
+            </p>
           </div>
 
-          <div className="space-y-4">
-            {[
-              {
-                title: 'On the Geometric Uniformity of Golden Ratio Lattices in Spherical Coordinates',
-                author: 'Dr. Evelyn Vance & GIE Collective (2026)',
-                summary: 'Proves that logarithmic spiral projections onto 3D spheres yield optimal packing density with minimal harmonic distortion.'
-              },
-              {
-                title: 'Universal Constants in Ancient Geodetic Architecture',
-                author: 'Prof. Marcus Aurel & GIE Research',
-                summary: 'Rigorous statistical analysis of 128 ancient megalithic sites showing 99.99% correlation with Pi and Phi angles.'
-              }
-            ].map((paper, idx) => (
-              <div key={idx} className="p-5 bg-slate-900/80 border border-cyan-500/30 rounded space-y-2">
-                <h3 className="text-base font-bold text-cyan-200">{paper.title}</h3>
-                <div className="text-xs text-amber-400">{paper.author}</div>
-                <p className="text-xs text-slate-300 leading-relaxed">{paper.summary}</p>
+          <div className="rounded border border-cyan-500/30 bg-slate-950/80 p-5">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <div className="text-[10px] font-bold tracking-[0.25em] text-cyan-400">
+                  CROP-CIRCLE SITE ANALYSIS
+                </div>
+                <h2 className="mt-2 text-xl font-bold text-white">
+                  MILK HILL — 2001
+                </h2>
+                <p className="mt-1 text-xs text-slate-400">
+                  Mathematical reconstruction, spiral analysis, binary analysis,
+                  letter permutation, supporting records and final conclusions.
+                </p>
+              </div>
+              <div className="shrink-0 rounded border border-cyan-400/40 bg-cyan-950/30 px-4 py-2 text-[10px] font-bold tracking-widest text-cyan-200">
+                12 PDF RECORDS
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {milkHillPdfs.slice(0, 12).map((pdf, index) => (
+              <div
+                key={pdf.file}
+                className="flex min-h-[205px] flex-col justify-between rounded border border-cyan-500/30 bg-slate-900/80 p-5 transition hover:border-cyan-300/70"
+              >
+                <div>
+                  <div className="flex items-center justify-between">
+                    <FileText className="h-6 w-6 text-cyan-300" />
+                    <span className="text-[9px] font-bold tracking-widest text-slate-500">
+                      DOCUMENT {String(index + 1).padStart(2, '0')}
+                    </span>
+                  </div>
+
+                  <h3 className="mt-4 text-sm font-bold leading-5 text-cyan-100">
+                    {pdf.title}
+                  </h3>
+
+                  <div className="mt-3 text-[9px] font-bold tracking-widest text-slate-500">
+                    GIE · READ-ONLY RESEARCH RECORD · PDF
+                  </div>
+                </div>
+
+                <a
+                  href={`${pdf.file}#toolbar=1&navpanes=0&view=FitH`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => soundManager.playClick()}
+                  className="mt-5 block w-full rounded border border-cyan-400/40 bg-cyan-950/30 px-4 py-3 text-center text-[10px] font-bold tracking-[0.18em] text-cyan-200 transition hover:border-cyan-300 hover:bg-cyan-950/60"
+                >
+                  OPEN DOCUMENT
+                </a>
               </div>
             ))}
           </div>
         </div>
       )}
+
 
       {/* DOCUMENTATION TAB */}
       {activeTab === 'DOCUMENTATION' && (
@@ -256,3 +294,5 @@ Content-Type: application/json
     </div>
   );
 };
+
+
