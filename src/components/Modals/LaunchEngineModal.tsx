@@ -1,349 +1,54 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import React, { useMemo, useState } from 'react';
+import { AnimatePresence, motion } from 'motion/react';
+import { X, Cpu, ShieldCheck, Upload, Network, Activity, FileText, KeyRound } from 'lucide-react';
 import { soundManager } from '../../utils/audio';
-import {
-  X,
-  Cpu,
-  CheckCircle2,
-  Zap,
-  AlertTriangle
-} from 'lucide-react';
 
-interface LaunchEngineModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
+interface LaunchEngineModalProps { isOpen: boolean; onClose: () => void; }
+type DataRecord = { id: string; x: number; y: number; capacity?: number; flow?: number };
+type Relationship = { source: string; target: string; distance?: number; capacity?: number; flow?: number };
+type Result = { recordCount:number; relationshipCount:number; bottlenecks:Array<{id:string; utilization:number; connections:number}>; trace:string[] };
 
-interface ArchitectResponse {
-  ok: boolean;
-  proposal?: {
-    id: string;
-    type: string;
-    objective: string;
-    status: string;
-    architect?: {
-      id: string;
-      provider: string;
-      model: string;
-    };
-    architecture: string;
-    authority?: {
-      ownerApprovalRequired: boolean;
-      automaticallyApproved: boolean;
-      automaticallyDeployable: boolean;
-    };
-  };
-  error?: {
-    code?: string;
-    message?: string;
-  };
-}
+const ENGINE_URL = (import.meta.env.VITE_GIE_ENGINE_URL || 'https://gie-engine.leh-oct1772.workers.dev').replace(/\/+$/, '');
 
-const ENGINE_URL = (
-  import.meta.env.VITE_GIE_ENGINE_URL ||
-  'https://gie-engine.leh-oct1772.workers.dev'
-).replace(/\/+$/, '');
-
-export const LaunchEngineModal: React.FC<
-  LaunchEngineModalProps
-> = ({ isOpen, onClose }) => {
-  const [objective, setObjective] = useState('');
-  const [running, setRunning] = useState(false);
-  const [proposal, setProposal] =
-    useState<ArchitectResponse['proposal'] | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  const handleRunArchitect = async () => {
-    const cleanObjective = objective.trim();
-
-    if (!cleanObjective || running) {
-      return;
-    }
-
-    soundManager.playScan();
-
-    setRunning(true);
-    setProposal(null);
-    setError(null);
-
-    try {
-      const response = await fetch(
-        `${ENGINE_URL}/api/v1/agents/architect/proposal`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            objective: cleanObjective
-          })
-        }
-      );
-
-      const data =
-        (await response.json()) as ArchitectResponse;
-
-      if (!response.ok || !data.ok || !data.proposal) {
-        throw new Error(
-          data.error?.message ||
-            `GIE Engine returned HTTP ${response.status}.`
-        );
-      }
-
-      setProposal(data.proposal);
-      soundManager.playChime();
-    } catch (err) {
-      console.error('GIE_ARCHITECT_REQUEST_ERROR', err);
-
-      setError(
-        err instanceof Error
-          ? err.message
-          : 'Unable to communicate with the GIE Engine.'
-      );
-    } finally {
-      setRunning(false);
-    }
-  };
-
-  const handleClose = () => {
-    if (running) {
-      return;
-    }
-
-    soundManager.playClick();
-    onClose();
-  };
-
-  if (!isOpen) {
-    return null;
+function parseCsv(text:string) {
+  const lines=text.trim().split(/\r?\n/).filter(Boolean); if(lines.length<2) throw new Error('CSV needs a header and data rows.');
+  const h=lines[0].split(',').map(v=>v.trim().toLowerCase());
+  const rows=lines.slice(1).map(line=>Object.fromEntries(line.split(',').map((v,i)=>[h[i],v.trim()])));
+  const records:DataRecord[]=[]; const relationships:Relationship[]=[];
+  for(const r of rows){
+    if(r.source && r.target) relationships.push({source:r.source,target:r.target,distance:Number(r.distance)||undefined,capacity:Number(r.capacity)||undefined,flow:Number(r.flow)||undefined});
+    else if(r.id) records.push({id:r.id,x:Number(r.x)||0,y:Number(r.y)||0,capacity:Number(r.capacity)||undefined,flow:Number(r.flow)||undefined});
   }
+  if(!relationships.length) throw new Error('CSV must contain source,target columns for relationships.');
+  const ids=new Set(records.map(r=>r.id)); relationships.forEach(r=>{ids.add(r.source);ids.add(r.target)});
+  ids.forEach(id=>{if(!records.some(r=>r.id===id)) records.push({id,x:0,y:0})});
+  return {records,relationships};
+}
 
-  return (
-    <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-md">
-        <motion.div
-          initial={{
-            opacity: 0,
-            scale: 0.9,
-            y: 20
-          }}
-          animate={{
-            opacity: 1,
-            scale: 1,
-            y: 0
-          }}
-          exit={{
-            opacity: 0,
-            scale: 0.9,
-            y: 20
-          }}
-          className="relative max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-lg border-2 border-cyan-400/80 bg-slate-950 p-6 font-mono text-slate-200 shadow-[0_0_40px_rgba(0,240,255,0.4)]"
-        >
-          {/* HEADER */}
-          <div className="mb-4 flex items-center justify-between border-b border-cyan-500/30 pb-3">
-            <div className="flex items-center space-x-2">
-              <Cpu
-                className={`h-5 w-5 text-cyan-400 ${
-                  running ? 'animate-pulse' : ''
-                }`}
-              />
+function analyze(records:DataRecord[], relationships:Relationship[]):Result {
+  const connectionCount=new Map<string,number>(); const flow=new Map<string,number>(); const cap=new Map<string,number>();
+  records.forEach(r=>{connectionCount.set(r.id,0);flow.set(r.id,r.flow||0);cap.set(r.id,r.capacity||0)});
+  relationships.forEach(e=>{connectionCount.set(e.source,(connectionCount.get(e.source)||0)+1);connectionCount.set(e.target,(connectionCount.get(e.target)||0)+1); const f=e.flow||0,c=e.capacity||0; flow.set(e.source,(flow.get(e.source)||0)+f);flow.set(e.target,(flow.get(e.target)||0)+f);cap.set(e.source,(cap.get(e.source)||0)+c);cap.set(e.target,(cap.get(e.target)||0)+c)});
+  const bottlenecks=records.map(r=>({id:r.id,connections:connectionCount.get(r.id)||0,utilization:(cap.get(r.id)||0)>0?(flow.get(r.id)||0)/(cap.get(r.id)||1):0})).sort((a,b)=>(b.utilization-a.utilization)||(b.connections-a.connections)).slice(0,10);
+  return {recordCount:records.length,relationshipCount:relationships.length,bottlenecks,trace:[`Imported ${records.length} records and ${relationships.length} relationships.`,`Mapped the supplied relationships for isolated project analysis.`,`Calculated connection concentration and supplied flow/capacity utilization.`,`Ranked convergence points and capacity pressure for bottleneck review.`,`Preserved source rows for auditable result tracing.`]};
+}
 
-              <div>
-                <h2 className="text-lg font-bold uppercase tracking-widest text-cyan-300">
-                  GIE SYSTEM ARCHITECT
-                </h2>
-
-                <div className="mt-1 text-[9px] uppercase tracking-[0.2em] text-cyan-200/60">
-                  Geometric Intelligence Engine
-                </div>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={handleClose}
-              disabled={running}
-              className="rounded border border-slate-700 bg-slate-900 p-1 text-slate-400 transition-colors hover:text-cyan-300 disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              <X className="h-5 w-5" />
-            </button>
-          </div>
-
-          <div className="space-y-4">
-            {/* AUTHORITY */}
-            <div className="rounded border border-amber-400/30 bg-amber-950/20 p-3">
-              <div className="text-[10px] font-bold uppercase tracking-widest text-amber-300">
-                Owner-Controlled Architecture
-              </div>
-
-              <p className="mt-1 text-[10px] leading-relaxed text-slate-400">
-                The Architect may analyze and design proposed
-                GIE work. It cannot deploy production changes,
-                alter accepted GIE mathematics, allocate funds,
-                spend funds, or activate paid services without
-                owner authorization.
-              </p>
-            </div>
-
-            {/* OBJECTIVE */}
-            <div>
-              <label
-                htmlFor="gie-build-objective"
-                className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-cyan-300"
-              >
-                Build Objective
-              </label>
-
-              <textarea
-                id="gie-build-objective"
-                value={objective}
-                onChange={(event) =>
-                  setObjective(event.target.value)
-                }
-                disabled={running}
-                placeholder="Tell the GIE Architect what you want designed or built next..."
-                rows={6}
-                className="w-full resize-y rounded border border-cyan-500/40 bg-slate-900/80 p-3 text-sm leading-relaxed text-slate-100 outline-none transition-colors placeholder:text-slate-600 focus:border-cyan-300 disabled:cursor-not-allowed disabled:opacity-60"
-              />
-            </div>
-
-            {/* RUN */}
-            <button
-              type="button"
-              onClick={handleRunArchitect}
-              disabled={running || !objective.trim()}
-              className={`flex w-full items-center justify-center space-x-2 rounded border py-3 text-sm font-bold uppercase tracking-widest transition-all ${
-                running || !objective.trim()
-                  ? 'cursor-not-allowed border-slate-700 bg-slate-800 text-slate-500'
-                  : 'cursor-pointer border-cyan-400 bg-cyan-950 text-cyan-200 shadow-[0_0_20px_rgba(0,240,255,0.4)] hover:bg-cyan-900'
-              }`}
-            >
-              <Zap className="h-4 w-4 text-amber-300" />
-
-              <span>
-                {running
-                  ? 'GIE ARCHITECT ANALYZING...'
-                  : 'GENERATE BUILD ARCHITECTURE'}
-              </span>
-            </button>
-
-            {/* ACTIVE REQUEST */}
-            {running && (
-              <div className="overflow-hidden rounded-full border border-cyan-500/30 bg-slate-900">
-                <motion.div
-                  className="h-2 w-1/3 bg-gradient-to-r from-cyan-400 via-amber-400 to-emerald-400"
-                  animate={{
-                    x: ['-100%', '300%']
-                  }}
-                  transition={{
-                    duration: 1.2,
-                    repeat: Infinity,
-                    ease: 'linear'
-                  }}
-                />
-              </div>
-            )}
-
-            {/* ERROR */}
-            {error && (
-              <motion.div
-                initial={{
-                  opacity: 0,
-                  y: 8
-                }}
-                animate={{
-                  opacity: 1,
-                  y: 0
-                }}
-                className="rounded border border-red-500/50 bg-red-950/30 p-4"
-              >
-                <div className="flex items-center text-xs font-bold uppercase text-red-300">
-                  <AlertTriangle className="mr-2 h-4 w-4" />
-                  Engine Request Failed
-                </div>
-
-                <div className="mt-2 text-xs leading-relaxed text-red-200/80">
-                  {error}
-                </div>
-              </motion.div>
-            )}
-
-            {/* REAL ARCHITECT RESPONSE */}
-            {proposal && (
-              <motion.div
-                initial={{
-                  opacity: 0,
-                  y: 10
-                }}
-                animate={{
-                  opacity: 1,
-                  y: 0
-                }}
-                className="space-y-4 rounded border border-emerald-500/50 bg-slate-900/90 p-4"
-              >
-                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-emerald-500/20 pb-3">
-                  <span className="flex items-center text-xs font-bold uppercase text-emerald-400">
-                    <CheckCircle2 className="mr-1.5 h-4 w-4" />
-                    Architect Proposal Generated
-                  </span>
-
-                  <span className="rounded border border-amber-500/40 bg-amber-950 px-2 py-1 text-[9px] font-bold uppercase tracking-wider text-amber-300">
-                    {proposal.status}
-                  </span>
-                </div>
-
-                <div className="grid gap-3 text-xs sm:grid-cols-2">
-                  <div className="rounded border border-cyan-500/20 bg-slate-950 p-3">
-                    <span className="block text-[9px] uppercase tracking-wider text-slate-500">
-                      Proposal ID
-                    </span>
-
-                    <span className="mt-1 block break-all text-cyan-300">
-                      {proposal.id}
-                    </span>
-                  </div>
-
-                  <div className="rounded border border-cyan-500/20 bg-slate-950 p-3">
-                    <span className="block text-[9px] uppercase tracking-wider text-slate-500">
-                      Architect
-                    </span>
-
-                    <span className="mt-1 block text-cyan-300">
-                      {proposal.architect?.id ||
-                        'gie-system-architect'}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="rounded border border-cyan-500/20 bg-slate-950 p-3">
-                  <span className="block text-[9px] uppercase tracking-wider text-slate-500">
-                    Objective
-                  </span>
-
-                  <div className="mt-2 whitespace-pre-wrap text-xs leading-relaxed text-slate-300">
-                    {proposal.objective}
-                  </div>
-                </div>
-
-                <div className="rounded border border-cyan-400/30 bg-[#020a12] p-4">
-                  <div className="mb-3 text-[10px] font-bold uppercase tracking-[0.18em] text-cyan-300">
-                    GIE Architecture Proposal
-                  </div>
-
-                  <div className="whitespace-pre-wrap text-xs leading-relaxed text-slate-200">
-                    {proposal.architecture}
-                  </div>
-                </div>
-
-                <div className="rounded border border-amber-400/30 bg-amber-950/20 p-3 text-[10px] leading-relaxed text-amber-200">
-                  OWNER APPROVAL REQUIRED — This proposal has
-                  not been automatically approved or deployed.
-                </div>
-              </motion.div>
-            )}
-          </div>
-        </motion.div>
-      </div>
-    </AnimatePresence>
-  );
+export const LaunchEngineModal:React.FC<LaunchEngineModalProps>=({isOpen,onClose})=>{
+  const [accessKey,setAccessKey]=useState(''); const [authorized,setAuthorized]=useState(false); const [checking,setChecking]=useState(false); const [message,setMessage]=useState('');
+  const [project,setProject]=useState(''); const [records,setRecords]=useState<DataRecord[]>([]); const [relationships,setRelationships]=useState<Relationship[]>([]); const [result,setResult]=useState<Result|null>(null);
+  const filename=useMemo(()=>project.trim()||'UNTITLED PROJECT',[project]);
+  const verify=async()=>{ if(!accessKey.trim())return; setChecking(true);setMessage(''); try{const r=await fetch(`${ENGINE_URL}/api/v1/access/verify`,{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${accessKey.trim()}`},body:'{}'}); const d=await r.json(); if(!r.ok||!d.ok)throw new Error(d?.error?.message||'Paid Engine access is not active for this key.'); setAuthorized(true);soundManager.playChime();}catch(e){setMessage(e instanceof Error?e.message:'Access verification failed.');}finally{setChecking(false)}};
+  const loadFile=async(file:File)=>{try{const text=await file.text(); let data:any; if(file.name.toLowerCase().endsWith('.json')) data=JSON.parse(text); else data=parseCsv(text); const importedRecords=data.records ?? data.locations; const importedRelationships=data.relationships ?? data.connections; if(!Array.isArray(importedRecords)||!Array.isArray(importedRelationships))throw new Error('JSON requires records[] and relationships[].'); setRecords(importedRecords);setRelationships(importedRelationships);setResult(null);setMessage(`${file.name} loaded into ${filename}.`);soundManager.playScan();}catch(e){setMessage(e instanceof Error?e.message:'Unable to import file.')}};
+  const run=()=>{if(!relationships.length){setMessage('Import an analysis dataset first.');return;} setResult(analyze(records,relationships));soundManager.playChime();};
+  const close=()=>{soundManager.playClick();onClose()}; if(!isOpen)return null;
+  return <AnimatePresence><div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-3 backdrop-blur-md"><motion.div initial={{opacity:0,scale:.96}} animate={{opacity:1,scale:1}} className="relative max-h-[94vh] w-full max-w-5xl overflow-y-auto rounded-lg border-2 border-cyan-400/70 bg-slate-950 p-5 font-mono text-slate-200 shadow-[0_0_40px_rgba(0,240,255,.35)]">
+    <div className="mb-5 flex items-center justify-between border-b border-cyan-500/30 pb-3"><div className="flex items-center gap-3"><Cpu className="h-6 w-6 text-cyan-300"/><div><h2 className="font-bold tracking-[.18em] text-cyan-200">GIE ENGINE</h2><p className="text-[9px] tracking-[.22em] text-slate-500">PAID ANALYTICS WORKSPACE</p></div></div><button onClick={close} className="rounded border border-slate-700 p-1 text-slate-400 hover:text-cyan-300"><X className="h-5 w-5"/></button></div>
+    {!authorized ? <div className="mx-auto max-w-xl space-y-4 py-8"><div className="rounded border border-amber-400/30 bg-amber-950/20 p-5 text-center"><ShieldCheck className="mx-auto mb-3 h-10 w-10 text-amber-300"/><h3 className="font-bold tracking-widest text-amber-200">AUTHORIZED PAID ACCESS</h3><p className="mt-2 text-xs leading-relaxed text-slate-400">GIE Engine analytics are available to licensed users and approved enterprise engagements.</p></div><div><label className="mb-2 block text-[10px] font-bold tracking-widest text-cyan-300">ENGINE ACCESS KEY</label><div className="flex gap-2"><div className="relative flex-1"><KeyRound className="absolute left-3 top-3 h-4 w-4 text-slate-500"/><input type="password" value={accessKey} onChange={e=>setAccessKey(e.target.value)} onKeyDown={e=>e.key==='Enter'&&verify()} className="w-full rounded border border-cyan-500/40 bg-slate-900 py-2.5 pl-10 pr-3 outline-none focus:border-cyan-300" placeholder="Enter licensed access key"/></div><button onClick={verify} disabled={checking||!accessKey.trim()} className="rounded border border-cyan-400 bg-cyan-950 px-5 text-xs font-bold tracking-wider text-cyan-200 disabled:opacity-40">{checking?'VERIFYING':'ENTER ENGINE'}</button></div></div>{message&&<div className="rounded border border-amber-500/30 bg-slate-900 p-3 text-xs text-amber-200">{message}</div>}</div> :
+    <div className="space-y-5"><div className="grid gap-4 md:grid-cols-3"><div className="rounded border border-cyan-500/25 bg-slate-900/70 p-4"><ShieldCheck className="mb-2 h-5 w-5 text-emerald-300"/><div className="text-[9px] tracking-widest text-slate-500">ACCESS</div><div className="text-sm font-bold text-emerald-300">LICENSE VERIFIED</div></div><div className="rounded border border-cyan-500/25 bg-slate-900/70 p-4"><Network className="mb-2 h-5 w-5 text-cyan-300"/><div className="text-[9px] tracking-widest text-slate-500">DATASET</div><div className="text-sm font-bold text-cyan-200">{records.length} RECORDS / {relationships.length} RELATIONSHIPS</div></div><div className="rounded border border-cyan-500/25 bg-slate-900/70 p-4"><Activity className="mb-2 h-5 w-5 text-amber-300"/><div className="text-[9px] tracking-widest text-slate-500">ANALYSIS</div><div className="text-sm font-bold text-amber-200">{result?'COMPLETE':'READY'}</div></div></div>
+      <div className="grid gap-4 md:grid-cols-[1fr_auto]"><input value={project} onChange={e=>setProject(e.target.value)} placeholder="Project / customer analysis name" className="rounded border border-cyan-500/30 bg-slate-900 p-3 text-sm outline-none focus:border-cyan-300"/><label className="flex cursor-pointer items-center justify-center gap-2 rounded border border-cyan-400 bg-cyan-950 px-5 py-3 text-xs font-bold text-cyan-200"><Upload className="h-4 w-4"/>IMPORT CSV / JSON<input type="file" accept=".csv,.json" className="hidden" onChange={e=>e.target.files?.[0]&&loadFile(e.target.files[0])}/></label></div>
+      <div className="rounded border border-slate-700 bg-black/30 p-3 text-[10px] text-slate-400">CSV relationship format: <span className="text-cyan-300">source,target,distance,capacity,flow</span> · JSON format: <span className="text-cyan-300">&#123; "records": [...], "relationships": [...] &#125;</span></div>
+      <button onClick={run} disabled={!relationships.length} className="w-full rounded border border-emerald-400 bg-emerald-950/50 py-3 text-xs font-bold tracking-[.16em] text-emerald-200 disabled:border-slate-700 disabled:text-slate-600">RUN GIE NETWORK ANALYSIS</button>{message&&<div className="text-xs text-cyan-200">{message}</div>}
+      {result&&<div className="grid gap-4 lg:grid-cols-2"><div className="rounded border border-cyan-500/30 bg-slate-900/70 p-4"><h3 className="mb-3 flex items-center gap-2 text-xs font-bold tracking-widest text-cyan-300"><Activity className="h-4 w-4"/>BOTTLENECK RANKING</h3><div className="space-y-2">{result.bottlenecks.map((b,i)=><div key={b.id} className="grid grid-cols-[30px_1fr_auto] gap-2 border-b border-slate-800 py-2 text-xs"><span className="text-slate-500">#{i+1}</span><span>{b.id}</span><span className="text-amber-300">{(b.utilization*100).toFixed(1)}% · CONNECTIONS {b.connections}</span></div>)}</div></div><div className="rounded border border-cyan-500/30 bg-slate-900/70 p-4"><h3 className="mb-3 flex items-center gap-2 text-xs font-bold tracking-widest text-cyan-300"><FileText className="h-4 w-4"/>VERIFIABLE TRACE</h3><ol className="space-y-3">{result.trace.map((t,i)=><li key={t} className="flex gap-3 text-xs leading-relaxed text-slate-300"><span className="text-emerald-300">{String(i+1).padStart(2,'0')}</span><span>{t}</span></li>)}</ol></div></div>}
+    </div>}
+  </motion.div></div></AnimatePresence>
 };
