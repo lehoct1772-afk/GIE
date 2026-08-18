@@ -591,10 +591,10 @@ export const CropCircleBlueprintModal: React.FC<Props> = ({
               </div>
               <div className="mt-5 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
                 {MILK_HILL_PDFS.map((pdf,index)=>(
-                  <div key={pdf.path} className="flex flex-col justify-between rounded border border-cyan-400/30 bg-[#020812] p-4">
+                  <div key={pdf.file} className="flex flex-col justify-between rounded border border-cyan-400/30 bg-[#020812] p-4">
                     <div className="flex items-start gap-3">
                       <FileText size={22} className="mt-0.5 shrink-0 text-cyan-300"/>
-                      <div><div className="text-sm font-bold leading-5 text-white">{pdf.title}</div><div className="mt-2 text-[10px] text-slate-500">GIE SUPPORTING EVIDENCE Â· PDF</div></div>
+                      <div><div className="text-sm font-bold leading-5 text-white">{pdf.title}</div><div className="mt-2 text-[10px] text-slate-500">GIE SUPPORTING EVIDENCE · PDF</div></div>
                     </div>
                     <button type="button" onClick={()=>{soundManager.playClick();setSelectedPdf(index);setView('pdf');}} className="mt-4 rounded border border-cyan-400/40 bg-cyan-950/25 px-4 py-2 text-[10px] font-bold tracking-wider text-cyan-200 transition hover:border-cyan-300 hover:bg-cyan-950/50">OPEN DOCUMENT</button>
                   </div>
@@ -609,14 +609,14 @@ export const CropCircleBlueprintModal: React.FC<Props> = ({
           <div className="flex min-h-0 flex-1 flex-col bg-[#03101a]">
             <div className="flex items-center justify-between gap-3 border-b border-cyan-400/25 px-5 py-3">
               <div>
-                <div className="text-[10px] tracking-[.24em] text-cyan-400">GIE Â· READ-ONLY DOCUMENT VIEWER</div>
+                <div className="text-[10px] tracking-[.24em] text-cyan-400">GIE · READ-ONLY DOCUMENT VIEWER</div>
                 <div className="mt-1 text-sm font-bold text-white">{MILK_HILL_PDFS[selectedPdf].title}</div>
                 <div className="mt-1 text-[9px] text-slate-500">DOCUMENT {String(selectedPdf+1).padStart(2,'0')} OF {String(MILK_HILL_PDFS.length).padStart(2,'0')}</div>
               </div>
               <button type="button" onClick={()=>{soundManager.playClick();setView('evidence');}} className="flex shrink-0 items-center gap-2 rounded border border-cyan-400/40 bg-cyan-950/25 px-3 py-2 text-[10px] font-bold tracking-wider text-cyan-200 transition hover:border-cyan-300 hover:bg-cyan-950/50"><ChevronLeft size={14}/>BACK TO EVIDENCE</button>
             </div>
             <div className="min-h-0 flex-1 p-3">
-              <iframe src={`${MILK_HILL_PDFS[selectedPdf].path}#toolbar=1&navpanes=0&view=FitH`} title={MILK_HILL_PDFS[selectedPdf].title} className="h-full min-h-[70vh] w-full rounded border border-cyan-400/25 bg-white"/>
+              <iframe src={`${MILK_HILL_PDFS[selectedPdf].file}#toolbar=1&navpanes=0&view=FitH`} title={MILK_HILL_PDFS[selectedPdf].title} className="h-full min-h-[70vh] w-full rounded border border-cyan-400/25 bg-white"/>
             </div>
           </div>
         )}
@@ -625,6 +625,7 @@ export const CropCircleBlueprintModal: React.FC<Props> = ({
     </div>
   );
 };
+
 
 
 
