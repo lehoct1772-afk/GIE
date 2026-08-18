@@ -1,3 +1,18 @@
+﻿const milkHillDocuments = [
+  { title: "01 Milk Hill 2001 Measurement Basis 787FT COMPLETE", url: "/evidence/crop-circles/milk-hill-2001/01_Milk_Hill_2001_Measurement_Basis_787FT_COMPLETE.pdf" },
+  { title: "02 Milk Hill 2001 409 COMPLETE Physical Reconstruction", url: "/evidence/crop-circles/milk-hill-2001/02_Milk_Hill_2001_409_COMPLETE_Physical_Reconstruction.pdf" },
+  { title: "03 Milk Hill 2001 Fibonacci Golden Spiral Full Test", url: "/evidence/crop-circles/milk-hill-2001/03_Milk_Hill_2001_Fibonacci_Golden_Spiral_Full_Test.pdf" },
+  { title: "04 Milk Hill 2001 409 Binary and FiveBit Full Record", url: "/evidence/crop-circles/milk-hill-2001/04_Milk_Hill_2001_409_Binary_and_FiveBit_Full_Record.pdf" },
+  { title: "05 Milk Hill 2001 Letter Permutation Test", url: "/evidence/crop-circles/milk-hill-2001/05_Milk_Hill_2001_Letter_Permutation_Test.pdf" },
+  { title: "06 Milk Hill 2001 FINAL MATHEMATICAL CONCLUSION", url: "/evidence/crop-circles/milk-hill-2001/06_Milk_Hill_2001_FINAL_MATHEMATICAL_CONCLUSION.pdf" },
+  { title: "GIE Milk Hill 2001 Mathematical Supporting Record PREVIEW", url: "/evidence/crop-circles/milk-hill-2001/GIE_Milk_Hill_2001_Mathematical_Supporting_Record_PREVIEW.pdf" },
+  { title: "GIE Milk Hill Blueprint 001 Analysis Record PREVIEW", url: "/evidence/crop-circles/milk-hill-2001/GIE_Milk_Hill_Blueprint_001_Analysis_Record_PREVIEW.pdf" },
+  { title: "GIE Milk Hill Spiral Arm Boundary Analysis 20260816", url: "/evidence/crop-circles/milk-hill-2001/GIE_Milk_Hill_Spiral_Arm_Boundary_Analysis_20260816.pdf" },
+  { title: "GIE Milk Hill Spiral Arm Boundary Analysis CONTINUED 20260816", url: "/evidence/crop-circles/milk-hill-2001/GIE_Milk_Hill_Spiral_Arm_Boundary_Analysis_CONTINUED_20260816.pdf" },
+  { title: "GIE Milk Hill Spiral Arm Boundary Analysis PHASE RING 20260816", url: "/evidence/crop-circles/milk-hill-2001/GIE_Milk_Hill_Spiral_Arm_Boundary_Analysis_PHASE_RING_20260816.pdf" },
+  { title: "Milk Hill 2001 MATHEMATICAL RESULT FINAL WITH VISUALS", url: "/evidence/crop-circles/milk-hill-2001/Milk_Hill_2001_MATHEMATICAL_RESULT_FINAL_WITH_VISUALS.pdf" }
+];
+
 import React, { useMemo, useState } from 'react';
 import {
   X,
@@ -20,47 +35,47 @@ type Props = {
 type ViewMode = 'blueprint' | 'record' | 'evidence' | 'pdf';
 
 const MILK_HILL_PDFS = [
-{ title:'01 · MEASUREMENT BASIS · 787 FT', path:'/evidence/crop-circles/milk-hill-2001/01_Milk_Hill_2001_Measurement_Basis_787FT_COMPLETE.pdf' },
-{ title:'02 · 409 COMPLETE PHYSICAL RECONSTRUCTION', path:'/evidence/crop-circles/milk-hill-2001/02_Milk_Hill_2001_409_COMPLETE_Physical_Reconstruction.pdf' },
-{ title:'03 · FIBONACCI / GOLDEN SPIRAL FULL TEST', path:'/evidence/crop-circles/milk-hill-2001/03_Milk_Hill_2001_Fibonacci_Golden_Spiral_Full_Test.pdf' },
-{ title:'04 · 409 BINARY & FIVE-BIT FULL RECORD', path:'/evidence/crop-circles/milk-hill-2001/04_Milk_Hill_2001_409_Binary_and_FiveBit_Full_Record.pdf' },
-{ title:'05 · LETTER PERMUTATION TEST', path:'/evidence/crop-circles/milk-hill-2001/05_Milk_Hill_2001_Letter_Permutation_Test.pdf' },
-{ title:'06 · FINAL MATHEMATICAL CONCLUSION', path:'/evidence/crop-circles/milk-hill-2001/06_Milk_Hill_2001_FINAL_MATHEMATICAL_CONCLUSION.pdf' },
-{ title:'07 · MATHEMATICAL SUPPORTING RECORD', path:'/evidence/crop-circles/milk-hill-2001/GIE_Milk_Hill_2001_Mathematical_Supporting_Record_PREVIEW.pdf' },
-{ title:'08 · BLUEPRINT 001 ANALYSIS RECORD', path:'/evidence/crop-circles/milk-hill-2001/GIE_Milk_Hill_Blueprint_001_Analysis_Record_PREVIEW.pdf' },
-{ title:'09 · SPIRAL ARM BOUNDARY ANALYSIS', path:'/evidence/crop-circles/milk-hill-2001/GIE_Milk_Hill_Spiral_Arm_Boundary_Analysis_20260816.pdf' }
+{ title:'01 Â· MEASUREMENT BASIS Â· 787 FT', path:'/evidence/crop-circles/milk-hill-2001/01_Milk_Hill_2001_Measurement_Basis_787FT_COMPLETE.pdf' },
+{ title:'02 Â· 409 COMPLETE PHYSICAL RECONSTRUCTION', path:'/evidence/crop-circles/milk-hill-2001/02_Milk_Hill_2001_409_COMPLETE_Physical_Reconstruction.pdf' },
+{ title:'03 Â· FIBONACCI / GOLDEN SPIRAL FULL TEST', path:'/evidence/crop-circles/milk-hill-2001/03_Milk_Hill_2001_Fibonacci_Golden_Spiral_Full_Test.pdf' },
+{ title:'04 Â· 409 BINARY & FIVE-BIT FULL RECORD', path:'/evidence/crop-circles/milk-hill-2001/04_Milk_Hill_2001_409_Binary_and_FiveBit_Full_Record.pdf' },
+{ title:'05 Â· LETTER PERMUTATION TEST', path:'/evidence/crop-circles/milk-hill-2001/05_Milk_Hill_2001_Letter_Permutation_Test.pdf' },
+{ title:'06 Â· FINAL MATHEMATICAL CONCLUSION', path:'/evidence/crop-circles/milk-hill-2001/06_Milk_Hill_2001_FINAL_MATHEMATICAL_CONCLUSION.pdf' },
+{ title:'07 Â· MATHEMATICAL SUPPORTING RECORD', path:'/evidence/crop-circles/milk-hill-2001/GIE_Milk_Hill_2001_Mathematical_Supporting_Record_PREVIEW.pdf' },
+{ title:'08 Â· BLUEPRINT 001 ANALYSIS RECORD', path:'/evidence/crop-circles/milk-hill-2001/GIE_Milk_Hill_Blueprint_001_Analysis_Record_PREVIEW.pdf' },
+{ title:'09 Â· SPIRAL ARM BOUNDARY ANALYSIS', path:'/evidence/crop-circles/milk-hill-2001/GIE_Milk_Hill_Spiral_Arm_Boundary_Analysis_20260816.pdf' }
 ];
 
 const steps = [
   {
-    title: '01 · RECONSTRUCTED FORMATION',
+    title: '01 Â· RECONSTRUCTED FORMATION',
     body:
       '361 measurable components reconstructed proportionally from the available source image. Circle position and diameter come directly from the GIE measurement table.',
     eq: 'Blueprint scale preserves x, y and diameter ratios.'
   },
   {
-    title: '02 · SIX-ARM GEOMETRY',
+    title: '02 Â· SIX-ARM GEOMETRY',
     body:
-      'Measured components are assigned to six radial arms. The construction grid marks the six 60° sectors used to inspect rotational structure.',
-    eq: '360° ÷ 6 = 60°'
+      'Measured components are assigned to six radial arms. The construction grid marks the six 60Â° sectors used to inspect rotational structure.',
+    eq: '360Â° Ã· 6 = 60Â°'
   },
   {
-    title: '03 · POLAR MEASUREMENT',
+    title: '03 Â· POLAR MEASUREMENT',
     body:
       'Every measured circle is located relative to the formation center. Select any circle to inspect its radius, angle, arm and center-outward rank.',
-    eq: 'r = √(x² + y²)   •   θ = atan2(y,x)'
+    eq: 'r = âˆš(xÂ² + yÂ²)   â€¢   Î¸ = atan2(y,x)'
   },
   {
-    title: '04 · DIAMETER SEQUENCE',
+    title: '04 Â· DIAMETER SEQUENCE',
     body:
       'Equivalent circle diameter is derived from measured component area. The center-outward sequence can then be tested without guessing from appearance.',
-    eq: 'd = 2√(A/π)'
+    eq: 'd = 2âˆš(A/Ï€)'
   },
   {
-    title: '05 · BINARY TEST',
+    title: '05 Â· BINARY TEST',
     body:
       'Where a binary comparison is defined, the measured sequence records its 0/1 assignment. The blueprint displays those bits on demand so the deduction remains traceable.',
-    eq: 'measured sequence → bit groups → decimal test'
+    eq: 'measured sequence â†’ bit groups â†’ decimal test'
   }
 ];
 
@@ -112,11 +127,11 @@ export const CropCircleBlueprintModal: React.FC<Props> = ({
         <div className="flex items-center justify-between border-b border-cyan-400/25 px-5 py-3">
           <div>
             <div className="text-[10px] tracking-[.28em] text-amber-300">
-              GIE · CROP-CIRCLE BLUEPRINT 001
+              GIE Â· CROP-CIRCLE BLUEPRINT 001
             </div>
 
             <h2 className="text-lg font-bold tracking-wider text-cyan-200">
-              MILK HILL 2001 · MEASURED GEOMETRIC RECONSTRUCTION
+              MILK HILL 2001 Â· MEASURED GEOMETRIC RECONSTRUCTION
             </h2>
           </div>
 
@@ -177,7 +192,7 @@ export const CropCircleBlueprintModal: React.FC<Props> = ({
           </button>
 
           <span className="ml-auto text-[9px] tracking-wider text-slate-500">
-            GIE-BP-CC-001 · SEQUENCE 001–361
+            GIE-BP-CC-001 Â· SEQUENCE 001â€“361
           </span>
         </div>
 
@@ -363,7 +378,7 @@ export const CropCircleBlueprintModal: React.FC<Props> = ({
                   <b>{p.d.toFixed(3)} px</b>
 
                   <span className="text-slate-500">ANGLE</span>
-                  <b>{p.theta.toFixed(3)}°</b>
+                  <b>{p.theta.toFixed(3)}Â°</b>
 
                   <span className="text-slate-500">RADIUS (NORM)</span>
                   <b>{p.r.toFixed(4)}</b>
@@ -372,7 +387,7 @@ export const CropCircleBlueprintModal: React.FC<Props> = ({
                   <b>{p.arm} / {p.rank}</b>
 
                   <span className="text-slate-500">BINARY</span>
-                  <b>{p.bit === null ? '—' : p.bit}</b>
+                  <b>{p.bit === null ? 'â€”' : p.bit}</b>
                 </div>
               </div>
 
@@ -388,7 +403,7 @@ export const CropCircleBlueprintModal: React.FC<Props> = ({
 
                 <div className="mb-2 flex justify-between text-[9px] text-slate-500">
                   <span>MEASUREMENT</span>
-                  <span>→ GEOMETRY → TEST → RESULT</span>
+                  <span>â†’ GEOMETRY â†’ TEST â†’ RESULT</span>
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -430,7 +445,7 @@ export const CropCircleBlueprintModal: React.FC<Props> = ({
               </div>
 
               <div className="border-t border-cyan-400/20 pt-3 text-[9px] leading-4 text-slate-500">
-                GIE ANALYSIS RECORD · Reconstructed from the available measured
+                GIE ANALYSIS RECORD Â· Reconstructed from the available measured
                 image dataset. The source image yielded 361 measurable
                 components; this blueprint does not represent those as an
                 independently verified 409-circle survey.
@@ -446,11 +461,11 @@ export const CropCircleBlueprintModal: React.FC<Props> = ({
 
               <div className="border-b border-white/25 pb-4">
                 <div className="text-[10px] tracking-[.28em] text-cyan-400">
-                  GIE ANALYSIS DOCUMENT · GIE-BP-CC-001
+                  GIE ANALYSIS DOCUMENT Â· GIE-BP-CC-001
                 </div>
 
                 <h3 className="mt-1 text-xl font-bold text-white">
-                  MILK HILL 2001 · GEOMETRIC MEASUREMENT RECORD
+                  MILK HILL 2001 Â· GEOMETRIC MEASUREMENT RECORD
                 </h3>
 
                 <p className="mt-2 max-w-3xl text-xs leading-5 text-slate-400">
@@ -472,7 +487,7 @@ export const CropCircleBlueprintModal: React.FC<Props> = ({
                   <div className="text-[9px] text-slate-500">
                     MEASURED SEQUENCE
                   </div>
-                  <b className="text-white">001–361</b>
+                  <b className="text-white">001â€“361</b>
                 </div>
 
                 <div className="border border-white/20 p-3">
@@ -482,14 +497,14 @@ export const CropCircleBlueprintModal: React.FC<Props> = ({
 
                 <div className="border border-white/20 p-3">
                   <div className="text-[9px] text-slate-500">SECTOR ANGLE</div>
-                  <b className="text-white">60°</b>
+                  <b className="text-white">60Â°</b>
                 </div>
               </div>
 
               <div className="mb-4 border border-white/20 bg-white/[.025] p-4 text-xs leading-6 text-slate-300">
                 <b className="text-white">Deduction chain:</b> measured component
-                → proportional blueprint coordinate → radial arm → center-outward
-                rank → radius/angle → diameter sequence → defined binary test.
+                â†’ proportional blueprint coordinate â†’ radial arm â†’ center-outward
+                rank â†’ radius/angle â†’ diameter sequence â†’ defined binary test.
                 Each row retains the same sequence identifier used by the visual
                 blueprint.
               </div>
@@ -508,7 +523,7 @@ export const CropCircleBlueprintModal: React.FC<Props> = ({
                         'Y px',
                         'DIAMETER px',
                         'RADIUS NORM',
-                        'ANGLE °',
+                        'ANGLE Â°',
                         'BIT'
                       ].map(h => (
                         <th
@@ -548,7 +563,7 @@ export const CropCircleBlueprintModal: React.FC<Props> = ({
                         <td className="px-2">{q.r.toFixed(4)}</td>
                         <td className="px-2">{q.theta.toFixed(3)}</td>
                         <td className="px-2">
-                          {q.bit === null ? '—' : q.bit}
+                          {q.bit === null ? 'â€”' : q.bit}
                         </td>
                       </tr>
                     ))}
@@ -557,7 +572,7 @@ export const CropCircleBlueprintModal: React.FC<Props> = ({
               </div>
 
               <div className="mt-4 text-[9px] leading-4 text-slate-500">
-                © 2026 GIE · Geometric Intelligence Engine.
+                Â© 2026 GIE Â· Geometric Intelligence Engine.
                 GIE-BP-CC-001 identifies this analytical reconstruction and its
                 corresponding measurement record. Source imagery should retain
                 original photographer/source attribution where known.
@@ -570,8 +585,8 @@ export const CropCircleBlueprintModal: React.FC<Props> = ({
           <div className="min-h-0 flex-1 overflow-y-auto bg-[#03101a] p-5">
             <div className="mx-auto max-w-[1080px]">
               <div className="border-b border-cyan-400/25 pb-4">
-                <div className="text-[10px] tracking-[.28em] text-cyan-400">GIE · DOCUMENT EVIDENCE LIBRARY</div>
-                <h3 className="mt-1 text-xl font-bold text-white">MILK HILL 2001 · PDF EVIDENCE</h3>
+                <div className="text-[10px] tracking-[.28em] text-cyan-400">GIE Â· DOCUMENT EVIDENCE LIBRARY</div>
+                <h3 className="mt-1 text-xl font-bold text-white">MILK HILL 2001 Â· PDF EVIDENCE</h3>
                 <p className="mt-2 text-xs leading-5 text-slate-400">Nine read-only supporting documents associated with the Milk Hill 2001 geometric reconstruction and mathematical analysis.</p>
               </div>
               <div className="mt-5 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
@@ -579,7 +594,7 @@ export const CropCircleBlueprintModal: React.FC<Props> = ({
                   <div key={pdf.path} className="flex flex-col justify-between rounded border border-cyan-400/30 bg-[#020812] p-4">
                     <div className="flex items-start gap-3">
                       <FileText size={22} className="mt-0.5 shrink-0 text-cyan-300"/>
-                      <div><div className="text-sm font-bold leading-5 text-white">{pdf.title}</div><div className="mt-2 text-[10px] text-slate-500">GIE SUPPORTING EVIDENCE · PDF</div></div>
+                      <div><div className="text-sm font-bold leading-5 text-white">{pdf.title}</div><div className="mt-2 text-[10px] text-slate-500">GIE SUPPORTING EVIDENCE Â· PDF</div></div>
                     </div>
                     <button type="button" onClick={()=>{soundManager.playClick();setSelectedPdf(index);setView('pdf');}} className="mt-4 rounded border border-cyan-400/40 bg-cyan-950/25 px-4 py-2 text-[10px] font-bold tracking-wider text-cyan-200 transition hover:border-cyan-300 hover:bg-cyan-950/50">OPEN DOCUMENT</button>
                   </div>
@@ -594,7 +609,7 @@ export const CropCircleBlueprintModal: React.FC<Props> = ({
           <div className="flex min-h-0 flex-1 flex-col bg-[#03101a]">
             <div className="flex items-center justify-between gap-3 border-b border-cyan-400/25 px-5 py-3">
               <div>
-                <div className="text-[10px] tracking-[.24em] text-cyan-400">GIE · READ-ONLY DOCUMENT VIEWER</div>
+                <div className="text-[10px] tracking-[.24em] text-cyan-400">GIE Â· READ-ONLY DOCUMENT VIEWER</div>
                 <div className="mt-1 text-sm font-bold text-white">{MILK_HILL_PDFS[selectedPdf].title}</div>
                 <div className="mt-1 text-[9px] text-slate-500">DOCUMENT {String(selectedPdf+1).padStart(2,'0')} OF {String(MILK_HILL_PDFS.length).padStart(2,'0')}</div>
               </div>
@@ -610,3 +625,6 @@ export const CropCircleBlueprintModal: React.FC<Props> = ({
     </div>
   );
 };
+
+
+
