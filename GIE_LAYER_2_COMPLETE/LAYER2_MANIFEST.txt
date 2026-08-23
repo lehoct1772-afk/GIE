@@ -1,0 +1,28 @@
+GIE LAYER 2 — GEOMETRIC INTELLIGENCE
+Version: engine registry 0.3.0
+
+ADDED
+- Geometric circle relationship classification
+- Collinearity and proportional relationship analysis
+- 3D translation, scaling, and rotation transforms
+- Spherical/cartesian coordinate transforms
+- Great-circle distance
+- Reconstruction residual and verification gate
+- Authorized-context requirement for reconstruction verification
+- Plain-data validation/security boundary
+- Timestamped SHA-256 provenance/audit events
+- Tamper detection for audit events
+- Layer 2 orchestration registration
+- Layer 2 automated self-test suite
+
+PRESERVED
+- Existing accepted GIE mathematics
+- Existing Layer 1 modules
+- Website/globe/UI files
+
+VERIFIED IN PACKAGE BUILD ENVIRONMENT
+- Existing GIE Layer 1 self-tests: PASS
+- GIE Layer 2 self-tests: PASS (7/7)
+
+NOTE
+The uploaded node_modules directory is Windows-specific. A Vite build cannot be executed inside the Linux packaging environment because Rollup's Linux native optional dependency is not present. No frontend/UI files are changed by this Layer 2 package.

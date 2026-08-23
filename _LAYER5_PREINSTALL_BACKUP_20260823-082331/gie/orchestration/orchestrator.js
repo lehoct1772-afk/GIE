@@ -10,9 +10,6 @@ import * as dynamics from "../math/dynamics.js";
 import * as quantum from "../math/quantum.js";
 import * as layer2 from "../layer2/index.js";
 import * as layer3 from "../layer3/index.js";
-import * as layer4 from "../layer4/index.js";
-import * as layer5 from "../layer5/index.js";
-import * as layer6 from "../layer6/index.js";
 
 export const modules = Object.freeze({
   geometry,
@@ -26,10 +23,7 @@ export const modules = Object.freeze({
   dynamics,
   quantum,
   layer2,
-  layer3,
-  layer4,
-  layer5,
-  layer6
+  layer3
 });
 
 export function listModules() {

@@ -11,7 +11,7 @@ export const GIE_ENGINE = Object.freeze({
   name: "GIE",
   fullName: "Geometric Intelligence Engine",
   architecture: "GEOMETRY_CENTERED",
-  version: "1.0.0",
+  version: "0.5.0",
 
   authority: {
     acceptedMathematicsImmutable: true,
@@ -33,9 +33,7 @@ export const GIE_ENGINE = Object.freeze({
     layer1: "MATHEMATICAL_FOUNDATION",
     layer2: "GEOMETRIC_INTELLIGENCE",
     layer3: "WORLD_GRAPH_RELATIONSHIP_ENGINE",
-    layer4: "VERIFICATION_ENGINE",
-    layer5: "INTELLIGENCE_PROBLEM_SOLVER",
-    layer6: "APPLICATION_CUSTOMER_INTERFACE"
+    layer4: "VERIFICATION_ENGINE"
   }
 });
 

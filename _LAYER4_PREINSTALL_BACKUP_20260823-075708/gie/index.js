@@ -4,8 +4,3 @@ export { verifyAgreement, createEvidenceTrace } from "./verification/verifier.js
 export { modules, listModules, describeEngine } from "./orchestration/orchestrator.js";
 export { SERVICE_LEVELS, getServiceLevel } from "./services/serviceLevels.js";
 export * as Layer2 from "./layer2/index.js"; export * as Layer3 from "./layer3/index.js"; export * as Provenance from "./provenance/audit.js"; export * as Security from "./security/validation.js";
-
-export * as Layer4 from "./layer4/index.js";
-export * as Layer5 from "./layer5/index.js";
-
-export * as Layer6 from "./layer6/index.js";

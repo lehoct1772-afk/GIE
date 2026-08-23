@@ -1,0 +1,18 @@
+import assert from "node:assert/strict";
+import { Evidence } from "./layer4/index.js";
+import { decomposeProblem, evaluateCandidate, rankVerifiedCandidates, solveProblem, verifySolutionIntegrity } from "./layer5/index.js";
+import { verifyAuditEvent } from "./provenance/audit.js";
+const tests=[];const test=(n,f)=>tests.push([n,f]);
+const ev=(s,v)=>Evidence.qualifyEvidence({source:s,value:v,method:`method-${s}`});
+const candidate=(id,v=10,extra={})=>({id,title:id,confidence:.9,impact:.8,feasibility:.9,risk:.1,evidence:[ev(`${id}-a`,v),ev(`${id}-b`,v)],...extra});
+test("problem decomposition",()=>{const d=decomposeProblem({objective:"Find bottleneck",observations:[{latency:10}]});assert.equal(d.tasks.length,3);});
+test("verified candidate accepted",()=>assert.equal(evaluateCandidate(candidate("a")).status,"VERIFIED_CANDIDATE"));
+test("disagreeing candidate rejected",()=>{const c=candidate("a");c.evidence=[ev("x",10),ev("y",12)];assert.equal(evaluateCandidate(c).status,"REJECTED_CANDIDATE");});
+test("unverified candidate cannot rank",()=>{const good=evaluateCandidate(candidate("g"));const bad=evaluateCandidate({...candidate("b"),evidence:[ev("one",1)]});assert.deepEqual(rankVerifiedCandidates([bad,good]).map(x=>x.id),["g"]);});
+test("deterministic solution ranking",()=>{const a=evaluateCandidate(candidate("a",10,{confidence:.7}));const b=evaluateCandidate(candidate("b",10,{confidence:.95}));assert.deepEqual(rankVerifiedCandidates([a,b]).map(x=>x.id),["b","a"]);});
+test("authorized verified solution",()=>{const r=solveProblem({context:{authorized:true,principal:"test"},objective:"diagnose",candidates:[candidate("fix")]});assert.equal(r.status,"VERIFIED_SOLUTION_AVAILABLE");assert.equal(r.selected.id,"fix");assert.equal(verifyAuditEvent(r.audit),true);assert.match(r.audit.timestamp,/Z$/);});
+test("no evidence means no recommendation",()=>{const r=solveProblem({context:{authorized:true,principal:"test"},objective:"diagnose",candidates:[{id:"guess",confidence:1,impact:1,feasibility:1,risk:0,evidence:[]}]});assert.equal(r.status,"NO_VERIFIED_SOLUTION");assert.equal(r.selected,null);});
+test("unauthorized solving blocked",()=>assert.throws(()=>solveProblem({context:{authorized:false,principal:"x"},objective:"x"}),/Authorized principal/));
+test("solution tamper detection",()=>{const r=solveProblem({context:{authorized:true,principal:"test"},objective:"x",candidates:[candidate("a")]});assert.equal(verifySolutionIntegrity(r),true);assert.equal(verifySolutionIntegrity({...r,status:"ALTERED"}),false);});
+test("inputs remain plain-data guarded",()=>assert.throws(()=>solveProblem({context:{authorized:true,principal:"test"},objective:"x",candidates:[{id:"x",evidence:[],fn:()=>1}]})));
+console.log("\nGIE LAYER 5 SELF TEST\n=====================");let failed=0;for(const [name,fn] of tests){try{fn();console.log(`PASS  ${name}`)}catch(e){failed++;console.error(`FAIL  ${name}: ${e.message}`)}}if(failed){console.error(`\n${failed} LAYER 5 TEST(S) FAILED`);process.exit(1)}console.log("\nALL GIE LAYER 5 TESTS PASSED");

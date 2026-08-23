@@ -1,0 +1,15 @@
+import assert from "node:assert/strict";
+import { Evidence, Replay, verificationGate, verifyAnalysis } from "./layer4/index.js";
+import { verifyAuditEvent } from "./provenance/audit.js";
+const tests=[];const test=(n,f)=>tests.push([n,f]);
+const ev=(source,value,opts={})=>Evidence.qualifyEvidence({source,value,method:`method-${source}`,...opts});
+test("evidence qualification",()=>assert.equal(ev("a",10).qualified,true));
+test("evidence tamper detection",()=>{const e=ev("a",10);assert.equal(Evidence.verifyEvidenceIntegrity(e),true);assert.equal(Evidence.verifyEvidenceIntegrity({...e,value:11}),false);});
+test("cross-method agreement",()=>assert.equal(verificationGate({evidence:[ev("a",10),ev("b",10)]}).status,"VERIFIED"));
+test("disagreement rejection",()=>assert.equal(verificationGate({evidence:[ev("a",10),ev("b",12)]}).status,"DISAGREEMENT"));
+test("insufficient evidence rejection",()=>assert.equal(verificationGate({evidence:[ev("a",10)]}).status,"INSUFFICIENT_EVIDENCE"));
+test("unqualified evidence rejection",()=>assert.equal(verificationGate({evidence:[ev("a",10),ev("b",10,{integrity:false})]}).verified,false));
+test("authorized timestamped verification",()=>{const r=verifyAnalysis({context:{authorized:true,principal:"test"},inputs:{x:1},evidence:[ev("a",5),ev("b",5)]});assert.equal(r.gate.verified,true);assert.equal(verifyAuditEvent(r.audit),true);assert.match(r.audit.timestamp,/Z$/);});
+test("unauthorized analysis blocked",()=>assert.throws(()=>verifyAnalysis({context:{authorized:false,principal:"x"},evidence:[ev("a",1),ev("b",1)]}),/Authorized principal/));
+test("replay integrity",()=>{const r=Replay.createReplayRecord({analysisId:"a",operation:"op",inputs:{x:1},result:{y:2}});assert.equal(Replay.verifyReplayRecord(r,{inputs:{x:1},result:{y:2}}),true);assert.equal(Replay.verifyReplayRecord(r,{inputs:{x:2},result:{y:2}}),false);});
+console.log("\nGIE LAYER 4 SELF TEST\n=====================");let failed=0;for(const [name,fn] of tests){try{fn();console.log(`PASS  ${name}`)}catch(e){failed++;console.error(`FAIL  ${name}: ${e.message}`)}}if(failed){console.error(`\n${failed} LAYER 4 TEST(S) FAILED`);process.exit(1)}console.log("\nALL GIE LAYER 4 TESTS PASSED");

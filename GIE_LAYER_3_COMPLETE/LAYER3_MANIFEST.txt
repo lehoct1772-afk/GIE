@@ -1,0 +1,13 @@
+GIE LAYER 3 — WORLD GRAPH / RELATIONSHIP ENGINE
+- Validated world/dependency graph construction
+- Weighted dependency path analysis
+- Upstream/downstream dependency closure
+- Cycle detection and topological ordering
+- Impact analysis
+- Root-cause candidate ranking from observed symptoms
+- Baseline-vs-observed deviation analysis
+- Tamper-evident chained audit records
+- Authorized analysis boundary
+- Timestamped provenance integration
+- Layer 1 + Layer 2 regression gates
+- No UI/globe files modified
