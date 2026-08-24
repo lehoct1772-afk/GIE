@@ -14,7 +14,8 @@ const app = express();
 app.use(express.json({ limit: '200kb' }));
 
 app.use((req, res, next) => {
-  console.log(`[${new Date().toISOString()}] ${req.ip} ${req.method} ${req.originalUrl}`);
+  const now = new Date().toISOString();
+  console.log(`[${now}] ${req.ip} ${req.method} ${req.originalUrl}`);
   next();
 });
 
@@ -35,8 +36,8 @@ const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000;
 const RATE_LIMIT_MAX = Number(process.env.RATE_LIMIT_MAX) || 200;
 const ipBuckets = new Map();
 
-app.use((req, res, next) => {
-  const ip = req.ip || req.connection?.remoteAddress || 'unknown';
+function rateLimiter(req, res, next) {
+  const ip = req.ip || (req.connection && req.connection.remoteAddress) || 'unknown';
   const now = Date.now();
   const bucket = ipBuckets.get(ip) || { count: 0, start: now };
   if (now - bucket.start > RATE_LIMIT_WINDOW_MS) {
@@ -47,7 +48,8 @@ app.use((req, res, next) => {
   ipBuckets.set(ip, bucket);
   if (bucket.count > RATE_LIMIT_MAX) return res.status(429).json({ ok: false, error: 'rate_limit_exceeded' });
   next();
-});
+}
+app.use(rateLimiter);
 
 app.use((req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -71,7 +73,15 @@ app.get('/api/v1/engine/status', (req, res) => {
 app.post('/api/v1/agents/architect/proposal', (req, res) => {
   const { objective } = req.body || {};
   if (!objective || typeof objective !== 'string' || objective.trim().length === 0) return res.status(400).json({ ok: false, error: { message: 'missing objective' } });
-  const proposal = { id: 'proposal-' + Date.now(), type: 'architecture_proposal', objective: objective.slice(0, 2000), status: 'DRAFT', architect: { id: 'gie-system-architect', provider: 'local-sim', model: 'gie-architect-v1' }, architecture: `Architecture proposal for objective: ${objective.slice(0, 500)}`, authority: { ownerApprovalRequired: true, automaticallyApproved: false, automaticallyDeployable: false } };
+  const proposal = {
+    id: 'proposal-' + Date.now(),
+    type: 'architecture_proposal',
+    objective: objective.slice(0, 2000),
+    status: 'DRAFT',
+    architect: { id: 'gie-system-architect', provider: 'local-sim', model: 'gie-architect-v1' },
+    architecture: `Simulated architecture proposal for objective: ${objective.slice(0, 500)}\n\nThis response is a placeholder. Owner approval required for any deployment.`,
+    authority: { ownerApprovalRequired: true, automaticallyApproved: false, automaticallyDeployable: false }
+  };
   publicActivity.unshift({ id: 'act-' + Date.now(), text: `Architect proposal generated: ${objective.slice(0, 80)}`, timestamp: new Date().toISOString(), type: 'INFO' });
   if (publicActivity.length > 200) publicActivity.pop();
   res.json({ ok: true, proposal });
@@ -81,7 +91,7 @@ app.post('/api/v1/geometric/decode', (req, res) => {
   const payload = req.body || {};
   if (!payload.matrix) return res.status(400).json({ ok: false, error: { message: 'matrix required' } });
   if (!Array.isArray(payload.matrix) || !Array.isArray(payload.matrix[0])) return res.status(400).json({ ok: false, error: { message: 'matrix must be a 2D array' } });
-  res.json({ ok: true, result: { analysis: 'placeholder', matches: [] } });
+  res.json({ ok: true, result: { analysis: 'placeholder', matches: [], note: 'Geometric decode not implemented on backend; this is a placeholder response.' } });
 });
 
 app.get('/api/v1/activity', (req, res) => res.json({ ok: true, activity: publicActivity.slice(0, 50) }));
@@ -96,7 +106,13 @@ app.get('/api/v1/documents/*', (req, res) => {
   res.sendFile(filePath);
 });
 
-app.get('/api/v1/projects', (req, res) => res.json({ ok: true, projects: [] }));
+app.get('/api/v1/projects', (req, res) => {
+  const samples = [
+    { id: 'p-001', title: 'Parthenon Root-5 Dynamic Symmetry', status: 'ACTIVE', nodes: 1420, accuracy: '99.98%' },
+    { id: 'p-002', title: 'Great Pyramid Planetary Grid Alignment', status: 'ACTIVE', nodes: 4890, accuracy: '99.99%' }
+  ];
+  res.json({ ok: true, projects: samples });
+});
 
 app.post('/api/v1/support/contact', (req, res) => {
   const { name, email, message } = req.body || {};
@@ -104,6 +120,8 @@ app.post('/api/v1/support/contact', (req, res) => {
   const id = 'support-' + Date.now();
   supportSubmissions.unshift({ id, name: name || null, email: email || null, message: message.slice(0, 2000), timestamp: new Date().toISOString() });
   if (supportSubmissions.length > 1000) supportSubmissions.pop();
+  publicActivity.unshift({ id: 'act-' + Date.now(), text: 'New support submission received', timestamp: new Date().toISOString(), type: 'NOTICE' });
+  if (publicActivity.length > 200) publicActivity.pop();
   res.json({ ok: true, id });
 });
 
@@ -111,19 +129,15 @@ app.post('/api/v1/support/contact', (req, res) => {
 // Billing/account procurement is handled by Google Marketplace once the product and account are approved/configured.
 // No direct card processor is embedded in GIE.
 app.get('/api/v1/marketplace/status', (req, res) => {
-  res.json({
-    ok: true,
-    provider: 'google-cloud-marketplace',
-    enabled: GOOGLE_MARKETPLACE_ENABLED,
-    ownerSetupRequired: !GOOGLE_MARKETPLACE_ENABLED,
-    timestamp: new Date().toISOString()
-  });
+  res.json({ ok: true, provider: 'google-cloud-marketplace', enabled: GOOGLE_MARKETPLACE_ENABLED, ownerSetupRequired: !GOOGLE_MARKETPLACE_ENABLED, timestamp: new Date().toISOString() });
 });
 
 app.use((req, res) => res.status(404).json({ ok: false, error: { message: 'not_found' } }));
 app.use((err, req, res, next) => {
-  console.error('SERVER_ERROR', err?.stack || err);
+  console.error('SERVER_ERROR', err && err.stack ? err.stack : err);
   res.status(500).json({ ok: false, error: { message: 'internal_server_error' } });
 });
 
-app.listen(PORT, () => console.log(`GIE backend listening on port ${PORT} (marketplace: Google Cloud Marketplace)`));
+app.listen(PORT, () => {
+  console.log(`GIE backend listening on port ${PORT} (frontend origin allowed: ${FRONTEND_ORIGIN}; marketplace: Google Cloud Marketplace)`);
+});
