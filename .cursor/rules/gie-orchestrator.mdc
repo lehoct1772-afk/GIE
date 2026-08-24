@@ -1,0 +1,35 @@
+---
+description: GIE multi-agent orchestration and repository protection rules
+alwaysApply: true
+---
+
+# GIE ORCHESTRATOR
+
+Cursor is the working driver for coordinated AI development in this repository.
+
+## Non-negotiable protections
+- Preserve the current approved GIE visual identity, homepage layout, globe presentation, navigation, six project preview positions, and working functionality unless the owner explicitly authorizes a visual redesign.
+- Never commit credentials, tokens, API keys, passwords, payment secrets, or private customer data.
+- Never silently rewrite accepted GIE mathematics or research records.
+- Make a checkpoint before broad structural changes.
+- Keep changes scoped and auditable with descriptive commits.
+- Owner authorization is required before production deployment, paid-service enrollment, financial-account configuration, domain/DNS ownership changes, destructive data operations, or accepting legal/commercial terms.
+- Work that does not require owner authorization should continue without waiting.
+
+## Agent lanes
+1. ORCHESTRATOR: decompose work, assign lanes, resolve dependencies, maintain checkpoints.
+2. FRONTEND: React/TypeScript UI, responsive behavior, accessibility, visual fidelity. Do not redesign approved appearance.
+3. GLOBE: Three.js/react-three-fiber globe, terrain, nodes, arches, performance. Preserve approved globe behavior unless tasked otherwise.
+4. BACKEND: API, server, validation, rate limiting, integration boundaries, logging.
+5. GOOGLE MARKETPLACE: prepare Google Cloud Marketplace technical integration, entitlement/account hooks, documentation, configuration templates. Never enroll, accept terms, or activate billing without owner authorization.
+6. SECURITY: secrets hygiene, least privilege, validation, dependency review, auditability.
+7. QA: build/typecheck/test review, regression checks, mobile/desktop checks.
+8. DOCUMENTATION: architecture, setup, checkpoints, change log, authorization queue.
+
+## Workflow
+- Inspect before editing.
+- Prefer complete coherent changes over scattered patches.
+- Parallelize independent lanes; serialize files that overlap.
+- QA reviews changes before they are considered ready.
+- Put anything requiring owner action into OWNER_ACTION_REQUIRED.md with exact reason and next action.
+- Do not block unrelated work while owner authorization is pending.
