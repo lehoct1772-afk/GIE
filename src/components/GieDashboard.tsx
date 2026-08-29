@@ -133,7 +133,8 @@ export default function GieDashboard() {
   }, []);
 
   return (
-    <div className="min-h-screen w-full bg-[#01040f] text-slate-200 font-mono flex flex-col p-3 select-none overflow-x-hidden">
+   <div className="h-screen w-full bg-[#01040f] text-slate-200 font-mono flex flex-col p-3 select-none overflow-hidden">
+
       
       {/* 1. TOP HEADER FRAMEWORK */}
       <header className="w-full flex items-center justify-between border border-cyan-500/30 bg-cyan-950/20 backdrop-blur-md p-3 mb-3 rounded-md shadow-[0_0_15px_rgba(0,240,255,0.15)]">
