@@ -126,37 +126,37 @@ export default function GieDashboard() {
   }, []);
 
   return (
-    <div className="h-screen w-full bg-[#01040f] text-slate-200 font-mono flex flex-col p-3 select-none overflow-hidden">
+    <div className="h-screen w-full bg-[#01040f] text-slate-200 font-mono flex flex-col p-2 select-none overflow-hidden justify-between">
       
       {/* 1. TOP HEADER FRAMEWORK */}
-      <header className="w-full flex items-center justify-between border border-cyan-500/30 bg-cyan-950/20 backdrop-blur-md p-3 mb-3 rounded-md shadow-[0_0_15px_rgba(0,240,255,0.15)]">
+      <header className="w-full flex items-center justify-between border border-cyan-500/30 bg-cyan-950/20 backdrop-blur-md px-3 py-1.5 rounded-md shadow-[0_0_15px_rgba(0,240,255,0.15)]">
         <div className="flex items-center gap-3">
-          <Activity className="h-5 w-5 text-cyan-400 animate-pulse" />
-          <div className="text-xs tracking-wider text-cyan-500/70">
+          <Activity className="h-3.5 w-3.5 text-cyan-400 animate-pulse" />
+          <div className="text-[9px] tracking-wider text-cyan-500/70">
             [ SECURE_SYSTEM_NODE_ONLINE ]
           </div>
         </div>
         
         <div className="text-center">
-          <h1 className="text-2xl font-black text-cyan-400 tracking-[0.25em] drop-shadow-[0_0_8px_rgba(0,240,255,0.6)]">
+          <h1 className="text-lg font-black text-cyan-400 tracking-[0.25em] drop-shadow-[0_0_8px_rgba(0,240,255,0.6)]">
             G I E
           </h1>
-          <p className="text-[9px] text-cyan-300/60 uppercase tracking-[0.4em] mt-0.5">
+          <p className="text-[7.5px] text-cyan-300/60 uppercase tracking-[0.4em] mt-0.5">
             Geometric Intelligence Engine / Written Through Mathematics
           </p>
         </div>
 
         <div>
-          <button className="flex items-center gap-2 border border-emerald-500 text-emerald-400 bg-emerald-950/30 hover:bg-emerald-500 hover:text-black transition-all duration-300 text-xs px-4 py-1.5 font-bold uppercase tracking-wider rounded shadow-[0_0_10px_rgba(16,185,129,0.3)]">
-            <Zap className="h-3.5 w-3.5" />
+          <button className="flex items-center gap-1.5 border border-emerald-500 text-emerald-400 bg-emerald-950/30 hover:bg-emerald-500 hover:text-black transition-all duration-300 text-[9px] px-2.5 py-0.5 font-bold uppercase tracking-wider rounded shadow-[0_0_10px_rgba(16,185,129,0.3)]">
+            <Zap className="h-2.5 w-2.5" />
             Launch Engine
           </button>
         </div>
       </header>
 
       {/* SUB HEADER NAV MENU */}
-      <div className="w-full flex justify-center gap-8 mb-4 text-[10px] tracking-[0.2em] font-bold text-cyan-400/70 border-b border-cyan-500/10 pb-2">
-        <span className="text-cyan-400 border-b border-cyan-400 pb-1 cursor-pointer">HOME</span>
+      <div className="w-full flex justify-center gap-5 text-[8.5px] tracking-[0.15em] font-bold text-cyan-400/70 border-b border-cyan-500/10 py-0.5">
+        <span className="text-cyan-400 border-b border-cyan-400 pb-0.5 cursor-pointer">HOME</span>
         <span className="hover:text-cyan-400 transition-colors cursor-pointer">ENGINE</span>
         <span className="hover:text-cyan-400 transition-colors cursor-pointer">PROJECTS</span>
         <span className="hover:text-cyan-400 transition-colors cursor-pointer">BLUEPRINT LIBRARY</span>
@@ -166,59 +166,58 @@ export default function GieDashboard() {
       </div>
 
       {/* 2. BODY LAYOUT */}
-      <div className="flex flex-1 w-full gap-4 items-stretch h-0">
+      <div className="flex flex-1 w-full gap-2 items-stretch my-1.5 min-h-0 overflow-hidden">
         
         {/* LEFT COMPACT VERTICAL SIDEBAR */}
-        <div className="flex flex-col justify-start items-center gap-4 w-12 border border-cyan-500/20 bg-cyan-950/10 rounded-md p-2 py-4">
-          <button className="p-2 bg-cyan-500/20 border border-cyan-400 text-cyan-300 rounded"><Globe className="h-4 w-4" /></button>
-          <button className="p-2 hover:bg-cyan-500/10 text-cyan-500/40 hover:text-cyan-400 transition-all rounded"><Layers className="h-4 w-4" /></button>
-          <button className="p-2 hover:bg-cyan-500/10 text-cyan-500/40 hover:text-cyan-400 transition-all rounded"><Radio className="h-4 w-4" /></button>
-          <button className="p-2 hover:bg-cyan-500/10 text-cyan-500/40 hover:text-cyan-400 transition-all rounded"><Grid className="h-4 w-4" /></button>
-          <button className="p-2 hover:bg-cyan-500/10 text-cyan-500/40 hover:text-cyan-400 transition-all rounded"><Lock className="h-4 w-4" /></button>
-          <button className="p-2 hover:bg-cyan-500/10 text-cyan-500/40 hover:text-cyan-400 transition-all rounded"><RefreshCw className="h-4 w-4" /></button>
+        <div className="flex flex-col justify-start items-center gap-2.5 w-9 border border-cyan-500/20 bg-cyan-950/10 rounded-md p-1 py-2.5 shrink-0">
+          <button className="p-1 bg-cyan-500/20 border border-cyan-400 text-cyan-300 rounded"><Globe className="h-3.5 w-3.5" /></button>
+          <button className="p-1 hover:bg-cyan-500/10 text-cyan-500/40 hover:text-cyan-400 transition-all rounded"><Layers className="h-3.5 w-3.5" /></button>
+          <button className="p-1 hover:bg-cyan-500/10 text-cyan-500/40 hover:text-cyan-400 transition-all rounded"><Radio className="h-3.5 w-3.5" /></button>
+          <button className="p-1 hover:bg-cyan-500/10 text-cyan-500/40 hover:text-cyan-400 transition-all rounded"><Grid className="h-3.5 w-3.5" /></button>
+          <button className="p-1 hover:bg-cyan-500/10 text-cyan-500/40 hover:text-cyan-400 transition-all rounded"><Lock className="h-3.5 w-3.5" /></button>
+          <button className="p-1 hover:bg-cyan-500/10 text-cyan-500/40 hover:text-cyan-400 transition-all rounded"><RefreshCw className="h-3.5 w-3.5" /></button>
         </div>
 
         {/* LEFT HUD INTERACTIVE DATA CARDS */}
-        <div className="w-[280px] flex flex-col gap-4 justify-between">
+        <div className="w-[230px] flex flex-col gap-2 justify-between shrink-0 min-h-0">
           
-          <div className="flex-1 border border-cyan-400 bg-[#000514]/80 p-3 rounded-sm shadow-[0_0_15px_rgba(0,240,255,0.2)] flex flex-col justify-between">
-            <div className="flex justify-between items-start border-b border-cyan-500/30 pb-1.5">
+          <div className="flex-1 border border-cyan-400 bg-[#000514]/80 p-1.5 rounded-sm shadow-[0_0_10px_rgba(0,240,255,0.15)] flex flex-col justify-between min-h-0">
+            <div className="flex justify-between items-start border-b border-cyan-500/20 pb-0.5">
               <div>
-                <span className="text-[9px] bg-cyan-500/20 text-cyan-300 border border-cyan-400/60 px-1 py-0.2 mr-2 rounded-sm font-bold">01</span>
-                <span className="text-xs font-bold text-cyan-300 tracking-wider">ARCHITECTURAL BLUEPRINT</span>
+                <span className="text-[7.5px] bg-cyan-500/20 text-cyan-300 border border-cyan-400/60 px-1 py-0.2 mr-1 rounded-sm font-bold">01</span>
+                <span className="text-[9px] font-bold text-cyan-300 tracking-wider">ARCHITECTURAL BLUEPRINT</span>
               </div>
-              <Maximize2 className="h-3 w-3 text-cyan-400/70 cursor-pointer hover:text-cyan-300" />
+              <Maximize2 className="h-2 w-2 text-cyan-400/70 cursor-pointer hover:text-cyan-300" />
             </div>
-            <div className="my-2 flex-1 flex items-center justify-center border border-cyan-500/10 bg-cyan-950/10 rounded-sm p-2">
-              <Building2 className="h-12 w-12 text-cyan-500/40" />
+            <div className="flex items-center justify-center border border-cyan-500/5 bg-cyan-950/5 rounded-sm p-0.5 min-h-0">
+              <Building2 className="h-6 w-6 text-cyan-500/20" />
             </div>
-            <div className="text-[9px] uppercase tracking-wider text-cyan-400/60 font-bold border-t border-cyan-500/10 pt-1">
-              STATUS // STRUCTURAL_MATRIX_READY
+            <div className="text-[7.5px] uppercase tracking-wider text-cyan-400/40 font-bold border-t border-cyan-500/10 pt-0.5">
+              STATUS // MATRIX_READY
             </div>
           </div>
 
-          <div className="flex-1 border border-cyan-400 bg-[#000514]/80 p-3 rounded-sm shadow-[0_0_15px_rgba(0,240,255,0.2)] flex flex-col justify-between">
-            <div className="flex justify-between items-start border-b border-cyan-500/30 pb-1.5">
+          <div className="flex-1 border border-cyan-400 bg-[#000514]/80 p-1.5 rounded-sm shadow-[0_0_10px_rgba(0,240,255,0.15)] flex flex-col justify-between min-h-0">
+            <div className="flex justify-between items-start border-b border-cyan-500/20 pb-0.5">
               <div>
-                <span className="text-[9px] bg-cyan-500/20 text-cyan-300 border border-cyan-400/60 px-1 py-0.2 mr-2 rounded-sm font-bold">02</span>
-                <span className="text-xs font-bold text-cyan-300 tracking-wider">CITY / INFRASTRUCTURE</span>
+                <span className="text-[7.5px] bg-cyan-500/20 text-cyan-300 border border-cyan-400/60 px-1 py-0.2 mr-1 rounded-sm font-bold">02</span>
+                <span className="text-[9px] font-bold text-cyan-300 tracking-wider">CITY / INFRASTRUCTURE</span>
               </div>
-              <Maximize2 className="h-3 w-3 text-cyan-400/70 cursor-pointer hover:text-cyan-300" />
+              <Maximize2 className="h-2 w-2 text-cyan-400/70 cursor-pointer hover:text-cyan-300" />
             </div>
-            <div className="my-2 flex-1 flex items-center justify-center border border-cyan-500/10 bg-cyan-950/10 rounded-sm p-2">
-              <Map className="h-12 w-12 text-cyan-500/40" />
+            <div className="flex items-center justify-center border border-cyan-500/5 bg-cyan-950/5 rounded-sm p-0.5 min-h-0">
+              <Map className="h-6 w-6 text-cyan-500/20" />
             </div>
-            <div className="text-[9px] uppercase tracking-wider text-cyan-400/60 font-bold border-t border-cyan-500/10 pt-1">
-              STATUS // INFRASTRUCTURE_MAPPED_2,408,192
+            <div className="text-[7.5px] uppercase tracking-wider text-cyan-400/40 font-bold border-t border-cyan-500/10 pt-0.5">
+              STATUS // INFRASTRUCTURE_MAPPED
             </div>
           </div>
 
-          <div className="flex-1 border border-cyan-400 bg-[#000514]/80 p-3 rounded-sm shadow-[0_0_15px_rgba(0,240,255,0.2)] flex flex-col justify-between">
-            <div className="flex justify-between items-start border-b border-cyan-500/30 pb-1.5">
+          <div className="flex-1 border border-cyan-400 bg-[#000514]/80 p-1.5 rounded-sm shadow-[0_0_10px_rgba(0,240,255,0.15)] flex flex-col justify-between min-h-0">
+            <div className="flex justify-between items-start border-b border-cyan-500/20 pb-0.5">
               <div>
-                <span className="text-[9px] bg-cyan-500/20 text-cyan-300 border border-cyan-400/60 px-1 py-0.2 mr-2 rounded-sm font-bold">03</span>
-                <span className="text-xs font-bold text-cyan-300 tracking-wider">CROP-CIRCLE SITE ANALYSIS</span>
+                <span className="text-[7.5px] bg-cyan-500/20 text-cyan-300 border border-cyan-400/60 px-1 py-0.2 mr-1 rounded-sm font-bold">03</span>
+                <span className="text-[9px] font-bold text-cyan-300 tracking-wider">CROP-CIRCLE SITE ANALYSIS</span>
               </div>
-              <Maximize2 className="h-3 w-3 text-cyan-400/70 cursor-pointer hover:text-cyan-300" />
+              <Maximize2 className="h-2 w-2 text-cyan-400/70 cursor-pointer hover:text-cyan-300" />
             </div>
-            <div className="my-2 flex-1 flex items-center justify-center border border-cyan-500/10 bg-cyan-950/10 rounded-sm p-2">
