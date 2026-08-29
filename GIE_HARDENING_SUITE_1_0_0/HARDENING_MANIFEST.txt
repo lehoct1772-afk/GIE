@@ -1,0 +1,5 @@
+GIE ENGINE 1.0.0 HARDENING SUITE
+Purpose: adversarial and resilience testing after six-layer verification.
+Does not modify accepted mathematics, website UI, globe, Git history, package.json, or deployment configuration.
+Installs only: server/gie/hardeningTest.js
+Runs: Layer 1 through Layer 6 regression tests + hardening/adversarial tests.
