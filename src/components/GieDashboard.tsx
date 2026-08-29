@@ -174,7 +174,8 @@ export default function GieDashboard() {
       </div>
 
       {/* 2. BODY LAYOUT: CONTROLS & THREEJS HUD CANVAS */}
-      <div className="flex flex-1 w-full gap-4 items-stretch min-h-[500px]">
+	<div className="flex flex-1 w-full gap-4 items-stretch h-0">
+
         
         {/* LEFT COMPACT VERTICAL SIDEBAR */}
         <div className="flex flex-col justify-start items-center gap-4 w-12 border border-cyan-500/20 bg-cyan-950/10 rounded-md p-2 py-4">
