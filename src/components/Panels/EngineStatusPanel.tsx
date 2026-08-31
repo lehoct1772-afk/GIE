@@ -23,55 +23,56 @@ export const EngineStatusPanel: React.FC = () => {
   };
 
   return (
-    <div className="bg-slate-950/80 border border-cyan-500/30 rounded p-3.5 backdrop-blur-md shadow-[0_0_15px_rgba(0,240,255,0.08)]">
+    <div className="bg-slate-950/80 border border-cyan-500/40 rounded p-3.5 backdrop-blur-md shadow-[0_0_15px_rgba(6,182,212,0.15)] transition-all duration-300">
+      
       {/* Header */}
-      <div className="flex justify-between items-center mb-2.5 pb-1.5 border-b border-cyan-500/20">
-        <span className="text-xs font-mono font-bold uppercase tracking-wider text-cyan-300">
+      <div className="flex justify-between items-center mb-2.5 pb-1.5 border-b border-cyan-500/20 bg-slate-950/20 px-0.5">
+        <span className="text-xs font-mono font-bold uppercase tracking-widest text-cyan-400 drop-shadow-[0_0_5px_rgba(6,182,212,0.5)]">
           ENGINE STATUS
         </span>
-        <span className="text-[10px] font-mono text-emerald-400 font-semibold flex items-center">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 mr-1.5 animate-pulse"></span>
-          ONLINE
+        <span className="text-[10px] font-mono text-emerald-400 font-bold flex items-center drop-shadow-[0_0_4px_rgba(52,211,153,0.4)]">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 mr-1.5 animate-pulse shadow-[0_0_8px_#34d399]"></span> ONLINE
         </span>
       </div>
 
       {/* Metrics List matching reference image */}
       <div className="space-y-1.5 font-mono text-[11px]">
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center transition-colors hover:bg-cyan-950/20 py-0.5 px-1 rounded-sm">
           <span className="text-slate-400">ACTIVE PROJECTS</span>
-          <span className="text-cyan-200 font-semibold">128</span>
+          <span className="text-cyan-300 font-bold">128</span>
         </div>
-
-        <div className="flex justify-between items-center">
+        
+        <div className="flex justify-between items-center transition-colors hover:bg-cyan-950/20 py-0.5 px-1 rounded-sm">
           <span className="text-slate-400">IMAGES DECODED</span>
-          <span className="text-cyan-200 font-semibold">{imagesDecoded.toLocaleString()}</span>
+          <span className="text-cyan-300 font-bold">{imagesDecoded.toLocaleString()}</span>
         </div>
-
-        <div className="flex justify-between items-center">
+        
+        <div className="flex justify-between items-center transition-colors hover:bg-cyan-950/20 py-0.5 px-1 rounded-sm">
           <span className="text-slate-400">RELATIONSHIPS FOUND</span>
-          <span className="text-cyan-200 font-semibold">3,982,741</span>
+          <span className="text-cyan-300 font-bold">3,982,741</span>
         </div>
-
-        <div className="flex justify-between items-center">
+        
+        <div className="flex justify-between items-center transition-colors hover:bg-cyan-950/20 py-0.5 px-1 rounded-sm">
           <span className="text-slate-400">CALCULATIONS / SEC</span>
-          <span className="text-amber-300 font-bold">8.652M</span>
+          <span className="text-amber-400 font-black drop-shadow-[0_0_4px_rgba(251,191,36,0.3)]">8.652M</span>
         </div>
-
-        <div className="flex justify-between items-center">
+        
+        <div className="flex justify-between items-center transition-colors hover:bg-cyan-950/20 py-0.5 px-1 rounded-sm">
           <span className="text-slate-400">ENGINE ACCURACY</span>
-          <span className="text-emerald-300 font-semibold">99.9987%</span>
+          <span className="text-emerald-400 font-bold drop-shadow-[0_0_4px_rgba(52,211,153,0.3)]">99.9987%</span>
         </div>
-
-        <div className="flex justify-between items-center">
+        
+        <div className="flex justify-between items-center transition-colors hover:bg-cyan-950/20 py-0.5 px-1 rounded-sm">
           <span className="text-slate-400">UPTIME</span>
-          <span className="text-cyan-300 font-semibold">{formatUptime(seconds)}</span>
+          <span className="text-cyan-400 font-bold">{formatUptime(seconds)}</span>
         </div>
-
-        <div className="flex justify-between items-center pt-1 border-t border-cyan-500/10">
+        
+        <div className="flex justify-between items-center pt-1 border-t border-cyan-500/10 transition-colors hover:bg-cyan-950/20 px-1 rounded-sm">
           <span className="text-slate-400">ACTIVE RESEARCHERS</span>
-          <span className="text-cyan-200 font-semibold">247</span>
+          <span className="text-cyan-300 font-bold">247</span>
         </div>
       </div>
+
     </div>
   );
 };

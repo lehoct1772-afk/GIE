@@ -1,223 +1,219 @@
-"use client";
-
-import React, { useState, useEffect, useRef } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
-import { OrbitControls, Stars } from "@react-three/drei";
-import * as THREE from "three";
+import React, { useRef, useEffect, useMemo, useState } from 'react';
+import Globe from 'react-globe.gl';
+import * as THREE from 'three';
 import { 
-  Building2, 
-  Map, 
-  Binary, 
-  Cpu, 
-  Globe, 
-  Layers, 
-  Activity, 
-  Zap, 
-  Maximize2, 
-  ShieldAlert, 
-  Radio, 
-  Grid, 
-  RefreshCw, 
-  Lock 
-} from "lucide-react";
+  Building2, Shield, Activity, Cpu, Globe as GlobeIcon, Terminal, 
+  Layers, Hammer, Compass, Search, Sliders, Zap, RefreshCw, Lock
+} from 'lucide-react';
 
-// --- 3D GLOBE ENGINE COMPONENTS ---
-function GlobeMesh() {
-  const meshRef = useRef<THREE.Mesh>(null);
+const MAP_NODES = [
+  { id: 1, lat: 51.4138, lng: -1.8583, label: "Node Alpha - Avebury", color: "#00ffff" },
+  { id: 2, lat: 51.1789, lng: -1.8262, label: "Node Beta - Stonehenge", color: "#a855f7" },
+  { id: 3, lat: 19.4326, lng: -99.1332, label: "Node Gamma - Teotihuacan", color: "#22c55e" },
+  { id: 4, lat: 30.0444, lng: 31.2357, label: "Node Delta - Giza", color: "#eab308" },
+  { id: 5, lat: -13.1631, lng: -72.5450, label: "Node Epsilon - Machu Picchu", color: "#ec4899" },
+  { id: 6, lat: 34.2685, lng: 108.9501, label: "Node Zeta - Xi'an", color: "#00ffff" },
+  { id: 7, lat: 22.9519, lng: -43.2105, label: "Node Eta - Rio", color: "#a855f7" },
+  { id: 8, lat: 35.6762, lng: 139.6503, label: "Node Theta - Tokyo", color: "#22c55e" },
+  { id: 9, lat: -3.4653, lng: -62.2159, label: "Node Iota - Amazon", color: "#eab308" },
+  { id: 10, lat: 45.4371, lng: 12.3326, label: "Node Kappa - Venice", color: "#ec4899" }
+];
 
-  useFrame(() => {
-    if (meshRef.current) {
-      meshRef.current.rotation.y += 0.001;
-    }
-  });
-
-  return (
-    <group ref={meshRef}>
-      <mesh>
-        <sphereGeometry args={[2.2, 32, 32]} />
-        <meshBasicMaterial 
-          color="#10b981" 
-          transparent={true} 
-          opacity={0.15} 
-        />
-      </mesh>
-      <mesh>
-        <sphereGeometry args={[2.22, 24, 24]} />
-        <meshBasicMaterial 
-          color="#00f0ff" 
-          wireframe={true} 
-          transparent={true} 
-          opacity={0.4} 
-        />
-      </mesh>
-      <ConnectingArcs />
-    </group>
-  );
-}
-
-function ConnectingArcs() {
-  const groupRef = useRef<THREE.Group>(null);
-
-  const pairs = [
-    { start: [0, 2.2, 0], end: [1.5, -1.2, 1.2], color: "#00f0ff" },
-    { start: [-1.5, 1.2, 1.2], end: [1.8, 1.0, -1.0], color: "#a855f7" },
-    { start: [0, -2.2, 0], end: [-1.2, 1.5, -1.2], color: "#eab308" },
-    { start: [1.8, 0, 1.2], end: [-1.8, 0, -1.2], color: "#00f0ff" },
-    { start: [-1.0, -1.5, 1.2], end: [1.0, 1.5, -1.2], color: "#10b981" }
-  ];
-
-  useFrame(() => {
-    if (groupRef.current) {
-      groupRef.current.rotation.y += 0.002;
-    }
-  });
-
-  return (
-    <group ref={groupRef}>
-      {pairs.map((pair, idx) => {
-        const startVec = new THREE.Vector3(...pair.start);
-        const endVec = new THREE.Vector3(...pair.end);
-        
-        const midVec = new THREE.Vector3()
-          .addVectors(startVec, endVec)
-          .multiplyScalar(0.5)
-          .normalize()
-          .multiplyScalar(3.2);
-
-        const curve = new THREE.QuadraticBezierCurve3(startVec, midVec, endVec);
-        const points = curve.getPoints(30);
-        const geometry = new THREE.BufferGeometry().setFromPoints(points);
-
-        return (
-          <group key={idx}>
-            <line geometry={geometry}>
-              <lineBasicMaterial color={pair.color} transparent opacity={0.8} />
-            </line>
-            <mesh position={[midVec.x, midVec.y, midVec.z]}>
-              <sphereGeometry args={[0.06, 8, 8]} />
-              <meshBasicMaterial color={pair.color} />
-            </mesh>
-          </group>
-        );
-      })}
-    </group>
-  );
-}
-
-// --- MAIN INTERFACE PANEL COMPONENTS ---
 export default function GieDashboard() {
-  const [time, setTime] = useState("");
+  const globeEl = useRef<any>(null);
+  const [hoveredNode, setHoveredNode] = useState<string | null>(null);
+
+  const arcData = useMemo(() => {
+    return MAP_NODES.map((node, index) => {
+      const nextNode = MAP_NODES[(index + 1) % MAP_NODES.length];
+      return {
+        startLat: node.lat,
+        startLng: node.lng,
+        endLat: nextNode.lat,
+        endLng: nextNode.lng,
+        color: ['rgba(6, 182, 212, 0.8)', 'rgba(168, 85, 247, 0.8)'],
+        label: `Vector Link ${node.id} → ${nextNode.id}`
+      };
+    });
+  }, []);
 
   useEffect(() => {
-    const updateTime = () => {
-      const now = new Date();
-      const options: Intl.DateTimeFormatOptions = {
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-        hour12: false,
-        timeZone: "America/Chicago"
-      };
-      setTime(now.toLocaleTimeString("en-US", options));
+    if (!globeEl.current) return;
+
+    const scene = globeEl.current.scene();
+    
+    // 1. Build the Multi-Layer Blueprint Hologram Cage
+    const geometry = new THREE.IcosahedronGeometry(102, 2);
+    const material = new THREE.MeshBasicMaterial({
+      color: 0x06b6d4,
+      wireframe: true,
+      transparent: true,
+      opacity: 0.25,
+      blending: THREE.AdditiveBlending
+    });
+    const cageMesh = new THREE.Mesh(geometry, material);
+    scene.add(cageMesh);
+
+    // 2. Inject External Glowing Vector Hoops (Latitudinal Alignment Rings)
+    const ringGroup = new THREE.Group();
+    const ringColors = [0x00ffff, 0xa855f7, 0x22c55e];
+    
+    for (let i = 0; i < 3; i++) {
+      const radius = 106 + (i * 4);
+      const ringGeo = new THREE.RingGeometry(radius, radius + 0.5, 64);
+      const ringMat = new THREE.MeshBasicMaterial({
+        color: ringColors[i],
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.3,
+        blending: THREE.AdditiveBlending
+      });
+      const ringMesh = new THREE.Mesh(ringGeo, ringMat);
+      ringMesh.rotation.x = Math.PI / 2;
+      ringMesh.rotation.y = (i * Math.PI) / 4;
+      ringGroup.add(ringMesh);
+    }
+    scene.add(ringGroup);
+
+    // 3. Coordinate Animation Loop for Orbital Paths
+    const animate = () => {
+      if (cageMesh) {
+        cageMesh.rotation.y += 0.002;
+        cageMesh.rotation.x += 0.0005;
+      }
+      if (ringGroup) {
+        ringGroup.children.forEach((ring, idx) => {
+          ring.rotation.z += 0.001 * (idx + 1);
+        });
+      }
+      requestAnimationFrame(animate);
     };
-    updateTime();
-    const interval = setInterval(updateTime, 1000);
-    return () => clearInterval(interval);
+    animate();
+
+    // 4. Fine-Tune Rigging Controls
+    globeEl.current.controls().autoRotate = true;
+    globeEl.current.controls().autoRotateSpeed = 0.4;
+    globeEl.current.controls().enableZoom = true;
+    globeEl.current.controls().minDistance = 200;
+    globeEl.current.controls().maxDistance = 500;
   }, []);
 
   return (
-    <div className="h-screen w-full bg-[#01040f] text-slate-200 font-mono flex flex-col p-2 select-none overflow-hidden justify-between">
+    <div className="flex h-screen w-screen bg-slate-950 font-sans text-slate-100 overflow-hidden select-none">
       
-      {/* 1. TOP HEADER FRAMEWORK */}
-      <header className="w-full flex items-center justify-between border border-cyan-500/30 bg-cyan-950/20 backdrop-blur-md px-3 py-1.5 rounded-md shadow-[0_0_15px_rgba(0,240,255,0.15)]">
-        <div className="flex items-center gap-3">
-          <Activity className="h-3.5 w-3.5 text-cyan-400 animate-pulse" />
-          <div className="text-[9px] tracking-wider text-cyan-500/70">
-            [ SECURE_SYSTEM_NODE_ONLINE ]
+      {/* LEFT SIDEBAR: Nav & Analysis Matrix */}
+      <div className="w-80 border-r border-slate-900 bg-slate-950/80 p-5 flex flex-col gap-5 backdrop-blur-md z-10">
+        <div className="flex items-center gap-3 border-b border-slate-900 pb-3">
+          <Terminal className="h-6 w-6 text-cyan-400 animate-pulse" />
+          <div>
+            <h1 className="text-md font-bold tracking-widest text-white uppercase">G I E</h1>
+            <p className="text-[10px] text-cyan-400 font-mono tracking-wider">GEOMETRIC INTELLIGENCE ENGINE</p>
           </div>
         </div>
-        
-        <div className="text-center">
-          <h1 className="text-lg font-black text-cyan-400 tracking-[0.25em] drop-shadow-[0_0_8px_rgba(0,240,255,0.6)]">
-            G I E
-          </h1>
-          <p className="text-[7.5px] text-cyan-300/60 uppercase tracking-[0.4em] mt-0.5">
-            Geometric Intelligence Engine / Written Through Mathematics
-          </p>
+
+        {/* Blueprint Modules Checklist */}
+        <div className="flex flex-col gap-2">
+          <div className="border border-cyan-500/30 bg-cyan-950/20 p-2.5 rounded flex items-center justify-between cursor-pointer group hover:bg-cyan-500/10 transition-all">
+            <span className="text-xs font-medium tracking-wide flex items-center gap-2"><Layers className="h-3.5 w-3.5 text-cyan-400" /> 01 ARCHITECTURAL BLUEPRINT</span>
+          </div>
+          <div className="border border-slate-800 bg-slate-900/40 p-2.5 rounded flex items-center justify-between cursor-pointer hover:bg-slate-900/80 transition-all">
+            <span className="text-xs font-medium tracking-wide flex items-center gap-2"><Hammer className="h-3.5 w-3.5 text-slate-400" /> 02 CITY / INFRASTRUCTURE</span>
+          </div>
+          <div className="border border-cyan-500/30 bg-cyan-950/20 p-2.5 rounded flex items-center justify-between cursor-pointer group hover:bg-cyan-500/10 transition-all">
+            <span className="text-xs font-medium tracking-wide flex items-center gap-2"><Compass className="h-3.5 w-3.5 text-cyan-400" /> 03 CROP-CIRCLE SITE ANALYSIS</span>
+          </div>
         </div>
 
-        <div>
-          <button className="flex items-center gap-1.5 border border-emerald-500 text-emerald-400 bg-emerald-950/30 hover:bg-emerald-500 hover:text-black transition-all duration-300 text-[9px] px-2.5 py-0.5 font-bold uppercase tracking-wider rounded shadow-[0_0_10px_rgba(16,185,129,0.3)]">
-            <Zap className="h-2.5 w-2.5" />
-            Launch Engine
-          </button>
+        {/* Telemetry Monitors */}
+        <div className="flex flex-col gap-2.5">
+          <h2 className="text-[10px] font-bold tracking-widest text-slate-500 uppercase">SYSTEM TELEMETRY</h2>
+          <div className="grid grid-cols-2 gap-2">
+            <div className="bg-slate-900/50 border border-slate-900 p-2.5 rounded flex flex-col">
+              <span className="text-[10px] text-slate-500 flex items-center gap-1"><Cpu className="h-3 w-3" /> CORE</span>
+              <span className="text-xs font-semibold text-emerald-400 mt-0.5">NOMINAL</span>
+            </div>
+            <div className="bg-slate-900/50 border border-slate-900 p-2.5 rounded flex flex-col">
+              <span className="text-[10px] text-slate-500 flex items-center gap-1"><Activity className="h-3 w-3" /> MATH</span>
+              <span className="text-xs font-semibold text-purple-400 mt-0.5">100% SYNC</span>
+            </div>
+          </div>
         </div>
-      </header>
 
-      {/* SUB HEADER NAV MENU */}
-      <div className="w-full flex justify-center gap-5 text-[8.5px] tracking-[0.15em] font-bold text-cyan-400/70 border-b border-cyan-500/10 py-0.5">
-        <span className="text-cyan-400 border-b border-cyan-400 pb-0.5 cursor-pointer">HOME</span>
-        <span className="hover:text-cyan-400 transition-colors cursor-pointer">ENGINE</span>
-        <span className="hover:text-cyan-400 transition-colors cursor-pointer">PROJECTS</span>
-        <span className="hover:text-cyan-400 transition-colors cursor-pointer">BLUEPRINT LIBRARY</span>
-        <span className="hover:text-cyan-400 transition-colors cursor-pointer">RESEARCH</span>
-        <span className="hover:text-cyan-400 transition-colors cursor-pointer">DOCUMENTATION</span>
-        <span className="hover:text-cyan-400 transition-colors cursor-pointer">PUBLIC ACTIVITY</span>
+        {/* Active Node Scanners */}
+        <div className="flex flex-col gap-2 flex-1 overflow-y-auto pr-1">
+          <h2 className="text-[10px] font-bold tracking-widest text-slate-500 uppercase">ACTIVE GEOMETRIC NODES</h2>
+          <div className="flex flex-col gap-1.5">
+            {MAP_NODES.map((node) => (
+              <div 
+                key={node.id}
+                className={`p-2 rounded border text-[11px] font-mono transition-all cursor-pointer ${
+                  hoveredNode === node.label 
+                    ? 'bg-cyan-500/10 border-cyan-500/50 text-cyan-300' 
+                    : 'bg-slate-900/20 border-slate-900/60 text-slate-400'
+                }`}
+                onMouseEnter={() => setHoveredNode(node.label)}
+                onMouseLeave={() => setHoveredNode(null)}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="truncate">{node.label}</span>
+                  <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: node.color }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
 
-      {/* 2. BODY LAYOUT */}
-      <div className="flex flex-1 w-full gap-2 items-stretch my-1.5 min-h-0 overflow-hidden">
+      {/* CENTER VIEWPORT: The Holographic Matrix Stage */}
+      <div className="flex-1 h-full relative bg-[radial-gradient(circle_at_center,rgba(15,23,42,0.6)_0%,rgba(2,6,23,1)_100%)] flex items-center justify-center">
         
-        {/* LEFT COMPACT VERTICAL SIDEBAR */}
-        <div className="flex flex-col justify-start items-center gap-2.5 w-9 border border-cyan-500/20 bg-cyan-950/10 rounded-md p-1 py-2.5 shrink-0">
-          <button className="p-1 bg-cyan-500/20 border border-cyan-400 text-cyan-300 rounded"><Globe className="h-3.5 w-3.5" /></button>
-          <button className="p-1 hover:bg-cyan-500/10 text-cyan-500/40 hover:text-cyan-400 transition-all rounded"><Layers className="h-3.5 w-3.5" /></button>
-          <button className="p-1 hover:bg-cyan-500/10 text-cyan-500/40 hover:text-cyan-400 transition-all rounded"><Radio className="h-3.5 w-3.5" /></button>
-          <button className="p-1 hover:bg-cyan-500/10 text-cyan-500/40 hover:text-cyan-400 transition-all rounded"><Grid className="h-3.5 w-3.5" /></button>
-          <button className="p-1 hover:bg-cyan-500/10 text-cyan-500/40 hover:text-cyan-400 transition-all rounded"><Lock className="h-3.5 w-3.5" /></button>
-          <button className="p-1 hover:bg-cyan-500/10 text-cyan-500/40 hover:text-cyan-400 transition-all rounded"><RefreshCw className="h-3.5 w-3.5" /></button>
+        {/* Top Centered Engine Header */}
+        <div className="absolute top-5 flex flex-col items-center pointer-events-none text-center">
+          <div className="text-[11px] font-mono tracking-[0.3em] text-cyan-400 font-medium">WRITTEN THROUGH MATHEMATICS</div>
         </div>
 
-        {/* LEFT HUD INTERACTIVE DATA CARDS */}
-        <div className="w-[230px] flex flex-col gap-2 justify-between shrink-0 min-h-0">
-          
-          <div className="flex-1 border border-cyan-400 bg-[#000514]/80 p-1.5 rounded-sm shadow-[0_0_10px_rgba(0,240,255,0.15)] flex flex-col justify-between min-h-0">
-            <div className="flex justify-between items-start border-b border-cyan-500/20 pb-0.5">
-              <div>
-                <span className="text-[7.5px] bg-cyan-500/20 text-cyan-300 border border-cyan-400/60 px-1 py-0.2 mr-1 rounded-sm font-bold">01</span>
-                <span className="text-[9px] font-bold text-cyan-300 tracking-wider">ARCHITECTURAL BLUEPRINT</span>
-              </div>
-              <Maximize2 className="h-2 w-2 text-cyan-400/70 cursor-pointer hover:text-cyan-300" />
-            </div>
-            <div className="flex items-center justify-center border border-cyan-500/5 bg-cyan-950/5 rounded-sm p-0.5 min-h-0">
-              <Building2 className="h-6 w-6 text-cyan-500/20" />
-            </div>
-            <div className="text-[7.5px] uppercase tracking-wider text-cyan-400/40 font-bold border-t border-cyan-500/10 pt-0.5">
-              STATUS // MATRIX_READY
-            </div>
-          </div>
+        {/* The 3D Engine Canvas Frame */}
+        <div className="w-full h-full flex items-center justify-center cursor-grab active:cursor-grabbing">
+          <Globe
+            ref={globeEl}
+            backgroundColor="rgba(0,0,0,0)"
+            showGlobe={true}
+            showAtmosphere={true}
+            atmosphereColor="#00ffff"
+            atmosphereRadiusScale={0.15}
+            
+            // Core Translucent Blueprint Styling
+            globeImageUrl="//://unpkg.com"
+            
+            // Custom Neon Data Point Anchors
+            pointsData={MAP_NODES}
+            pointLat="lat"
+            pointLng="lng"
+            pointColor="color"
+            pointAltitude={0.03}
+            pointRadius={0.4}
+            pointsMerge={false}
 
-          <div className="flex-1 border border-cyan-400 bg-[#000514]/80 p-1.5 rounded-sm shadow-[0_0_10px_rgba(0,240,255,0.15)] flex flex-col justify-between min-h-0">
-            <div className="flex justify-between items-start border-b border-cyan-500/20 pb-0.5">
-              <div>
-                <span className="text-[7.5px] bg-cyan-500/20 text-cyan-300 border border-cyan-400/60 px-1 py-0.2 mr-1 rounded-sm font-bold">02</span>
-                <span className="text-[9px] font-bold text-cyan-300 tracking-wider">CITY / INFRASTRUCTURE</span>
-              </div>
-              <Maximize2 className="h-2 w-2 text-cyan-400/70 cursor-pointer hover:text-cyan-300" />
-            </div>
-            <div className="flex items-center justify-center border border-cyan-500/5 bg-cyan-950/5 rounded-sm p-0.5 min-h-0">
-              <Map className="h-6 w-6 text-cyan-500/20" />
-            </div>
-            <div className="text-[7.5px] uppercase tracking-wider text-cyan-400/40 font-bold border-t border-cyan-500/10 pt-0.5">
-              STATUS // INFRASTRUCTURE_MAPPED
-            </div>
-          </div>
+            // High-Speed Holographic Connector Arcs
+            arcsData={arcData}
+            arcStartLat="startLat"
+            arcStartLng="startLng"
+            arcEndLat="endLat"
+            arcEndLng="endLng"
+            arcColor="color"
+            arcAltitudeAutoScaling={0.4}
+            arcStroke={0.5}
+            arcDashLength={0.6}
+            arcDashGap={2}
+            arcDashAnimateTime={1000}
+          />
+        </div>
 
-          <div className="flex-1 border border-cyan-400 bg-[#000514]/80 p-1.5 rounded-sm shadow-[0_0_10px_rgba(0,240,255,0.15)] flex flex-col justify-between min-h-0">
-            <div className="flex justify-between items-start border-b border-cyan-500/20 pb-0.5">
-              <div>
-                <span className="text-[7.5px] bg-cyan-500/20 text-cyan-300 border border-cyan-400/60 px-1 py-0.2 mr-1 rounded-sm font-bold">03</span>
-                <span className="text-[9px] font-bold text-cyan-300 tracking-wider">CROP-CIRCLE SITE ANALYSIS</span>
-              </div>
-              <Maximize2 className="h-2 w-2 text-cyan-400/70 cursor-pointer hover:text-cyan-300" />
-            </div>
+        {/* Floating node label display info banner */}
+        {hoveredNode && (
+          <div className="absolute bottom-20 bg-slate-950/90 border border-cyan-500/40 px-4 py-2 rounded font-mono text-xs tracking-wider text-cyan-300 backdrop-blur-md shadow-[0_0_15px_rgba(6,182,212,0.15)] animate-fade-in">
+            NODE VECTOR SCANNING: {hoveredNode.toUpperCase()}
+          </div>
+        )}
+
+        {/* BOTTOM METRIC TOOLBAR MATRIX */}
