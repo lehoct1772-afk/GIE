@@ -122,7 +122,7 @@ export default function GieDashboard() {
           <div className="border border-cyan-500/30 bg-cyan-950/20 p-2.5 rounded flex items-center justify-between cursor-pointer group hover:bg-cyan-500/10 transition-all">
             <span className="text-xs font-medium tracking-wide flex items-center gap-2"><Compass className="h-3.5 w-3.5 text-cyan-400" /> 03 CROP-CIRCLE SITE ANALYSIS</span>
           </div>
-        </div>
+
 
         {/* Telemetry Monitors */}
         <div className="flex flex-col gap-2.5">
@@ -183,7 +183,7 @@ export default function GieDashboard() {
             atmosphereRadiusScale={0.15}
             
             // Core Translucent Blueprint Styling
-            globeImageUrl="//://unpkg.com"
+            globeImageUrl="//unpkg.com/three-globe/example/img/earth-night.jpg"
             
             // Custom Neon Data Point Anchors
             pointsData={MAP_NODES}
@@ -216,4 +216,16 @@ export default function GieDashboard() {
           </div>
         )}
 
-        {/* BOTTOM METRIC TOOLBAR MATRIX */}
+    {/* BOTTOM METRIC TOOLBAR MATRIX */}
+    <div className="mt-auto w-full border-t border-cyan-500/20 bg-black/40 p-4 backdrop-blur-md flex items-center justify-between">
+      <span className="text-xs font-mono tracking-widest text-cyan-400/60">SYSTEM STATUS: ACTIVE</span>
+      <div className="flex items-center gap-2">
+        <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_8px_#00ffff]" />
+        <span className="text-xs font-mono text-cyan-400">NODE_OK</span>
+      </div>
+    </div>
+
+      </div>
+    </div>
+  );
+}
