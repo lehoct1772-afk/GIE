@@ -7,15 +7,15 @@ import { LightningStrike } from 'three/examples/jsm/geometries/LightningStrike.j
 const lightningParams = {
   sourceOffset: new THREE.Vector3(0, 0, 0),
   destOffset: new THREE.Vector3(0, 0, 0),
-  radius0: 0.12,         // Starting thickness of the fractal branch
-  radius1: 0.02,         // Ending tip thickness
+  radius0: 0.12,
+  radius1: 0.02,
   minRadius: 0.008,
-  maxIterations: 6,      // Fractal depth iteration limit
-  isRay: true,           // Ensures directional tracking
+  maxIterations: 6,
+  isRay: true,
   shorten: 1.0,
-  roughness: 0.88,       // High roughness for sharp, crackling paths
+  roughness: 0.88,
   straightness: 0.55,
-  birefringence: 0.12,
+  bireindex: 0.12,
   upcorner: 0.1
 };
 
@@ -40,7 +40,7 @@ const generateMatrixData = () => {
           startLng: start.lng,
           endLat: end.lat,
           endLng: end.lng,
-          color: ['#00ffff', '#b55fe6', '#3b82f6'][parseInt((Math.random() * 3).toString())],
+          color: ['rgba(6,182,212,0.6)', 'rgba(168,85,247,0.6)', 'rgba(37,99,235,0.6)'][parseInt((Math.random() * 3).toString())],
           stroke: 0.15 + Math.random() * 0.2,
           altitude: 0.1 + Math.random() * 0.4
         });
@@ -59,38 +59,38 @@ export const GlobeScene: React.FC = () => {
 
     // 1. Force the custom dark vector look onto the core globe sphere layer
     const globeMaterial = globeRef.current.globeMaterial();
-    globeMaterial.color = new THREE.Color(0x0a1526);
-    globeMaterial.emissive = new THREE.Color(0x020813);
-    globeMaterial.roughness = 0.35;
+    globeMaterial.color = new THREE.Color(0x020617);
+    globeMaterial.emissive = new THREE.Color(0x010a15);
+    globeMaterial.roughness = 0.4;
     globeMaterial.metalness = 0.9;
+    globeMaterial.transparent = true;
+    globeMaterial.opacity = 0.85;
 
     const scene = globeRef.current.scene();
 
     // 2. Add multiple overlapping high-tech holographic orbital grid rings
     const orbitalGroup = new THREE.Group();
     const ringRadii = [100.6, 101.4, 102.2];
-    const ringColors = [0x00ffff, 0xb55fe6, 0x1d4ed8];
+    const ringColors = [0x00f3ff, 0xa855f7, 0x1d4ed8];
 
     ringRadii.forEach((radius, index) => {
       const geometry = new THREE.IcosahedronGeometry(radius, 2);
       const material = new THREE.MeshBasicMaterial({
         color: ringColors[index],
         transparent: true,
-        opacity: 0.18,
+        opacity: 0.22,
         wireframe: true,
         blending: THREE.AdditiveBlending
       });
       const mesh = new THREE.Mesh(geometry, material);
       orbitalGroup.add(mesh);
     });
-
     scene.add(orbitalGroup);
 
     // 3. INITIALIZE PROCEDURAL LIGHTNING ARCS IN 3D SPACE
     const lightningGeometries: any[] = [];
     const lightningGroup = new THREE.Group();
 
-    // Draw active electric connections directly between neighboring coordinates
     for (let i = 0; i < BLUEPRINT_NODES.length - 1; i++) {
       const startNode = BLUEPRINT_NODES[i];
       const endNode = BLUEPRINT_NODES[i + 1];
@@ -98,39 +98,33 @@ export const GlobeScene: React.FC = () => {
       // Convert Lat/Lng coordinates directly to 3D Cartesian vectors
       const p1 = globeRef.current.getCoords(startNode.lat, startNode.lng, 0.04);
       const p2 = globeRef.current.getCoords(endNode.lat, endNode.lng, 0.04);
-
       const startVec = new THREE.Vector3(p1.x, p1.y, p1.z);
       const endVec = new THREE.Vector3(p2.x, p2.y, p2.z);
 
-      // Create the mathematical LightningStrike path
       const strikeGeo = new LightningStrike(startVec, endVec, lightningParams);
       lightningGeometries.push(strikeGeo);
 
-      // Emissive material layer so the bolt emits a high-frequency glow
       const strikeMat = new THREE.MeshBasicMaterial({
-        color: new THREE.Color(0x00ffff),
+        color: new THREE.Color(0x22d3ee),
         transparent: true,
-        opacity: 0.85,
+        opacity: 0.9,
         blending: THREE.AdditiveBlending
       });
-
       const strikeMesh = new THREE.Mesh(strikeGeo, strikeMat);
       lightningGroup.add(strikeMesh);
     }
     scene.add(lightningGroup);
 
-    // 4. Core Engine update loop (handles rotation and fractal crackle state)
+    // 4. Core Engine update loop
     let frameId: number;
     const clock = new THREE.Clock();
 
     const updateEngine = () => {
       const elapsedTime = clock.getElapsedTime();
 
-      // Spin the architectural vector shells smoothly
       orbitalGroup.rotation.y += 0.0012;
       orbitalGroup.rotation.x += 0.0004;
 
-      // Force each procedural lightning mesh geometry to re-calculate its path layout
       lightningGeometries.forEach((geo) => {
         geo.update(elapsedTime);
       });
@@ -148,17 +142,14 @@ export const GlobeScene: React.FC = () => {
     <div className="w-full h-full relative bg-transparent flex items-center justify-center">
       <Globe
         ref={globeRef}
-        backgroundColor="rgba(0,0,0,0)" // Keeps container transparent for HUD overlays
+        backgroundColor="rgba(0,0,0,0)"
         
-        // High-fidelity dark earth textures with glowing night illumination
-        globeImageUrl="https://unpkg.com"
-        bumpImageUrl="https://unpkg.com"
-        
-        // Brilliant glowing cyan atmosphere shell
+        // Disable the default map layer texture files completely to stop fallbacks
+        showGlobe={true}
         showAtmosphere={true}
-        atmosphereColor="#00ffff"
-        atmosphereAltitude={0.35}
-
+        atmosphereColor="#06b6d4"
+        atmosphereAltitude={0.28}
+        
         // Crackling data arc system parameters
         arcsData={matrixArcs}
         arcStartLat={(d: any) => d.startLat}
@@ -170,13 +161,13 @@ export const GlobeScene: React.FC = () => {
         arcStroke={(d: any) => d.stroke}
         arcDashLength={0.4}
         arcDashGap={0.15}
-        arcDashAnimateTime={800} // Matches high-velocity pulse speed
-
+        arcDashAnimateTime={800}
+        
         // Blazing node point grids
         pointsData={BLUEPRINT_NODES}
         pointLat={(d: any) => d.lat}
         pointLng={(d: any) => d.lng}
-        pointColor={() => '#00ffff'}
+        pointColor={() => '#22d3ee'}
         pointRadius={0.45}
         pointAltitude={0.02}
       />
