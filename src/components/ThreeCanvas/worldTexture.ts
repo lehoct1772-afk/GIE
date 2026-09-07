@@ -12,7 +12,6 @@ import countries110m from 'world-atlas/countries-110m.json';
  * bathymetric ocean depth contours, country boundaries, and terrain shading.
  */
 
-
 type GeoPosition = [number, number];
 type GeoRing = GeoPosition[];
 type GeoPolygon = GeoRing[];
@@ -77,7 +76,10 @@ export function createGISWorldTexture(layers: GlobeLayers): THREE.CanvasTexture 
     return [x, y];
   };
 
-  // 1. Deep Ocean Floor & Bathymetric Gradient Base (NASA GIS Styling)
+  // ============================================================
+  // 1. Deep Ocean Floor & Bathymetric Gradient
+  // ============================================================
+
   const oceanGrad = ctx.createRadialGradient(
     width / 2, height / 2, 100,
     width / 2, height / 2, width / 1.4
@@ -88,7 +90,10 @@ export function createGISWorldTexture(layers: GlobeLayers): THREE.CanvasTexture 
   ctx.fillStyle = oceanGrad;
   ctx.fillRect(0, 0, width, height);
 
+  // ============================================================
   // 2. Bathymetric Continental Shelf Depths (0-200m depth zone)
+  // ============================================================
+
   if (layers.bathymetry) {
     NaturalEarthDatasets.CONTINENTS.forEach(feature => {
       ctx.beginPath();
@@ -109,9 +114,10 @@ export function createGISWorldTexture(layers: GlobeLayers): THREE.CanvasTexture 
     });
   }
 
-  // 3. WGS84 Natural Earth Continents & Islands Fill
-  // Draw every country polygon independently. This avoids a single giant
-  // compound clipping path swallowing the land fill at the antimeridian.
+  // ============================================================
+  // 3. WGS84 Continents & Islands Fill
+  // ============================================================
+
   if (layers.continents) {
     const landGrad = ctx.createLinearGradient(0, 0, width, height);
     landGrad.addColorStop(0.00, '#c29a62');
@@ -125,12 +131,9 @@ export function createGISWorldTexture(layers: GlobeLayers): THREE.CanvasTexture 
       tracePolygon(ctx, rings, toXY);
       ctx.fillStyle = landGrad;
       ctx.fill('evenodd');
-      ctx.strokeStyle = 'rgba(74, 205, 177, 0.72)';
-      ctx.lineWidth = 1.0;
-      ctx.stroke();
     });
 
-    // Deterministic low-contrast terrain mottling, clipped per polygon.
+    // Deterministic low-contrast terrain mottling, clipped per polygon
     ctx.save();
     forEachWorldPolygon((rings) => {
       tracePolygon(ctx, rings, toXY);
@@ -151,7 +154,27 @@ export function createGISWorldTexture(layers: GlobeLayers): THREE.CanvasTexture 
     ctx.restore();
   }
 
-  // 4. Country Administrative Boundaries (WGS84 Borders)
+  // ============================================================
+  // 4. Coastlines — INDEPENDENT CONTROL
+  // ============================================================
+
+  if (layers.coastlines) {
+    // Coastlines follow the same polygon outlines as continents
+    forEachWorldPolygon((rings) => {
+      tracePolygon(ctx, rings, toXY);
+      ctx.strokeStyle = '#00f0ff';
+      ctx.lineWidth = 3.2;
+      ctx.shadowColor = '#00f0ff';
+      ctx.shadowBlur = 8;
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+    });
+  }
+
+  // ============================================================
+  // 5. Country Administrative Boundaries (WGS84 Borders)
+  // ============================================================
+
   if (layers.countries) {
     ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
     ctx.lineWidth = 1.2;
@@ -184,7 +207,10 @@ export function createGISWorldTexture(layers: GlobeLayers): THREE.CanvasTexture 
     ctx.setLineDash([]);
   }
 
-  // 5. Major Hydrography / River Basins
+  // ============================================================
+  // 6. Major Hydrography / River Basins
+  // ============================================================
+
   if (layers.rivers) {
     ctx.strokeStyle = '#00ff9d';
     ctx.lineWidth = 2.2;
@@ -218,7 +244,10 @@ export function createGISWorldTexture(layers: GlobeLayers): THREE.CanvasTexture 
     ctx.shadowBlur = 0;
   }
 
-  // 6. Mountain Topography Relief
+  // ============================================================
+  // 7. Mountain Topography Relief
+  // ============================================================
+
   if (layers.mountains) {
     ctx.strokeStyle = 'rgba(255, 183, 0, 0.7)';
     ctx.lineWidth = 2.5;
@@ -246,7 +275,10 @@ export function createGISWorldTexture(layers: GlobeLayers): THREE.CanvasTexture 
     });
   }
 
-  // 7. Oceanic Subduction Trenches
+  // ============================================================
+  // 8. Oceanic Subduction Trenches
+  // ============================================================
+
   if (layers.oceanTrenches) {
     ctx.strokeStyle = '#ff0055';
     ctx.lineWidth = 3.5;
@@ -268,11 +300,19 @@ export function createGISWorldTexture(layers: GlobeLayers): THREE.CanvasTexture 
     ctx.shadowBlur = 0;
   }
 
+  // ============================================================
+  // 9. Create and Return Texture
+  // ============================================================
+
   const texture = new THREE.CanvasTexture(canvas);
   texture.wrapS = THREE.RepeatWrapping;
   texture.wrapT = THREE.ClampToEdgeWrapping;
   return texture;
 }
+
+// ============================================================
+// ELEVATION & BATHYMETRY BUMP MAP
+// ============================================================
 
 /**
  * Generates an Elevation & Bathymetry Bump Map (SRTM/ETOPO1 Relief)
@@ -319,10 +359,14 @@ export function createGISElevationBumpMap(): THREE.CanvasTexture {
   ctx.filter = 'blur(8px)';
 
   const MOUNTAIN_PEAKS: [number, number][][] = [
-    [[72, 34], [78, 30], [88, 28], [95, 29]], // Himalayas
-    [[-77, 8], [-78, -10], [-70, -30], [-72, -45]], // Andes
-    [[-122, 50], [-115, 42], [-105, 36]], // Rockies
-    [[6, 45], [10, 47], [14, 46]] // Alps
+    // Himalayas
+    [[72, 34], [78, 30], [88, 28], [95, 29]],
+    // Andes
+    [[-77, 8], [-78, -10], [-70, -30], [-72, -45]],
+    // Rockies
+    [[-122, 50], [-115, 42], [-105, 36]],
+    // Alps
+    [[6, 45], [10, 47], [14, 46]]
   ];
 
   MOUNTAIN_PEAKS.forEach(m => {
@@ -341,5 +385,3 @@ export function createGISElevationBumpMap(): THREE.CanvasTexture {
   texture.wrapT = THREE.ClampToEdgeWrapping;
   return texture;
 }
-
-

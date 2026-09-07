@@ -25,10 +25,14 @@ export interface GeoNode {
   lng: number;
   latLabel: string;
   lngLabel: string;
-  type: 'CORE' | 'HARMONIC' | 'BLUEPRINT' | 'SATELLITE';
+  type: 'CORE' | 'HARMONIC' | 'BLUEPRINT' | 'SATELLITE' | 'SERVER' | 'DATABASE' | 'API' | 'CLIENT' | 'WORKER';
   intensity: number;
-  connections: string[]; // ids of connected nodes
+  connections: string[];
   formula: string;
+  status?: 'healthy' | 'warning' | 'critical' | 'unknown';
+  load?: number;
+  capacity?: number;
+  flow?: number;
 }
 
 export interface ActivityFeedItem {
@@ -126,4 +130,42 @@ export interface CityInfrastructureBlueprint {
   zoomLevel: GISZoomLevel;
   createdAt: string;
   updatedAt: string;
+}
+
+// ============================================
+// NEW TYPES FOR UPLOADED DATA
+// ============================================
+
+export interface UploadedNode {
+  id: string;
+  name: string;
+  lat: number;
+  lng: number;
+  type?: 'CORE' | 'HARMONIC' | 'BLUEPRINT' | 'SATELLITE' | 'SERVER' | 'DATABASE' | 'API' | 'CLIENT' | 'WORKER';
+  status?: 'healthy' | 'warning' | 'critical' | 'unknown';
+  load?: number;
+  capacity?: number;
+  flow?: number;
+  connections?: string[];
+  metadata?: Record<string, any>;
+}
+
+export interface UploadedArc {
+  id: string;
+  source: string;
+  target: string;
+  flow?: number;
+  capacity?: number;
+  latency?: number;
+  status?: 'healthy' | 'warning' | 'critical' | 'unknown';
+  color?: string;
+}
+
+export interface UploadedData {
+  nodes: UploadedNode[];
+  arcs: UploadedArc[];
+}
+
+export interface DataLoadCallback {
+  (data: UploadedData): void;
 }

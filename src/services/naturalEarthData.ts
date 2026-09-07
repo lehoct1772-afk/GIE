@@ -1,8 +1,24 @@
 /**
- * Natural Earth WGS84 Geographic Dataset
- * Accurate high-resolution vectors derived from 1:110m and 1:50m Natural Earth GIS datasets.
- * Used by CesiumJS, NASA WorldWind, and ArcGIS desktop software for scientific visualization.
+ * Natural Earth WGS84 Geographic Dataset — GIS Feature Provider
+ *
+ * Provides structured access to geographic feature data used by the GIE rendering system.
+ * High-resolution geometry is loaded from authoritative `world-atlas` TopoJSON datasets
+ * (Natural Earth 1:110m) via topojson-client, not from hand-written approximations.
+ *
+ * This file consolidates and provides access to geographic feature collections,
+ * including tectonic plates, ocean trenches, and other mapped Earth features
+ * consumed by `worldTexture.ts` and `Globe3DLayers.tsx`.
+ *
+ * Continent/coastline geometry is loaded directly from `world-atlas/countries-110m.json`
+ * in `worldTexture.ts` via topojson-client for maximum accuracy.
  */
+
+import { feature } from 'topojson-client';
+import countries110m from 'world-atlas/countries-110m.json';
+
+// ============================================================
+// Types
+// ============================================================
 
 export interface GISFeaturePolygon {
   id: string;
@@ -11,217 +27,109 @@ export interface GISFeaturePolygon {
   coordinates: [number, number][]; // Array of [longitude, latitude] in WGS84
 }
 
-// 1. Accurate WGS84 Continents & Islands Polygons
-export class NaturalEarthDatasets {
-  static readonly CONTINENTS: GISFeaturePolygon[] = [
-    // North America (Detailed accurate perimeter)
-    {
-      id: 'NA_MAIN',
-      name: 'North America',
-      category: 'CONTINENT',
-      coordinates: [
-        [-168.0, 65.5], [-160.0, 70.8], [-141.0, 69.6], [-120.0, 69.0], [-100.0, 69.5],
-        [-85.0, 73.0], [-78.0, 76.5], [-68.0, 70.0], [-64.0, 60.0], [-55.0, 52.0],
-        [-60.0, 46.0], [-66.0, 44.0], [-70.0, 41.5], [-75.0, 35.0], [-80.0, 25.5],
-        [-80.5, 25.0], [-82.0, 23.0], [-85.0, 10.0], [-83.0, 8.5], [-77.5, 8.0],
-        [-80.0, 8.5], [-84.0, 10.0], [-88.0, 14.0], [-92.0, 15.0], [-96.0, 16.5],
-        [-105.0, 20.0], [-109.0, 23.0], [-117.0, 32.5], [-124.0, 40.0], [-125.0, 50.0],
-        [-135.0, 57.0], [-150.0, 60.0], [-160.0, 55.0], [-165.0, 60.0], [-168.0, 65.5]
-      ]
-    },
-    // Baja California
-    {
-      id: 'NA_BAJA',
-      name: 'Baja California',
-      category: 'ISLAND',
-      coordinates: [
-        [-117.0, 32.5], [-114.0, 31.0], [-109.0, 23.0], [-110.5, 24.0], [-115.0, 30.0], [-117.0, 32.5]
-      ]
-    },
-    // Florida Peninsula
-    {
-      id: 'NA_FLORIDA',
-      name: 'Florida',
-      category: 'CONTINENT',
-      coordinates: [
-        [-81.5, 30.8], [-80.0, 26.8], [-80.5, 25.0], [-81.8, 24.5], [-82.8, 27.8], [-84.2, 30.0], [-81.5, 30.8]
-      ]
-    },
-    // South America (Accurate perimeter)
-    {
-      id: 'SA_MAIN',
-      name: 'South America',
-      category: 'CONTINENT',
-      coordinates: [
-        [-77.5, 8.0], [-72.0, 11.8], [-60.0, 8.5], [-50.0, 0.0], [-35.0, -5.0],
-        [-34.8, -7.5], [-37.0, -12.0], [-40.0, -20.0], [-48.0, -28.0], [-55.0, -34.5],
-        [-62.0, -39.0], [-65.0, -53.0], [-68.0, -55.0], [-73.0, -53.0], [-75.0, -45.0],
-        [-72.0, -33.0], [-70.0, -18.0], [-81.0, -4.5], [-80.0, 2.0], [-77.5, 8.0]
-      ]
-    },
-    // Europe (Accurate coastline)
-    {
-      id: 'EU_MAIN',
-      name: 'Europe',
-      category: 'CONTINENT',
-      coordinates: [
-        [-9.5, 37.0], [-9.0, 43.0], [-1.5, 43.5], [3.0, 43.5], [4.5, 47.0],
-        [4.0, 52.0], [8.0, 54.0], [14.0, 54.5], [20.0, 55.0], [28.0, 60.0],
-        [31.0, 65.0], [40.0, 67.0], [50.0, 68.0], [60.0, 68.0], [60.0, 50.0],
-        [40.0, 45.0], [30.0, 41.0], [26.0, 40.0], [22.0, 38.0], [20.0, 39.0],
-        [15.0, 41.0], [12.0, 44.0], [8.0, 44.0], [3.0, 41.5], [-5.0, 36.0], [-9.5, 37.0]
-      ]
-    },
-    // Scandinavia
-    {
-      id: 'EU_SCAN',
-      name: 'Scandinavia',
-      category: 'CONTINENT',
-      coordinates: [
-        [5.0, 58.0], [10.0, 58.0], [12.0, 56.0], [16.0, 56.0], [18.0, 60.0],
-        [24.0, 65.0], [28.0, 70.0], [20.0, 71.0], [15.0, 68.0], [5.0, 62.0], [5.0, 58.0]
-      ]
-    },
-    // Great Britain
-    {
-      id: 'EU_UK',
-      name: 'Great Britain',
-      category: 'ISLAND',
-      coordinates: [
-        [-5.5, 50.0], [1.5, 51.0], [1.8, 52.8], [0.0, 58.0], [-3.0, 58.5],
-        [-5.5, 56.5], [-3.5, 54.5], [-5.0, 52.0], [-5.5, 50.0]
-      ]
-    },
-    // Ireland
-    {
-      id: 'EU_IRE',
-      name: 'Ireland',
-      category: 'ISLAND',
-      coordinates: [
-        [-10.5, 51.5], [-6.0, 52.0], [-5.5, 55.0], [-9.5, 55.0], [-10.5, 51.5]
-      ]
-    },
-    // Africa (Accurate perimeter)
-    {
-      id: 'AF_MAIN',
-      name: 'Africa',
-      category: 'CONTINENT',
-      coordinates: [
-        [-17.0, 35.0], [-5.0, 36.0], [10.0, 37.0], [25.0, 32.0], [32.5, 31.5],
-        [35.0, 27.0], [43.0, 12.5], [51.5, 12.0], [42.0, 0.0], [40.0, -10.0],
-        [35.0, -22.0], [32.0, -28.0], [28.0, -33.0], [18.0, -34.8], [15.0, -30.0],
-        [12.0, -15.0], [9.0, 4.0], [2.0, 6.0], [-8.0, 4.5], [-15.0, 11.0],
-        [-17.5, 15.0], [-16.0, 21.0], [-17.0, 35.0]
-      ]
-    },
-    // Madagascar
-    {
-      id: 'AF_MAD',
-      name: 'Madagascar',
-      category: 'ISLAND',
-      coordinates: [
-        [43.5, -12.0], [49.5, -12.0], [50.5, -15.0], [47.5, -25.0], [43.5, -25.0], [43.5, -12.0]
-      ]
-    },
-    // Asia (Accurate landmass)
-    {
-      id: 'AS_MAIN',
-      name: 'Asia',
-      category: 'CONTINENT',
-      coordinates: [
-        [35.0, 32.0], [40.0, 40.0], [50.0, 40.0], [60.0, 50.0], [60.0, 68.0],
-        [80.0, 73.0], [100.0, 75.0], [120.0, 75.0], [140.0, 72.0], [170.0, 66.0],
-        [180.0, 65.0], [160.0, 58.0], [140.0, 50.0], [130.0, 42.0], [120.0, 32.0],
-        [120.0, 22.0], [108.0, 18.0], [105.0, 10.0], [98.0, 8.0], [80.0, 8.0],
-        [70.0, 20.0], [60.0, 25.0], [55.0, 25.0], [43.0, 12.5], [35.0, 27.0], [35.0, 32.0]
-      ]
-    },
-    // Arabian Peninsula
-    {
-      id: 'AS_ARABIA',
-      name: 'Arabian Peninsula',
-      category: 'CONTINENT',
-      coordinates: [
-        [35.0, 30.0], [48.0, 30.0], [56.0, 26.0], [59.0, 22.5], [54.0, 16.0], [43.0, 12.5], [35.0, 30.0]
-      ]
-    },
-    // Indian Subcontinent
-    {
-      id: 'AS_INDIA',
-      name: 'India',
-      category: 'CONTINENT',
-      coordinates: [
-        [68.0, 24.0], [78.0, 31.0], [88.0, 22.0], [80.0, 13.0], [77.5, 8.0], [73.0, 15.0], [68.0, 24.0]
-      ]
-    },
-    // Japan Main Arc
-    {
-      id: 'AS_JAPAN',
-      name: 'Japan',
-      category: 'ISLAND',
-      coordinates: [
-        [130.0, 31.0], [136.0, 35.0], [141.0, 38.0], [145.0, 44.0], [140.0, 40.0], [133.0, 33.0], [130.0, 31.0]
-      ]
-    },
-    // Australia
-    {
-      id: 'AU_MAIN',
-      name: 'Australia',
-      category: 'CONTINENT',
-      coordinates: [
-        [113.0, -22.0], [114.0, -14.0], [130.0, -12.0], [136.0, -12.0], [142.0, -10.5],
-        [150.0, -22.0], [153.5, -28.0], [150.0, -37.5], [138.0, -35.0], [115.0, -34.0], [113.0, -22.0]
-      ]
-    },
-    // Tasmania
-    {
-      id: 'AU_TAS',
-      name: 'Tasmania',
-      category: 'ISLAND',
-      coordinates: [
-        [145.0, -41.0], [148.5, -41.0], [148.0, -43.5], [144.5, -43.5], [145.0, -41.0]
-      ]
-    },
-    // New Zealand North & South
-    {
-      id: 'NZ_NORTH',
-      name: 'New Zealand North',
-      category: 'ISLAND',
-      coordinates: [
-        [173.0, -34.5], [178.0, -37.5], [175.0, -41.5], [172.0, -38.0], [173.0, -34.5]
-      ]
-    },
-    {
-      id: 'NZ_SOUTH',
-      name: 'New Zealand South',
-      category: 'ISLAND',
-      coordinates: [
-        [173.0, -41.0], [174.0, -42.0], [170.0, -46.5], [166.5, -46.0], [171.0, -43.0], [173.0, -41.0]
-      ]
-    },
-    // Greenland
-    {
-      id: 'GL_MAIN',
-      name: 'Greenland',
-      category: 'ISLAND',
-      coordinates: [
-        [-72.0, 78.0], [-20.0, 81.0], [-18.0, 70.0], [-43.0, 60.0], [-55.0, 65.0], [-72.0, 78.0]
-      ]
-    },
-    // Antarctica (Accurate polar perimeter)
-    {
-      id: 'ANT_MAIN',
-      name: 'Antarctica',
-      category: 'CONTINENT',
-      coordinates: [
-        [-180.0, -65.0], [-140.0, -74.0], [-100.0, -73.0], [-60.0, -65.0],
-        [-30.0, -72.0], [0.0, -70.0], [40.0, -68.0], [80.0, -66.0],
-        [120.0, -66.0], [160.0, -68.0], [180.0, -65.0], [180.0, -90.0], [-180.0, -90.0]
-      ]
-    }
-  ];
+// ============================================================
+// 1. World Atlas — Authority Dataset
+// ============================================================
 
-  // 2. Tectonic Plates Boundaries (WGS84 Fault Lines)
+/**
+ * Access point for the authoritative Natural Earth 1:110m country data.
+ * This is consumed directly by worldTexture.ts for continent/coastline rendering.
+ */
+export const WORLD_ATLAS = {
+  countries: countries110m,
+  /**
+   * Returns the complete countries FeatureCollection
+   */
+  getCountriesGeoJSON() {
+    return feature(
+      countries110m as any,
+      (countries110m as any).objects.countries
+    ) as any;
+  },
+  /**
+   * Iterates over all country polygons
+   */
+  forEachPolygon(callback: (rings: any) => void) {
+    const geo = this.getCountriesGeoJSON();
+    for (const item of geo.features ?? []) {
+      const geometry = item.geometry;
+      if (!geometry) continue;
+      if (geometry.type === 'Polygon') {
+        callback(geometry.coordinates);
+      } else if (geometry.type === 'MultiPolygon') {
+        for (const polygon of geometry.coordinates) {
+          callback(polygon);
+        }
+      }
+    }
+  },
+};
+
+// ============================================================
+// 2. NaturalEarthDatasets — COMPATIBLE with worldTexture.ts
+// ============================================================
+
+/**
+ * Geographic datasets for the GIE rendering system.
+ *
+ * CONTINENTS: Provides polygon coordinates for bathymetry and elevation bump map.
+ * These are derived from the authoritative world-atlas dataset.
+ *
+ * TECTONIC_PLATES: Structural plate boundaries for Globe3DLayers.
+ *
+ * OCEAN_TRENCHES: Deep subduction zones for Globe3DLayers and worldTexture.ts.
+ *
+ * RIVER_BASINS: Hydrography reference points for worldTexture.ts.
+ */
+export class NaturalEarthDatasets {
+  /**
+   * CONTINENTS — Dataset-backed polygon coordinates.
+   * Extracted from world-atlas/countries-110m.json for compatibility
+   * with the approved worldTexture.ts which consumes this property.
+   *
+   * These are authoritative Natural Earth 1:110m polygons.
+   */
+  static readonly CONTINENTS: GISFeaturePolygon[] = (() => {
+    const result: GISFeaturePolygon[] = [];
+    const geo = WORLD_ATLAS.getCountriesGeoJSON();
+
+    for (const feature of geo.features ?? []) {
+      const geometry = feature.geometry;
+      if (!geometry) continue;
+
+      let polygons: any[] = [];
+      if (geometry.type === 'Polygon') {
+        polygons = [geometry.coordinates];
+      } else if (geometry.type === 'MultiPolygon') {
+        polygons = geometry.coordinates;
+      }
+
+      for (const polygon of polygons) {
+        // Extract the outer ring (first ring)
+        const outerRing = polygon[0];
+        if (!outerRing || outerRing.length < 4) continue;
+
+        // Convert to [longitude, latitude] format
+        const coords: [number, number][] = outerRing.map(
+          (point: [number, number]) => [point[0], point[1]]
+        );
+
+        result.push({
+          id: `continent-${result.length}`,
+          name: feature.properties?.name || `Feature ${result.length}`,
+          category: 'CONTINENT',
+          coordinates: coords,
+        });
+      }
+    }
+
+    return result;
+  })();
+
+  // ============================================================
+  // 3. Tectonic Plates Boundaries (WGS84 Fault Lines)
+  // ============================================================
+
   static readonly TECTONIC_PLATES: GISFeaturePolygon[] = [
     {
       id: 'RING_OF_FIRE',
@@ -250,7 +158,10 @@ export class NaturalEarthDatasets {
     }
   ];
 
-  // 3. Ocean Trenches (Deep subduction zones)
+  // ============================================================
+  // 4. Ocean Trenches (Deep subduction zones)
+  // ============================================================
+
   static readonly OCEAN_TRENCHES: GISFeaturePolygon[] = [
     {
       id: 'MARIANA_TRENCH',
@@ -271,4 +182,82 @@ export class NaturalEarthDatasets {
       coordinates: [[95.0, 5.0], [105.0, -6.0], [120.0, -10.0]]
     }
   ];
+
+  // ============================================================
+  // 5. Major River Basins — Reference Points
+  // ============================================================
+
+  static readonly RIVER_BASINS: GISFeaturePolygon[] = [
+    {
+      id: 'NILE_BASIN',
+      name: 'Nile River Basin',
+      category: 'RIVER_BASIN',
+      coordinates: [
+        [31.0, 31.0], [32.0, 25.0], [33.0, 15.0], [30.0, 2.0], [32.0, -3.0]
+      ]
+    },
+    {
+      id: 'AMAZON_BASIN',
+      name: 'Amazon River Basin',
+      category: 'RIVER_BASIN',
+      coordinates: [
+        [-50.0, -0.1], [-60.0, -3.0], [-70.0, -4.0], [-76.0, -5.0]
+      ]
+    },
+    {
+      id: 'MISSISSIPPI_BASIN',
+      name: 'Mississippi River Basin',
+      category: 'RIVER_BASIN',
+      coordinates: [
+        [-89.0, 29.0], [-91.0, 35.0], [-90.0, 42.0], [-95.0, 47.0]
+      ]
+    },
+    {
+      id: 'YANGTZE_BASIN',
+      name: 'Yangtze River Basin',
+      category: 'RIVER_BASIN',
+      coordinates: [
+        [121.0, 31.0], [112.0, 30.0], [105.0, 30.0], [91.0, 33.0]
+      ]
+    },
+    {
+      id: 'DANUBE_BASIN',
+      name: 'Danube River Basin',
+      category: 'RIVER_BASIN',
+      coordinates: [
+        [29.0, 45.0], [20.0, 44.0], [16.0, 48.0], [8.0, 48.0]
+      ]
+    }
+  ];
+}
+
+// ============================================================
+// 6. Utility Functions
+// ============================================================
+
+/**
+ * Get all available feature categories
+ */
+export function getFeatureCategories(): string[] {
+  return [
+    'TECTONIC_PLATE',
+    'OCEAN_TRENCH',
+    'RIVER_BASIN',
+    'CONTINENT',
+    'ISLAND',
+    'COUNTRY_BORDER',
+  ];
+}
+
+/**
+ * Get features by category
+ */
+export function getFeaturesByCategory(category: string): GISFeaturePolygon[] {
+  const allFeatures: GISFeaturePolygon[] = [
+    ...NaturalEarthDatasets.CONTINENTS,
+    ...NaturalEarthDatasets.TECTONIC_PLATES,
+    ...NaturalEarthDatasets.OCEAN_TRENCHES,
+    ...NaturalEarthDatasets.RIVER_BASINS,
+  ];
+  return allFeatures.filter(f => f.category === category);
 }

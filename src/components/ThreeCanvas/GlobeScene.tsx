@@ -5,7 +5,7 @@ import { GlobeSphere } from "./GlobeSphere";
 import { PlatonicSolids } from "./PlatonicSolids";
 import { SacredGeometry3D } from "./SacredGeometry3D";
 import { ParticleField } from "./ParticleField";
-import { GeoNode, GlobeLayers, GISZoomLevel } from "../../types";
+import { GeoNode, GlobeLayers, GISZoomLevel, UploadedData } from "../../types";
 
 interface GlobeSceneProps {
   viewMode: string;
@@ -18,6 +18,7 @@ interface GlobeSceneProps {
   layers: GlobeLayers;
   onToggleLayer: (key: keyof GlobeLayers) => void;
   onResetLayers: () => void;
+  uploadedData?: UploadedData | null;
 }
 
 function ZoomTracker({
@@ -43,8 +44,9 @@ export const GlobeScene: React.FC<GlobeSceneProps> = ({
   isFocusMode,
   onToggleFocusMode,
   layers,
+  uploadedData = null,
 }) => {
-  const [cameraDistance, setCameraDistance] = useState(9.1);
+  const [cameraDistance, setCameraDistance] = useState(6.5);
 
   const zoomLevel: GISZoomLevel =
     cameraDistance > 6.8
@@ -70,7 +72,7 @@ export const GlobeScene: React.FC<GlobeSceneProps> = ({
     >
       <Canvas
         camera={{
-          position: [0, 0, 9.1],
+          position: [0, 0, 6.5],
           fov: 42,
         }}
         gl={{
@@ -97,7 +99,7 @@ export const GlobeScene: React.FC<GlobeSceneProps> = ({
           color="#ffb700"
         />
 
-        {/* BACKGROUND FIELD - STAYS BEHIND GLOBE */}
+        {/* BACKGROUND FIELD */}
         <ParticleField />
 
         {/* MAIN GLOBE */}
@@ -109,9 +111,10 @@ export const GlobeScene: React.FC<GlobeSceneProps> = ({
             showNodes={showNodes}
             showWireframe={showWireframe}
             layers={layers}
+            uploadedData={uploadedData}
           />
 
-          {/* ONLY SHOW THESE WHEN THEIR VIEW MODES REQUIRE THEM */}
+          {/* SACRED GEOMETRY LAYERS */}
           {(viewMode === "SACRED_GEOMETRY" ||
             viewMode === "GEOMETRIC_LAYERS") && (
             <PlatonicSolids viewMode={viewMode} />

@@ -17,18 +17,18 @@ export const MathVisualizerModal: React.FC<MathVisualizerModalProps> = ({ isOpen
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-3 sm:p-4">
         <motion.div
           initial={{ opacity: 0, scale: 0.9, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 20 }}
-          className="w-full max-w-3xl bg-slate-950 border-2 border-cyan-400/80 rounded-lg p-6 shadow-[0_0_40px_rgba(0,240,255,0.4)] relative font-mono text-slate-200"
+          className="w-full max-w-[min(92vw,896px)] max-h-[90vh] overflow-y-auto bg-slate-950 border-2 border-cyan-400/80 rounded-lg p-4 sm:p-6 shadow-[0_0_40px_rgba(0,240,255,0.4)] relative font-mono text-slate-200"
         >
           {/* Header */}
-          <div className="flex justify-between items-center pb-3 mb-4 border-b border-cyan-500/30">
-            <div className="flex items-center space-x-2">
-              <Activity className="w-5 h-5 text-cyan-400" />
-              <h2 className="text-lg font-bold text-cyan-300 uppercase tracking-widest">
+          <div className="flex justify-between items-center pb-3 mb-4 border-b border-cyan-500/30 flex-shrink-0">
+            <div className="flex items-center space-x-2 min-w-0">
+              <Activity className="h-4 w-4 sm:h-5 sm:w-5 text-cyan-400 flex-shrink-0" />
+              <h2 className="text-sm sm:text-lg font-bold text-cyan-300 uppercase tracking-widest truncate">
                 INTERACTIVE MATHEMATICAL GRAPH & WAVE VISUALIZER
               </h2>
             </div>
@@ -37,27 +37,27 @@ export const MathVisualizerModal: React.FC<MathVisualizerModalProps> = ({ isOpen
                 soundManager.playClick();
                 onClose();
               }}
-              className="p-1 rounded bg-slate-900 border border-slate-700 text-slate-400 hover:text-cyan-300 transition-colors"
+              className="p-1 rounded bg-slate-900 border border-slate-700 text-slate-400 hover:text-cyan-300 transition-colors flex-shrink-0"
             >
-              <X className="w-5 h-5" />
+              <X className="h-4 w-4 sm:h-5 sm:w-5" />
             </button>
           </div>
 
           {/* Controls & Presets */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4 mb-4">
             <button
               onClick={() => {
                 soundManager.playClick();
                 setSelectedEquation('wave');
               }}
-              className={`p-2.5 rounded border text-xs text-left cursor-pointer transition-colors ${
+              className={`p-2 sm:p-2.5 rounded border text-[10px] sm:text-xs text-left cursor-pointer transition-colors ${
                 selectedEquation === 'wave'
                   ? 'bg-cyan-950 border-cyan-400 text-cyan-200'
                   : 'bg-slate-900 border-slate-800 text-slate-400 hover:border-cyan-500/30'
               }`}
             >
               <div className="font-bold">HARMONIC WAVE</div>
-              <div className="text-[10px] opacity-75">z = sin(a·x) · cos(b·y)</div>
+              <div className="text-[8px] sm:text-[10px] opacity-75">z = sin(a·x) · cos(b·y)</div>
             </button>
 
             <button
@@ -65,14 +65,14 @@ export const MathVisualizerModal: React.FC<MathVisualizerModalProps> = ({ isOpen
                 soundManager.playClick();
                 setSelectedEquation('spiral');
               }}
-              className={`p-2.5 rounded border text-xs text-left cursor-pointer transition-colors ${
+              className={`p-2 sm:p-2.5 rounded border text-[10px] sm:text-xs text-left cursor-pointer transition-colors ${
                 selectedEquation === 'spiral'
                   ? 'bg-cyan-950 border-cyan-400 text-cyan-200'
                   : 'bg-slate-900 border-slate-800 text-slate-400 hover:border-cyan-500/30'
               }`}
             >
               <div className="font-bold">GOLDEN LOGARITHMIC</div>
-              <div className="text-[10px] opacity-75">r = a · e^(b · &theta;)</div>
+              <div className="text-[8px] sm:text-[10px] opacity-75">r = a · e^(b · &theta;)</div>
             </button>
 
             <button
@@ -80,19 +80,19 @@ export const MathVisualizerModal: React.FC<MathVisualizerModalProps> = ({ isOpen
                 soundManager.playClick();
                 setSelectedEquation('hyperbolic');
               }}
-              className={`p-2.5 rounded border text-xs text-left cursor-pointer transition-colors ${
+              className={`p-2 sm:p-2.5 rounded border text-[10px] sm:text-xs text-left cursor-pointer transition-colors ${
                 selectedEquation === 'hyperbolic'
                   ? 'bg-cyan-950 border-cyan-400 text-cyan-200'
                   : 'bg-slate-900 border-slate-800 text-slate-400 hover:border-cyan-500/30'
               }`}
             >
               <div className="font-bold">HYPERBOLIC PARABOLOID</div>
-              <div className="text-[10px] opacity-75">z = (x²/a²) - (y²/b²)</div>
+              <div className="text-[8px] sm:text-[10px] opacity-75">z = (x²/a²) - (y²/b²)</div>
             </button>
           </div>
 
           {/* Interactive Graph Box */}
-          <div className="w-full h-64 bg-slate-900/90 border border-cyan-500/30 rounded p-4 relative flex flex-col items-center justify-center overflow-hidden">
+          <div className="w-full h-40 sm:h-56 md:h-64 bg-slate-900/90 border border-cyan-500/30 rounded p-3 sm:p-4 relative flex flex-col items-center justify-center overflow-hidden">
             <svg className="w-full h-full text-cyan-400" viewBox="0 0 400 200" preserveAspectRatio="none">
               <defs>
                 <linearGradient id="waveGrad" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -117,17 +117,17 @@ export const MathVisualizerModal: React.FC<MathVisualizerModalProps> = ({ isOpen
                 }
                 fill="none"
                 stroke="url(#waveGrad)"
-                strokeWidth="3"
+                strokeWidth="2.5"
               />
             </svg>
 
-            <div className="absolute top-3 left-3 text-[10px] text-cyan-400">
+            <div className="absolute top-2 left-2 sm:top-3 sm:left-3 text-[8px] sm:text-[10px] text-cyan-400">
               PARAMETER &phi; ALIGNMENT: {paramA.toFixed(3)}
             </div>
           </div>
 
           {/* Sliders */}
-          <div className="grid grid-cols-2 gap-4 mt-4 text-xs font-mono">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-3 sm:mt-4 text-[9px] sm:text-xs font-mono">
             <div>
               <div className="flex justify-between text-slate-400 mb-1">
                 <span>FREQUENCY COEFFICIENT (a)</span>
@@ -140,7 +140,7 @@ export const MathVisualizerModal: React.FC<MathVisualizerModalProps> = ({ isOpen
                 step="0.05"
                 value={paramA}
                 onChange={e => setParamA(parseFloat(e.target.value))}
-                className="w-full accent-cyan-400 bg-slate-900 cursor-pointer"
+                className="w-full accent-cyan-400 bg-slate-900 cursor-pointer h-1.5 sm:h-2"
               />
             </div>
             <div>
@@ -155,7 +155,7 @@ export const MathVisualizerModal: React.FC<MathVisualizerModalProps> = ({ isOpen
                 step="0.05"
                 value={paramB}
                 onChange={e => setParamB(parseFloat(e.target.value))}
-                className="w-full accent-amber-400 bg-slate-900 cursor-pointer"
+                className="w-full accent-amber-400 bg-slate-900 cursor-pointer h-1.5 sm:h-2"
               />
             </div>
           </div>

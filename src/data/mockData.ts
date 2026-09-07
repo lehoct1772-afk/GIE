@@ -1,6 +1,11 @@
-import { GeoNode, ActivityFeedItem, MathConstant, DataStream, ActiveUpload, BlueprintPreset } from '../types';
+import { GeoNode, ActivityFeedItem, MathConstant, DataStream, ActiveUpload, BlueprintPreset, UploadedData } from '../types';
+
+// ============================================================
+// GEOGRAPHIC DEMO NODES — For Globe Display
+// ============================================================
 
 export const GEO_NODES: GeoNode[] = [
+  // CORE NODES — Major system hubs
   {
     id: 'node-denver',
     name: 'Denver Grid Origin',
@@ -11,7 +16,11 @@ export const GEO_NODES: GeoNode[] = [
     type: 'CORE',
     intensity: 0.95,
     connections: ['node-giza', 'node-athens', 'node-kyoto'],
-    formula: 'd = \\sqrt{(x_2-x_1)^2 + (y_2-y_1)^2 + (z_2-z_1)^2}'
+    formula: 'd = \\sqrt{(x_2-x_1)^2 + (y_2-y_1)^2 + (z_2-z_1)^2}',
+    status: 'healthy',
+    load: 45,
+    capacity: 100,
+    flow: 45,
   },
   {
     id: 'node-giza',
@@ -23,7 +32,11 @@ export const GEO_NODES: GeoNode[] = [
     type: 'HARMONIC',
     intensity: 0.98,
     connections: ['node-denver', 'node-stonehenge', 'node-teotihuacan'],
-    formula: '\\phi = \\frac{1+\\sqrt{5}}{2} = 1.6180339...'
+    formula: '\\phi = \\frac{1+\\sqrt{5}}{2} = 1.6180339...',
+    status: 'warning',
+    load: 72,
+    capacity: 100,
+    flow: 72,
   },
   {
     id: 'node-athens',
@@ -35,7 +48,11 @@ export const GEO_NODES: GeoNode[] = [
     type: 'BLUEPRINT',
     intensity: 0.88,
     connections: ['node-denver', 'node-stonehenge'],
-    formula: 'F_n = F_{n-1} + F_{n-2}'
+    formula: 'F_n = F_{n-1} + F_{n-2}',
+    status: 'healthy',
+    load: 30,
+    capacity: 80,
+    flow: 30,
   },
   {
     id: 'node-stonehenge',
@@ -47,7 +64,11 @@ export const GEO_NODES: GeoNode[] = [
     type: 'HARMONIC',
     intensity: 0.85,
     connections: ['node-giza', 'node-athens', 'node-easter'],
-    formula: '\\sum_{n=1}^\\infty \\frac{1}{n^2} = \\frac{\\pi^2}{6}'
+    formula: '\\sum_{n=1}^\\infty \\frac{1}{n^2} = \\frac{\\pi^2}{6}',
+    status: 'critical',
+    load: 92,
+    capacity: 100,
+    flow: 92,
   },
   {
     id: 'node-kyoto',
@@ -59,7 +80,11 @@ export const GEO_NODES: GeoNode[] = [
     type: 'SATELLITE',
     intensity: 0.79,
     connections: ['node-denver', 'node-sydney'],
-    formula: 'e^{i\\pi} + 1 = 0'
+    formula: 'e^{i\\pi} + 1 = 0',
+    status: 'healthy',
+    load: 20,
+    capacity: 50,
+    flow: 20,
   },
   {
     id: 'node-teotihuacan',
@@ -71,7 +96,11 @@ export const GEO_NODES: GeoNode[] = [
     type: 'HARMONIC',
     intensity: 0.91,
     connections: ['node-giza', 'node-machu'],
-    formula: '\\nabla \\cdot \\vec{E} = \\frac{\\rho}{\\epsilon_0}'
+    formula: '\\nabla \\cdot \\vec{E} = \\frac{\\rho}{\\epsilon_0}',
+    status: 'warning',
+    load: 68,
+    capacity: 90,
+    flow: 68,
   },
   {
     id: 'node-machu',
@@ -83,7 +112,11 @@ export const GEO_NODES: GeoNode[] = [
     type: 'SATELLITE',
     intensity: 0.83,
     connections: ['node-teotihuacan', 'node-easter'],
-    formula: 'A = \\pi r^2'
+    formula: 'A = \\pi r^2',
+    status: 'unknown',
+    load: 0,
+    capacity: 0,
+    flow: 0,
   },
   {
     id: 'node-sydney',
@@ -95,7 +128,11 @@ export const GEO_NODES: GeoNode[] = [
     type: 'SATELLITE',
     intensity: 0.77,
     connections: ['node-kyoto'],
-    formula: '\\gamma = \\lim_{n \\to \\infty} \\left( \\sum \\frac{1}{k} - \\ln n \\right)'
+    formula: '\\gamma = \\lim_{n \\to \\infty} \\left( \\sum \\frac{1}{k} - \\ln n \\right)',
+    status: 'healthy',
+    load: 15,
+    capacity: 40,
+    flow: 15,
   },
   {
     id: 'node-easter',
@@ -107,68 +144,414 @@ export const GEO_NODES: GeoNode[] = [
     type: 'CORE',
     intensity: 0.93,
     connections: ['node-giza', 'node-machu', 'node-stonehenge'],
-    formula: '\\phi^2 = \\phi + 1'
-  }
+    formula: '\\phi^2 = \\phi + 1',
+    status: 'critical',
+    load: 95,
+    capacity: 100,
+    flow: 95,
+  },
 ];
+
+// ============================================================
+// DEMO UPLOADED DATA — For Testing the Full Pipeline
+// Each case exercises a specific diagnostic condition
+// ============================================================
+
+export const DEMO_UPLOADED_DATA: UploadedData = {
+  nodes: [
+    // HEALTHY NODES
+    {
+      id: 'web-server-1',
+      name: 'Web Server 1',
+      type: 'SERVER',
+      status: 'healthy',
+      lat: 40.7128,
+      lng: -74.0060,
+      load: 45,
+      capacity: 100,
+      flow: 45,
+    },
+    {
+      id: 'web-server-2',
+      name: 'Web Server 2',
+      type: 'SERVER',
+      status: 'healthy',
+      lat: 34.0522,
+      lng: -118.2437,
+      load: 35,
+      capacity: 80,
+      flow: 35,
+    },
+    {
+      id: 'cache-1',
+      name: 'Redis Cache',
+      type: 'WORKER',
+      status: 'healthy',
+      lat: -23.5505,
+      lng: -46.6333,
+      load: 20,
+      capacity: 50,
+      flow: 20,
+    },
+    {
+      id: 'cdn-1',
+      name: 'CDN Edge',
+      type: 'CLIENT',
+      status: 'healthy',
+      lat: 22.5431,
+      lng: 114.0579,
+      load: 35,
+      capacity: 200,
+      flow: 35,
+    },
+
+    // WARNING NODES
+    {
+      id: 'api-gateway',
+      name: 'API Gateway',
+      type: 'API',
+      status: 'warning',
+      lat: 35.6895,
+      lng: 139.6917,
+      load: 68,
+      capacity: 90,
+      flow: 68,
+    },
+    {
+      id: 'worker-2',
+      name: 'Background Worker 2',
+      type: 'WORKER',
+      status: 'warning',
+      lat: 19.4326,
+      lng: -99.1332,
+      load: 70,
+      capacity: 100,
+      flow: 70,
+    },
+
+    // CRITICAL NODES
+    {
+      id: 'database-1',
+      name: 'Primary Database',
+      type: 'DATABASE',
+      status: 'critical',
+      lat: 51.5074,
+      lng: -0.1278,
+      load: 92,
+      capacity: 100,
+      flow: 92,
+    },
+    {
+      id: 'db-backup',
+      name: 'Database Backup',
+      type: 'DATABASE',
+      status: 'critical',
+      lat: -27.1127,
+      lng: -109.3497,
+      load: 95,
+      capacity: 100,
+      flow: 95,
+    },
+
+    // UNKNOWN NODE
+    {
+      id: 'worker-1',
+      name: 'Background Worker 1',
+      type: 'WORKER',
+      status: 'unknown',
+      lat: -33.8688,
+      lng: 151.2093,
+      load: 0,
+      capacity: 0,
+      flow: 0,
+    },
+
+    // UNDERUTILIZED / POTENTIALLY STALLED
+    {
+      id: 'database-2',
+      name: 'Replica Database',
+      type: 'DATABASE',
+      status: 'healthy',
+      lat: 48.8566,
+      lng: 2.3522,
+      load: 5,
+      capacity: 80,
+      flow: 5,
+    },
+  ],
+
+  arcs: [
+    // ============================================================
+    // HEALTHY RELATIONSHIPS
+    // ============================================================
+    {
+      id: 'arc-web1-web2',
+      source: 'web-server-1',
+      target: 'web-server-2',
+      flow: 35,
+      capacity: 80,
+      latency: 12,
+      status: 'healthy',
+    },
+    {
+      id: 'arc-web1-db2',
+      source: 'web-server-1',
+      target: 'database-2',
+      flow: 5,
+      capacity: 60,
+      latency: 18,
+      status: 'healthy',
+    },
+    {
+      id: 'arc-cache-worker2',
+      source: 'cache-1',
+      target: 'worker-2',
+      flow: 15,
+      capacity: 40,
+      latency: 8,
+      status: 'healthy',
+    },
+    {
+      id: 'arc-db2-cache',
+      source: 'database-2',
+      target: 'cache-1',
+      flow: 5,
+      capacity: 50,
+      latency: 10,
+      status: 'healthy',
+    },
+    {
+      id: 'arc-cdn-api',
+      source: 'cdn-1',
+      target: 'api-gateway',
+      flow: 30,
+      capacity: 60,
+      latency: 22,
+      status: 'healthy',
+    },
+
+    // ============================================================
+    // WARNING UTILIZATION (65-85% of capacity)
+    // ============================================================
+    {
+      id: 'arc-web2-api',
+      source: 'web-server-2',
+      target: 'api-gateway',
+      flow: 68,
+      capacity: 85,
+      latency: 25,
+      status: 'warning',
+    },
+    {
+      id: 'arc-web2-cache',
+      source: 'web-server-2',
+      target: 'cache-1',
+      flow: 50,
+      capacity: 70,
+      latency: 30,
+      status: 'warning',
+    },
+    {
+      id: 'arc-api-db1',
+      source: 'api-gateway',
+      target: 'database-1',
+      flow: 60,
+      capacity: 80,
+      latency: 15,
+      status: 'warning',
+    },
+
+    // ============================================================
+    // CRITICAL UTILIZATION (85%+ of capacity)
+    // ============================================================
+    {
+      id: 'arc-db1-dbbackup',
+      source: 'database-1',
+      target: 'db-backup',
+      flow: 92,
+      capacity: 100,
+      latency: 120,
+      status: 'critical',
+    },
+
+    // ============================================================
+    // OVERLOADED (>100% utilization — tests uncapped handling)
+    // ============================================================
+    {
+      id: 'arc-api-worker2-overload',
+      source: 'api-gateway',
+      target: 'worker-2',
+      flow: 150,
+      capacity: 100,
+      latency: 45,
+      status: 'critical',
+    },
+
+    // ============================================================
+    // WARNING LATENCY (50-100ms) WITHOUT OVERLOAD
+    // ============================================================
+    {
+      id: 'arc-cache-db2-latency',
+      source: 'cache-1',
+      target: 'database-2',
+      flow: 10,
+      capacity: 40,
+      latency: 65,
+      status: 'warning',
+    },
+
+    // ============================================================
+    // CRITICAL LATENCY (>100ms) WITHOUT OVERLOAD
+    // ============================================================
+    {
+      id: 'arc-cdn-web1-latency',
+      source: 'cdn-1',
+      target: 'web-server-1',
+      flow: 25,
+      capacity: 50,
+      latency: 150,
+      status: 'critical',
+    },
+
+    // ============================================================
+    // STALLED (zero flow, positive capacity)
+    // ============================================================
+    {
+      id: 'arc-worker1-worker2-stalled',
+      source: 'worker-1',
+      target: 'worker-2',
+      flow: 0,
+      capacity: 40,
+      latency: 8,
+      status: 'unknown',
+    },
+
+    // ============================================================
+    // BROKEN (missing endpoint — source doesn't exist)
+    // ============================================================
+    {
+      id: 'arc-missing-source-broken',
+      source: 'missing-node-1',
+      target: 'web-server-1',
+      flow: 0,
+      capacity: 0,
+      latency: 0,
+      status: 'unknown',
+    },
+
+    // ============================================================
+    // BROKEN (missing endpoint — target doesn't exist)
+    // ============================================================
+    {
+      id: 'arc-web1-missing-target-broken',
+      source: 'web-server-1',
+      target: 'missing-node-2',
+      flow: 0,
+      capacity: 0,
+      latency: 0,
+      status: 'unknown',
+    },
+
+    // ============================================================
+    // NODE BOTTLENECK TESTING — High connection count node
+    // database-1 has many connections + critical utilization
+    // ============================================================
+    {
+      id: 'arc-db1-api',
+      source: 'database-1',
+      target: 'api-gateway',
+      flow: 40,
+      capacity: 50,
+      latency: 10,
+      status: 'healthy',
+    },
+    {
+      id: 'arc-db1-worker2',
+      source: 'database-1',
+      target: 'worker-2',
+      flow: 25,
+      capacity: 30,
+      latency: 12,
+      status: 'healthy',
+    },
+    {
+      id: 'arc-db1-cdn',
+      source: 'database-1',
+      target: 'cdn-1',
+      flow: 15,
+      capacity: 20,
+      latency: 8,
+      status: 'healthy',
+    },
+  ],
+};
+
+// ============================================================
+// ACTIVITY FEED — Clearly marked as demo/fallback
+// ============================================================
 
 export const INITIAL_ACTIVITY_FEED: ActivityFeedItem[] = [
   {
     id: 'act-1',
-    text: 'New geometric relationship',
+    text: 'DEMO: Sample activity feed — real data replaces this',
     timestamp: '09:29:31 UTC',
     timeAgo: '2s ago',
-    type: 'DETECTED'
+    type: 'INFO',
   },
   {
     id: 'act-2',
-    text: 'Fibonacci sequence detected',
+    text: 'DEMO: GIE ready — upload your data to begin analysis',
     timestamp: '09:29:29 UTC',
     timeAgo: '4s ago',
-    type: 'INFO'
+    type: 'INFO',
   },
   {
     id: 'act-3',
-    text: 'Prime pattern recognized',
+    text: 'DEMO: 9 sample nodes loaded for visualization',
     timestamp: '09:29:26 UTC',
     timeAgo: '7s ago',
-    type: 'DETECTED'
+    type: 'INFO',
   },
   {
     id: 'act-4',
-    text: 'Symmetry alignment verified',
+    text: 'DEMO: Sample relationships available for inspection',
     timestamp: '09:29:24 UTC',
     timeAgo: '9s ago',
-    type: 'VERIFIED'
+    type: 'INFO',
   },
   {
     id: 'act-5',
-    text: 'Data correlation complete',
+    text: 'DEMO: Use Launch Engine to analyze your system architecture',
     timestamp: '09:29:22 UTC',
     timeAgo: '11s ago',
-    type: 'CONFIRMED'
+    type: 'INFO',
   },
   {
     id: 'act-6',
-    text: 'Blueprint match confirmed',
+    text: 'DEMO: All sample data is static — replace with real data',
     timestamp: '09:29:20 UTC',
     timeAgo: '13s ago',
-    type: 'ANALYZED'
+    type: 'INFO',
   },
   {
     id: 'act-7',
-    text: 'Golden Ratio phi resonance mapped',
+    text: 'DEMO: Engine ready for real dataset upload',
     timestamp: '09:29:15 UTC',
     timeAgo: '18s ago',
-    type: 'VERIFIED'
+    type: 'INFO',
   },
   {
     id: 'act-8',
-    text: 'Icosahedron symmetry tensor normalized',
+    text: 'DEMO: GIE visualization layer active — awaiting customer data',
     timestamp: '09:29:10 UTC',
     timeAgo: '23s ago',
-    type: 'CONFIRMED'
-  }
+    type: 'INFO',
+  },
 ];
+
+// ============================================================
+// MATH CONSTANTS
+// ============================================================
 
 export const MATH_CONSTANTS: MathConstant[] = [
   {
@@ -178,7 +561,7 @@ export const MATH_CONSTANTS: MathConstant[] = [
     fullValue: '3.14159265358979323846264338327950288419716939937510',
     formula: 'C / d',
     description: 'The ratio of a circle\'s circumference to its diameter in Euclidean space.',
-    geometricSignificance: 'Found in spherical harmonic projections, wave physics, and circle squaring matrices.'
+    geometricSignificance: 'Found in spherical harmonic projections, wave physics, and circle squaring matrices.',
   },
   {
     symbol: 'ϕ (PHI)',
@@ -187,7 +570,7 @@ export const MATH_CONSTANTS: MathConstant[] = [
     fullValue: '1.61803398874989484820458683436563811772030917980576',
     formula: '(1 + √5) / 2',
     description: 'The divine proportion where the ratio of two quantities equals the ratio of their sum to the larger.',
-    geometricSignificance: 'Governs logarithmic spiral lattices, pentagonal symmetry, and pentagram proportions.'
+    geometricSignificance: 'Governs logarithmic spiral lattices, pentagonal symmetry, and pentagram proportions.',
   },
   {
     symbol: 'e (E)',
@@ -196,7 +579,7 @@ export const MATH_CONSTANTS: MathConstant[] = [
     fullValue: '2.71828182845904523536028747135266249775724709369995',
     formula: 'lim_{n→∞} (1 + 1/n)^n',
     description: 'The base of the natural logarithm representing continuous growth and decay rates.',
-    geometricSignificance: 'Underpins catenary curves, complex exponentiation, and wave phase shifts.'
+    geometricSignificance: 'Underpins catenary curves, complex exponentiation, and wave phase shifts.',
   },
   {
     symbol: '√2',
@@ -205,7 +588,7 @@ export const MATH_CONSTANTS: MathConstant[] = [
     fullValue: '1.41421356237309504880168872420969807856967187537694',
     formula: 'd_{square} / s',
     description: 'The positive real number that, when multiplied by itself, equals the number 2.',
-    geometricSignificance: 'Diagonal length of a unit square; foundational to ISO 216 paper ratios and octagonal symmetry.'
+    geometricSignificance: 'Diagonal length of a unit square; foundational to ISO 216 paper ratios and octagonal symmetry.',
   },
   {
     symbol: 'γ (EULER)',
@@ -214,7 +597,7 @@ export const MATH_CONSTANTS: MathConstant[] = [
     fullValue: '0.57721566490153286060651209008240243104215933593992',
     formula: 'lim_{n→∞} (∑ 1/k - ln n)',
     description: 'The limiting difference between the harmonic series and the natural logarithm.',
-    geometricSignificance: 'Appears in prime distribution bounds, quantum field regularizations, and fractal dimensioning.'
+    geometricSignificance: 'Appears in prime distribution bounds, quantum field regularizations, and fractal dimensioning.',
   },
   {
     symbol: 'α (FINE STR)',
@@ -223,9 +606,13 @@ export const MATH_CONSTANTS: MathConstant[] = [
     fullValue: '0.007297352569311',
     formula: 'e^2 / (4π ε_0 ℏ c) ≈ 1/137.035999',
     description: 'The coupling constant characterizing the strength of electromagnetic interaction between elementary charged particles.',
-    geometricSignificance: 'Dictates atomic energy level splitting and cosmic geometric spacing ratios.'
-  }
+    geometricSignificance: 'Dictates atomic energy level splitting and cosmic geometric spacing ratios.',
+  },
 ];
+
+// ============================================================
+// DATA STREAMS
+// ============================================================
 
 export const DATA_STREAMS: DataStream[] = [
   {
@@ -234,7 +621,7 @@ export const DATA_STREAMS: DataStream[] = [
     value: '4.21M',
     rawBytes: 4210000,
     percent: 48.6,
-    color: '#00f0ff'
+    color: '#00f0ff',
   },
   {
     id: 'ds-2',
@@ -242,7 +629,7 @@ export const DATA_STREAMS: DataStream[] = [
     value: '2.18M',
     rawBytes: 2180000,
     percent: 25.2,
-    color: '#00ff9d'
+    color: '#00ff9d',
   },
   {
     id: 'ds-3',
@@ -250,7 +637,7 @@ export const DATA_STREAMS: DataStream[] = [
     value: '1.45M',
     rawBytes: 1450000,
     percent: 16.7,
-    color: '#ffb700'
+    color: '#ffb700',
   },
   {
     id: 'ds-4',
@@ -258,7 +645,7 @@ export const DATA_STREAMS: DataStream[] = [
     value: '521K',
     rawBytes: 521000,
     percent: 6.0,
-    color: '#bf5af2'
+    color: '#bf5af2',
   },
   {
     id: 'ds-5',
@@ -266,42 +653,50 @@ export const DATA_STREAMS: DataStream[] = [
     value: '273K',
     rawBytes: 273000,
     percent: 3.5,
-    color: '#ff2d55'
-  }
+    color: '#ff2d55',
+  },
 ];
+
+// ============================================================
+// ACTIVE UPLOADS
+// ============================================================
 
 export const INITIAL_UPLOADS: ActiveUpload[] = [
   {
     id: 'up-1',
-    filename: 'IMG_2026_07_31_001.jpg',
+    filename: 'sample-architecture-001.json',
     status: 'Analyzing',
     progress: 76,
-    fileType: 'image',
+    fileType: 'blueprint',
     size: '14.2 MB',
     extractedNodes: 142,
-    symmetryScore: 94.2
+    symmetryScore: 94.2,
   },
   {
     id: 'up-2',
-    filename: 'Blueprint_Staircase.dwg',
+    filename: 'system-blueprint-002.csv',
     status: 'Queued',
     progress: 45,
     fileType: 'cad',
     size: '8.7 MB',
     extractedNodes: 89,
-    symmetryScore: 88.6
+    symmetryScore: 88.6,
   },
   {
     id: 'up-3',
-    filename: 'Field_Survey_003.pdf',
+    filename: 'network-topology-003.json',
     status: 'Queued',
     progress: 12,
-    fileType: 'pdf',
+    fileType: 'blueprint',
     size: '4.1 MB',
     extractedNodes: 34,
-    symmetryScore: 91.0
-  }
+    symmetryScore: 91.0,
+  },
 ];
+
+// ============================================================
+// BLUEPRINT PRESETS
+// ============================================================
 
 export const BLUEPRINT_PRESETS: BlueprintPreset[] = [
   {
@@ -314,7 +709,7 @@ export const BLUEPRINT_PRESETS: BlueprintPreset[] = [
     formula: 'H/W = \\frac{1}{\\phi} \\approx 0.618',
     complexity: 'High',
     author: 'Iktinos & Kallikrates (447 BC)',
-    svgPath: 'M10 90 L90 90 L90 30 L50 10 L10 30 Z'
+    svgPath: 'M10 90 L90 90 L90 30 L50 10 L10 30 Z',
   },
   {
     id: 'bp-giza',
@@ -326,7 +721,7 @@ export const BLUEPRINT_PRESETS: BlueprintPreset[] = [
     formula: '\\tan(\\theta) = \\frac{4}{\\pi} \\approx 1.273',
     complexity: 'Masterwork',
     author: 'Hemiunu (c. 2560 BC)',
-    svgPath: 'M50 10 L90 85 L10 85 Z'
+    svgPath: 'M50 10 L90 85 L10 85 Z',
   },
   {
     id: 'bp-flower-of-life',
@@ -338,7 +733,7 @@ export const BLUEPRINT_PRESETS: BlueprintPreset[] = [
     formula: 'r_n = r_0 \\cdot e^{i n \\pi / 3}',
     complexity: 'Harmonic',
     author: 'Universal Geometry',
-    svgPath: 'M50 50 m-30 0 a30 30 0 1 0 60 0 a30 30 0 1 0 -60 0'
+    svgPath: 'M50 50 m-30 0 a30 30 0 1 0 60 0 a30 30 0 1 0 -60 0',
   },
   {
     id: 'bp-dna-helix',
@@ -350,7 +745,7 @@ export const BLUEPRINT_PRESETS: BlueprintPreset[] = [
     formula: 'z(t) = c t, x(t) = R \\cos(\\omega t)',
     complexity: 'Extreme',
     author: 'Nature / Watson & Crick',
-    svgPath: 'M20 20 Q 50 80 80 20 Q 50 80 20 20'
+    svgPath: 'M20 20 Q 50 80 80 20 Q 50 80 20 20',
   },
   {
     id: 'bp-mandelbrot',
@@ -362,6 +757,60 @@ export const BLUEPRINT_PRESETS: BlueprintPreset[] = [
     formula: 'z_{n+1} = z_n^2 + c',
     complexity: 'Infinite',
     author: 'Benoit Mandelbrot (1980)',
-    svgPath: 'M10 50 Q 30 10 50 50 T 90 50'
-  }
+    svgPath: 'M10 50 Q 30 10 50 50 T 90 50',
+  },
 ];
+
+// ============================================================
+// UTILITY FUNCTIONS
+// ============================================================
+
+/**
+ * Get demo uploaded data for testing the full pipeline.
+ * This should only be used when no real uploaded data exists.
+ */
+export function getDemoUploadedData(): UploadedData {
+  // Return a deep copy to prevent accidental mutation
+  return JSON.parse(JSON.stringify(DEMO_UPLOADED_DATA));
+}
+
+/**
+ * Check if there is real uploaded data available.
+ * This helps determine whether to use demo or real data.
+ */
+export function hasRealData(uploadedData: UploadedData | null): boolean {
+  if (!uploadedData) return false;
+  return uploadedData.nodes.length > 0 || uploadedData.arcs.length > 0;
+}
+
+/**
+ * Get demo GEO_NODES for globe display fallback.
+ * This is used when no real data is available for the globe.
+ */
+export function getDemoNodes(): GeoNode[] {
+  return JSON.parse(JSON.stringify(GEO_NODES));
+}
+
+/**
+ * Get a complete demo dataset including all features.
+ * Useful for testing the full GIE experience.
+ */
+export function getCompleteDemoDataset(): {
+  nodes: GeoNode[];
+  uploadedData: UploadedData;
+  activityFeed: ActivityFeedItem[];
+  mathConstants: MathConstant[];
+  dataStreams: DataStream[];
+  uploads: ActiveUpload[];
+  blueprints: BlueprintPreset[];
+} {
+  return {
+    nodes: getDemoNodes(),
+    uploadedData: getDemoUploadedData(),
+    activityFeed: JSON.parse(JSON.stringify(INITIAL_ACTIVITY_FEED)),
+    mathConstants: JSON.parse(JSON.stringify(MATH_CONSTANTS)),
+    dataStreams: JSON.parse(JSON.stringify(DATA_STREAMS)),
+    uploads: JSON.parse(JSON.stringify(INITIAL_UPLOADS)),
+    blueprints: JSON.parse(JSON.stringify(BLUEPRINT_PRESETS)),
+  };
+}

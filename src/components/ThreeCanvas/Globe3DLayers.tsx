@@ -1,13 +1,18 @@
-import React, { useMemo, useRef } from "react";
+import React, { useMemo, useRef, useEffect } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { GlobeLayers } from "../../types";
 import { latLngToVector3 } from "./GlobeSphere";
+import { NaturalEarthDatasets } from "../../services/naturalEarthData";
 
 interface Globe3DLayersProps {
   layers: GlobeLayers;
   radius: number;
 }
+
+// ============================================================
+// Data Sources
+// ============================================================
 
 const ANCIENT_SITES = [
   { name: "Great Pyramid of Giza", lat: 29.9792, lng: 31.1342 },
@@ -46,110 +51,84 @@ const EARTHQUAKES = [
   { lat: 61.02, lng: -147.65, mag: 9.2 },
 ];
 
-const TECTONIC_PLATES: [number, number][][] = [
-  [
-    [60, -150],
-    [50, -170],
-    [30, 140],
-    [10, 130],
-    [-10, 150],
-    [-30, 180],
-    [-50, -140],
-    [-60, -80],
-    [-20, -75],
-    [10, -85],
-    [30, -115],
-    [60, -150],
-  ],
-  [
-    [70, -20],
-    [50, -30],
-    [20, -40],
-    [0, -20],
-    [-30, -15],
-    [-50, -10],
-  ],
-  [
-    [35, -10],
-    [40, 15],
-    [38, 40],
-    [35, 70],
-    [28, 90],
-    [10, 100],
-    [-5, 120],
-  ],
-];
+// ============================================================
+// Tectonic Plates — from NaturalEarthDatasets
+// Coordinates are [longitude, latitude] in the dataset
+// ============================================================
 
-/* =========================================================
-   MAGNETIC FIELD
-   ========================================================= */
+const TECTONIC_PLATES: [number, number][][] = NaturalEarthDatasets.TECTONIC_PLATES.map(
+  (plate) => plate.coordinates
+);
+
+// ============================================================
+// Magnetic Field Generator
+// ============================================================
 
 function createMagneticFieldLine(
   earthRadius: number,
   shell: number,
   rotation: number
-) {
+): THREE.Vector3[] {
   const points: THREE.Vector3[] = [];
-
   const L = earthRadius * shell;
   const steps = 180;
 
   for (let i = 0; i <= steps; i++) {
-    const theta =
-      0.30 + (i / steps) * (Math.PI - 0.60);
-
-    const distance =
-      L * Math.pow(Math.sin(theta), 2);
-
+    const theta = 0.30 + (i / steps) * (Math.PI - 0.60);
+    const distance = L * Math.pow(Math.sin(theta), 2);
     if (distance < earthRadius * 1.025) continue;
 
     const x = distance * Math.sin(theta);
     const y = distance * Math.cos(theta);
 
     const point = new THREE.Vector3(x, y, 0);
-
-    point.applyAxisAngle(
-      new THREE.Vector3(0, 1, 0),
-      rotation
-    );
-
+    point.applyAxisAngle(new THREE.Vector3(0, 1, 0), rotation);
     points.push(point);
   }
 
   return points;
 }
 
-export const Globe3DLayers: React.FC<
-  Globe3DLayersProps
-> = ({ layers, radius }) => {
-  const magneticGroupRef =
-    useRef<THREE.Group>(null);
+// ============================================================
+// Geometry Helpers
+// ============================================================
 
-  const northPulseRef =
-    useRef<THREE.Mesh>(null);
+function createLineGeometry(points: THREE.Vector3[]): THREE.BufferGeometry {
+  return new THREE.BufferGeometry().setFromPoints(points);
+}
 
-  const southPulseRef =
-    useRef<THREE.Mesh>(null);
+function disposeGeometries(geometries: THREE.BufferGeometry[]): void {
+  for (const geo of geometries) {
+    geo.dispose();
+  }
+}
 
-  /* ---------------------------------------------------------
-     ANCIENT SITE CONNECTIONS
-     --------------------------------------------------------- */
+// ============================================================
+// Main Component
+// ============================================================
 
-  const leyLinePoints = useMemo(() => {
-    const lines: THREE.Vector3[][] = [];
+export const Globe3DLayers: React.FC<Globe3DLayersProps> = ({
+  layers,
+  radius,
+}) => {
+  const magneticGroupRef = useRef<THREE.Group>(null);
+  const northPulseRef = useRef<THREE.Mesh>(null);
+  const southPulseRef = useRef<THREE.Mesh>(null);
+
+  // ============================================================
+  // Ley Lines — Ancient Site Connections
+  // ============================================================
+
+  const leyLineGeometries = useMemo(() => {
+    const geometries: THREE.BufferGeometry[] = [];
 
     for (let i = 0; i < ANCIENT_SITES.length; i++) {
-      for (
-        let j = i + 1;
-        j < ANCIENT_SITES.length;
-        j++
-      ) {
+      for (let j = i + 1; j < ANCIENT_SITES.length; j++) {
         const p1 = latLngToVector3(
           ANCIENT_SITES[i].lat,
           ANCIENT_SITES[i].lng,
           radius * 1.003
         );
-
         const p2 = latLngToVector3(
           ANCIENT_SITES[j].lat,
           ANCIENT_SITES[j].lng,
@@ -157,159 +136,125 @@ export const Globe3DLayers: React.FC<
         );
 
         const distance = p1.distanceTo(p2);
-
         if (distance < radius * 1.8) {
           const midpoint = new THREE.Vector3()
             .addVectors(p1, p2)
             .multiplyScalar(0.5);
-
           midpoint
             .normalize()
-            .multiplyScalar(
-              radius *
-                (1.003 + distance * 0.08)
-            );
+            .multiplyScalar(radius * (1.003 + distance * 0.08));
 
-          const curve =
-            new THREE.QuadraticBezierCurve3(
-              p1,
-              midpoint,
-              p2
-            );
-
-          lines.push(curve.getPoints(32));
+          const curve = new THREE.QuadraticBezierCurve3(p1, midpoint, p2);
+          geometries.push(createLineGeometry(curve.getPoints(32)));
         }
       }
     }
 
-    return lines;
+    return geometries;
   }, [radius]);
 
-  /* ---------------------------------------------------------
-     TECTONIC PLATES
-     --------------------------------------------------------- */
+  // Cleanup ley line geometries when they change
+  useEffect(() => {
+    return () => {
+      disposeGeometries(leyLineGeometries);
+    };
+  }, [leyLineGeometries]);
 
-  const plateLines = useMemo(() => {
-    return TECTONIC_PLATES.map((plate) =>
-      plate.map(([lat, lng]) =>
-        latLngToVector3(
-          lat,
-          lng,
-          radius * 1.006
-        )
-      )
-    );
+  // ============================================================
+  // Tectonic Plates — CORRECTED coordinate order
+  // ============================================================
+
+  const plateGeometries = useMemo(() => {
+    const geometries: THREE.BufferGeometry[] = [];
+
+    TECTONIC_PLATES.forEach((plate) => {
+      const points = plate.map(([lng, lat]) => {
+        // Dataset stores [longitude, latitude]
+        return latLngToVector3(lat, lng, radius * 1.006);
+      });
+      geometries.push(createLineGeometry(points));
+    });
+
+    return geometries;
   }, [radius]);
 
-  /* ---------------------------------------------------------
-     MAGNETIC SHELLS
-     Keep the field controlled â€” no giant spaghetti cage.
-     --------------------------------------------------------- */
+  // Cleanup plate geometries when they change
+  useEffect(() => {
+    return () => {
+      disposeGeometries(plateGeometries);
+    };
+  }, [plateGeometries]);
 
-  const magneticFieldLines = useMemo(() => {
-    const lines: {
-      points: THREE.Vector3[];
-      major: boolean;
-    }[] = [];
+  // ============================================================
+  // Magnetic Field Lines
+  // ============================================================
 
-    // Keep the geomagnetic arches tight to the globe like the approved
-    // homepage reference. These are intentionally low-altitude shells.
-    const shells = [
-      1.045,
-      1.065,
-      1.085,
-      1.11,
-      1.14,
-    ];
+  const magneticData = useMemo(() => {
+    const items: { geometry: THREE.BufferGeometry; major: boolean }[] = [];
 
+    const shells = [1.045, 1.065, 1.085, 1.11, 1.14];
     const rotations = 7;
 
     shells.forEach((shell, shellIndex) => {
-      for (
-        let i = 0;
-        i < rotations;
-        i++
-      ) {
-        const rotation =
-          (i / rotations) * Math.PI * 2;
-
-        const points =
-          createMagneticFieldLine(
-            radius,
-            shell,
-            rotation
-          );
-
+      for (let i = 0; i < rotations; i++) {
+        const rotation = (i / rotations) * Math.PI * 2;
+        const points = createMagneticFieldLine(radius, shell, rotation);
         if (points.length > 1) {
-          lines.push({
-            points,
-            major:
-              shellIndex === 1 ||
-              shellIndex === 3,
+          items.push({
+            geometry: createLineGeometry(points),
+            major: shellIndex === 1 || shellIndex === 3,
           });
         }
       }
     });
 
-    return lines;
+    return items;
   }, [radius]);
 
-  /* ---------------------------------------------------------
-     FIELD ANIMATION
-     --------------------------------------------------------- */
+  // Cleanup magnetic geometries when they change
+  useEffect(() => {
+    return () => {
+      for (const item of magneticData) {
+        item.geometry.dispose();
+      }
+    };
+  }, [magneticData]);
+
+  // ============================================================
+  // Animation
+  // ============================================================
 
   useFrame((state) => {
     const time = state.clock.elapsedTime;
 
     if (magneticGroupRef.current) {
-      /*
-        VERY subtle breathing.
-        Not rotating independently from Gaia.
-      */
-
-      const breathe =
-        1 + Math.sin(time * 0.8) * 0.008;
-
-      magneticGroupRef.current.scale.setScalar(
-        breathe
-      );
+      const breathe = 1 + Math.sin(time * 0.8) * 0.008;
+      magneticGroupRef.current.scale.setScalar(breathe);
     }
 
-    /*
-      Polar energy pulses.
-      Small enough to remain technical rather than cartoonish.
-    */
-
     if (northPulseRef.current) {
-      const pulse =
-        1 + Math.sin(time * 2.2) * 0.22;
-
-      northPulseRef.current.scale.setScalar(
-        pulse
-      );
+      const pulse = 1 + Math.sin(time * 2.2) * 0.22;
+      northPulseRef.current.scale.setScalar(pulse);
     }
 
     if (southPulseRef.current) {
-      const pulse =
-        1 +
-        Math.sin(time * 2.2 + Math.PI) *
-          0.22;
-
-      southPulseRef.current.scale.setScalar(
-        pulse
-      );
+      const pulse = 1 + Math.sin(time * 2.2 + Math.PI) * 0.22;
+      southPulseRef.current.scale.setScalar(pulse);
     }
   });
 
-  const showMagneticField =
-    layers.mathOverlays;
+  const showMagneticField = layers.mathOverlays;
+
+  // ============================================================
+  // Render
+  // ============================================================
 
   return (
     <group>
 
-      {/* =====================================================
-          GEOMAGNETIC FIELD V2
-          ===================================================== */}
+      {/* ==========================================================
+          GEOMAGNETIC FIELD
+          ========================================================== */}
 
       {showMagneticField && (
         <group
@@ -319,161 +264,75 @@ export const Globe3DLayers: React.FC<
             0,
             THREE.MathUtils.degToRad(-7),
           ]}
-          userData={{
-            layer: "GEOMAGNETIC FIELD",
-            model:
-              "Dipole field-line visualization",
-          }}
+          userData={{ layer: "GEOMAGNETIC FIELD" }}
         >
-          {magneticFieldLines.map(
-            ({ points, major }, index) => {
-              const geometry =
-                new THREE.BufferGeometry()
-                  .setFromPoints(points);
+          {magneticData.map(({ geometry, major }, index) => (
+            <line key={`mag-${index}`} renderOrder={18}>
+              <primitive object={geometry} />
+              <lineBasicMaterial
+                color={major ? "#a855f7" : "#5b5cff"}
+                transparent
+                opacity={major ? 0.72 : 0.38}
+                blending={THREE.AdditiveBlending}
+                depthWrite={false}
+                toneMapped={false}
+              />
+            </line>
+          ))}
 
-              return (
-                <primitive object={new THREE.Line()}
-                  key={`mag-${index}`}
-                  renderOrder={18}
-                  userData={{
-                    layer:
-                      "GEOMAGNETIC FIELD",
-                  }}
-                >
-                  <primitive
-                    object={geometry}
-                  />
-
-                  <lineBasicMaterial
-                    color={
-                      major
-                        ? "#a855f7"
-                        : "#5b5cff"
-                    }
-                    transparent
-                    opacity={
-                      major ? 0.72 : 0.38
-                    }
-                    blending={
-                      THREE.AdditiveBlending
-                    }
-                    depthWrite={false}
-                    toneMapped={false}
-                  />
-                </primitive>
-              );
-            }
-          )}
-
-          {/* NORTH MAGNETIC ENERGY POINT */}
-
+          {/* NORTH MAGNETIC POLE */}
           <mesh
             ref={northPulseRef}
-            position={[
-              0,
-              radius * 1.065,
-              0,
-            ]}
+            position={[0, radius * 1.065, 0]}
             renderOrder={30}
-            userData={{
-              layer:
-                "GEOMAGNETIC NORTH",
-            }}
           >
-            <sphereGeometry
-              args={[0.065, 18, 18]}
-            />
-
+            <sphereGeometry args={[0.065, 18, 18]} />
             <meshBasicMaterial
               color="#e9a7ff"
               transparent
               opacity={0.95}
-              blending={
-                THREE.AdditiveBlending
-              }
+              blending={THREE.AdditiveBlending}
               depthWrite={false}
               toneMapped={false}
             />
           </mesh>
 
-          {/* NORTH GLOW */}
-
-          <mesh
-            position={[
-              0,
-              radius * 1.065,
-              0,
-            ]}
-            renderOrder={29}
-          >
-            <sphereGeometry
-              args={[0.14, 18, 18]}
-            />
-
+          <mesh position={[0, radius * 1.065, 0]} renderOrder={29}>
+            <sphereGeometry args={[0.14, 18, 18]} />
             <meshBasicMaterial
               color="#a855ff"
               transparent
               opacity={0.22}
-              blending={
-                THREE.AdditiveBlending
-              }
+              blending={THREE.AdditiveBlending}
               depthWrite={false}
               toneMapped={false}
             />
           </mesh>
 
-          {/* SOUTH MAGNETIC ENERGY POINT */}
-
+          {/* SOUTH MAGNETIC POLE */}
           <mesh
             ref={southPulseRef}
-            position={[
-              0,
-              -radius * 1.065,
-              0,
-            ]}
+            position={[0, -radius * 1.065, 0]}
             renderOrder={30}
-            userData={{
-              layer:
-                "GEOMAGNETIC SOUTH",
-            }}
           >
-            <sphereGeometry
-              args={[0.065, 18, 18]}
-            />
-
+            <sphereGeometry args={[0.065, 18, 18]} />
             <meshBasicMaterial
               color="#e9a7ff"
               transparent
               opacity={0.95}
-              blending={
-                THREE.AdditiveBlending
-              }
+              blending={THREE.AdditiveBlending}
               depthWrite={false}
               toneMapped={false}
             />
           </mesh>
 
-          {/* SOUTH GLOW */}
-
-          <mesh
-            position={[
-              0,
-              -radius * 1.065,
-              0,
-            ]}
-            renderOrder={29}
-          >
-            <sphereGeometry
-              args={[0.14, 18, 18]}
-            />
-
+          <mesh position={[0, -radius * 1.065, 0]} renderOrder={29}>
+            <sphereGeometry args={[0.14, 18, 18]} />
             <meshBasicMaterial
               color="#a855ff"
               transparent
               opacity={0.22}
-              blending={
-                THREE.AdditiveBlending
-              }
+              blending={THREE.AdditiveBlending}
               depthWrite={false}
               toneMapped={false}
             />
@@ -481,233 +340,120 @@ export const Globe3DLayers: React.FC<
         </group>
       )}
 
-      {/* =====================================================
+      {/* ==========================================================
           ANCIENT SITE CONNECTION NETWORK
-          ===================================================== */}
+          ========================================================== */}
 
       {layers.leyLines &&
-        leyLinePoints.map(
-          (points, index) => {
-            const geometry =
-              new THREE.BufferGeometry()
-                .setFromPoints(points);
+        leyLineGeometries.map((geometry, index) => (
+          <line key={`ley-${index}`} renderOrder={13}>
+            <primitive object={geometry} />
+            <lineBasicMaterial
+              color="#00ff9d"
+              transparent
+              opacity={0.82}
+              blending={THREE.AdditiveBlending}
+              depthWrite={false}
+              toneMapped={false}
+            />
+          </line>
+        ))}
 
-            return (
-              <primitive object={new THREE.Line()}
-                key={`ley-${index}`}
-                renderOrder={13}
-                userData={{
-                  layer:
-                    "ANCIENT-SITE CONNECTION NETWORK",
-                }}
-              >
-                <primitive
-                  object={geometry}
-                />
-
-                <lineBasicMaterial
-                  color="#00ff9d"
-                  transparent
-                  opacity={0.82}
-                  blending={
-                    THREE.AdditiveBlending
-                  }
-                  depthWrite={false}
-                  toneMapped={false}
-                />
-              </primitive>
-            );
-          }
-        )}
-
-      {/* =====================================================
-          TECTONIC PLATES
-          ===================================================== */}
+      {/* ==========================================================
+          TECTONIC PLATES — CORRECTED COORDINATES
+          ========================================================== */}
 
       {layers.tectonicPlates &&
-        plateLines.map(
-          (points, index) => {
-            const geometry =
-              new THREE.BufferGeometry()
-                .setFromPoints(points);
+        plateGeometries.map((geometry, index) => (
+          <line key={`plate-${index}`} renderOrder={13}>
+            <primitive object={geometry} />
+            <lineBasicMaterial
+              color="#ff8a00"
+              transparent
+              opacity={0.8}
+              depthWrite={false}
+              toneMapped={false}
+            />
+          </line>
+        ))}
 
-            return (
-              <primitive object={new THREE.Line()}
-                key={`plate-${index}`}
-                userData={{
-                  layer:
-                    "TECTONIC PLATE BOUNDARY",
-                }}
-              >
-                <primitive
-                  object={geometry}
-                />
-
-                <lineBasicMaterial
-                  color="#ff8a00"
-                  transparent
-                  opacity={0.8}
-                  depthWrite={false}
-                  toneMapped={false}
-                />
-              </primitive>
-            );
-          }
-        )}
-
-      {/* =====================================================
+      {/* ==========================================================
           ANCIENT SITES
-          ===================================================== */}
+          ========================================================== */}
 
       {layers.ancientSites &&
         ANCIENT_SITES.map((site) => {
-          const position =
-            latLngToVector3(
-              site.lat,
-              site.lng,
-              radius * 1.025
-            );
-
+          const position = latLngToVector3(
+            site.lat,
+            site.lng,
+            radius * 1.025
+          );
           return (
-            <mesh
-              key={site.name}
-              position={position}
-              renderOrder={20}
-              userData={{
-                layer: "ANCIENT SITE",
-                name: site.name,
-              }}
-            >
-              <sphereGeometry
-                args={[0.045, 16, 16]}
-              />
-
-              <meshBasicMaterial
-                color="#ffd000"
-                toneMapped={false}
-              />
+            <mesh key={site.name} position={position} renderOrder={20}>
+              <sphereGeometry args={[0.045, 16, 16]} />
+              <meshBasicMaterial color="#ffd000" toneMapped={false} />
             </mesh>
           );
         })}
 
-      {/* =====================================================
+      {/* ==========================================================
           CROP CIRCLES
-          ===================================================== */}
+          ========================================================== */}
 
       {layers.cropCircles &&
-        CROP_CIRCLES.map(
-          (site, index) => {
-            const position =
-              latLngToVector3(
-                site.lat,
-                site.lng,
-                radius * 1.026
-              );
+        CROP_CIRCLES.map((site, index) => {
+          const position = latLngToVector3(
+            site.lat,
+            site.lng,
+            radius * 1.026
+          );
+          return (
+            <mesh key={`crop-${index}`} position={position} renderOrder={20}>
+              <sphereGeometry args={[0.04, 16, 16]} />
+              <meshBasicMaterial color="#00ff9d" toneMapped={false} />
+            </mesh>
+          );
+        })}
 
-            return (
-              <mesh
-                key={`crop-${index}`}
-                position={position}
-                renderOrder={20}
-                userData={{
-                  layer:
-                    "CROP-CIRCLE SITE",
-                }}
-              >
-                <sphereGeometry
-                  args={[
-                    0.04,
-                    16,
-                    16,
-                  ]}
-                />
-
-                <meshBasicMaterial
-                  color="#00ff9d"
-                  toneMapped={false}
-                />
-              </mesh>
-            );
-          }
-        )}
-
-      {/* =====================================================
+      {/* ==========================================================
           VOLCANOES
-          ===================================================== */}
+          ========================================================== */}
 
       {layers.volcanoes &&
         VOLCANOES.map((volcano) => {
-          const position =
-            latLngToVector3(
-              volcano.lat,
-              volcano.lng,
-              radius * 1.025
-            );
-
+          const position = latLngToVector3(
+            volcano.lat,
+            volcano.lng,
+            radius * 1.025
+          );
           return (
-            <mesh
-              key={volcano.name}
-              position={position}
-              userData={{
-                layer: "VOLCANO",
-                name: volcano.name,
-              }}
-            >
-              <sphereGeometry
-                args={[0.04, 14, 14]}
-              />
-
-              <meshBasicMaterial
-                color="#ff305f"
-                toneMapped={false}
-              />
+            <mesh key={volcano.name} position={position} renderOrder={20}>
+              <sphereGeometry args={[0.04, 14, 14]} />
+              <meshBasicMaterial color="#ff305f" toneMapped={false} />
             </mesh>
           );
         })}
 
-      {/* =====================================================
+      {/* ==========================================================
           EARTHQUAKES
-          ===================================================== */}
+          ========================================================== */}
 
       {layers.earthquakes &&
-        EARTHQUAKES.map(
-          (earthquake, index) => {
-            const position =
-              latLngToVector3(
-                earthquake.lat,
-                earthquake.lng,
-                radius * 1.027
-              );
-
-            return (
-              <mesh
-                key={`quake-${index}`}
-                position={position}
-                userData={{
-                  layer: "EARTHQUAKE",
-                  magnitude:
-                    earthquake.mag,
-                }}
-              >
-                <sphereGeometry
-                  args={[
-                    0.035 +
-                      earthquake.mag *
-                        0.002,
-                    14,
-                    14,
-                  ]}
-                />
-
-                <meshBasicMaterial
-                  color="#ff6500"
-                  toneMapped={false}
-                />
-              </mesh>
-            );
-          }
-        )}
+        EARTHQUAKES.map((earthquake, index) => {
+          const position = latLngToVector3(
+            earthquake.lat,
+            earthquake.lng,
+            radius * 1.027
+          );
+          return (
+            <mesh key={`quake-${index}`} position={position} renderOrder={20}>
+              <sphereGeometry
+                args={[0.035 + earthquake.mag * 0.002, 14, 14]}
+              />
+              <meshBasicMaterial color="#ff6500" toneMapped={false} />
+            </mesh>
+          );
+        })}
     </group>
   );
 };
-

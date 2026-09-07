@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { ExternalLink } from "lucide-react";
 import { NavTab } from "../../types";
 import { soundManager } from "../../utils/audio";
@@ -55,9 +55,11 @@ const rightProjects: Project[] = [
 function PreviewCard({
   project,
   onActivate,
+  compact = false,
 }: {
   project: Project;
   onActivate: () => void;
+  compact?: boolean;
 }) {
   return (
     <button
@@ -67,10 +69,9 @@ function PreviewCard({
         onActivate();
       }}
       onMouseEnter={() => soundManager.playHover()}
-      className="
+      className={`
         group
         relative
-        h-[112px]
         w-full
         overflow-hidden
         rounded-[5px]
@@ -85,44 +86,146 @@ function PreviewCard({
         hover:border-cyan-200
         hover:bg-[#03101a]/92
         hover:shadow-[0_0_20px_rgba(0,245,255,.26)]
-      "
+        ${
+          compact
+            ? "aspect-[4/1] min-h-[48px] max-h-[80px]"
+            : "aspect-[3.2/1] min-h-[64px] max-h-[140px]"
+        }
+      `}
     >
       {/* BLUEPRINT PREVIEW */}
-      <div className="absolute bottom-2 left-2 top-2 w-[94px] overflow-hidden rounded-[3px] border border-cyan-400/25 bg-[#03101a]">
+      <div className="absolute bottom-[8%] left-[6%] top-[8%] aspect-square overflow-hidden rounded-[3px] border border-cyan-400/25 bg-[#03101a]">
         <img
           src={project.image}
           alt=""
           draggable={false}
-          className="h-full w-full object-cover opacity-80 transition-opacity group-hover:opacity-100"
+          className="h-full w-full object-contain opacity-80 transition-opacity group-hover:opacity-100"
         />
       </div>
 
       {/* PROJECT NUMBER */}
-      <div className="absolute left-[82px] top-[8px] flex h-[30px] w-[30px] items-center justify-center rounded-full border border-cyan-300/80 bg-[#001018] font-mono text-[10px] font-bold text-cyan-200 shadow-[0_0_8px_rgba(0,245,255,.35)]">
+      <div className="absolute left-[22%] top-[12%] flex aspect-square h-[26%] min-h-[22px] max-h-[38px] items-center justify-center rounded-full border border-cyan-300/80 bg-[#001018] font-mono text-[clamp(10px,1.2vh,14px)] font-bold text-cyan-200 shadow-[0_0_8px_rgba(0,245,255,.35)]">
         {project.number}
       </div>
 
       {/* TITLE */}
-      <div className="absolute bottom-3 left-[116px] right-9 top-3 flex items-center font-mono text-[12px] font-bold leading-[1.35] tracking-[0.035em] text-slate-100">
+      <div className="absolute bottom-[12%] left-[34%] right-[10%] top-[12%] flex items-center font-mono font-bold leading-[1.2] tracking-[0.035em] text-slate-100 text-[clamp(10px,1.3vh,16px)]">
         {project.title}
       </div>
 
       {/* OPEN ICON */}
-      <ExternalLink className="absolute right-3 top-3 h-4 w-4 text-cyan-300/80 transition-colors group-hover:text-cyan-100" />
+      <ExternalLink className="absolute right-[4%] top-[12%] h-[clamp(12px,1.4vh,18px)] w-[clamp(12px,1.4vh,18px)] text-cyan-300/80 transition-colors group-hover:text-cyan-100" />
 
       {/* ACCENT */}
-      <div className="absolute bottom-2 right-3 h-[2px] w-8 bg-cyan-300/80 shadow-[0_0_7px_#00f5ff]" />
+      <div className="absolute bottom-[10%] right-[4%] h-[2px] w-[clamp(16px,2vw,32px)] bg-cyan-300/80 shadow-[0_0_7px_#00f5ff]" />
     </button>
   );
 }
 
 export const ProjectPreviews = ({
   onNavigate,
-  onOpenCropBlueprint,
+  onOpenCropCircleBlueprint,
 }: {
   onNavigate: (tab: NavTab) => void;
-  onOpenCropBlueprint?: () => void;
+  onOpenCropCircleBlueprint?: () => void;
 }) => {
+  const [isMobile, setIsMobile] = useState(false);
+  const [isTablet, setIsTablet] = useState(false);
+
+  useEffect(() => {
+    const checkScreenSize = () => {
+      const width = window.innerWidth;
+      setIsMobile(width < 768);
+      setIsTablet(width >= 768 && width < 1024);
+    };
+
+    checkScreenSize();
+    window.addEventListener("resize", checkScreenSize);
+    return () => window.removeEventListener("resize", checkScreenSize);
+  }, []);
+
+  // Mobile: 2-column grid BELOW the globe (normal layout flow)
+  if (isMobile) {
+    return (
+      <div className="relative z-20 w-full px-4 py-3 pointer-events-none mt-auto">
+        <div className="pointer-events-auto grid grid-cols-2 gap-3 max-w-[600px] mx-auto">
+          {[...leftProjects, ...rightProjects].map((p) => (
+            <PreviewCard
+              key={p.number}
+              project={p}
+              compact={true}
+              onActivate={
+                p.number === "03" && onOpenCropCircleBlueprint
+                  ? onOpenCropCircleBlueprint
+                  : () => onNavigate(p.target)
+              }
+            />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // Tablet: reduced footprint side columns
+  if (isTablet) {
+    return (
+      <>
+        {/* LEFT THREE CARDS */}
+        <div
+          className="
+            pointer-events-auto
+            absolute
+            left-[2%]
+            top-[6%]
+            z-20
+            flex
+            w-[clamp(110px,16vw,180px)]
+            flex-col
+            gap-[clamp(4px,0.8vh,10px)]
+          "
+        >
+          {leftProjects.map((p) => (
+            <PreviewCard
+              key={p.number}
+              project={p}
+              compact={true}
+              onActivate={
+                p.number === "03" && onOpenCropCircleBlueprint
+                  ? onOpenCropCircleBlueprint
+                  : () => onNavigate(p.target)
+              }
+            />
+          ))}
+        </div>
+
+        {/* RIGHT THREE CARDS */}
+        <div
+          className="
+            pointer-events-auto
+            absolute
+            right-[2%]
+            top-[6%]
+            z-20
+            flex
+            w-[clamp(110px,16vw,180px)]
+            flex-col
+            gap-[clamp(4px,0.8vh,10px)]
+          "
+        >
+          {rightProjects.map((p) => (
+            <PreviewCard
+              key={p.number}
+              project={p}
+              compact={true}
+              onActivate={() => onNavigate(p.target)}
+            />
+          ))}
+        </div>
+      </>
+    );
+  }
+
+  // Desktop/Laptop: original side-column layout
   return (
     <>
       {/* LEFT THREE CARDS */}
@@ -130,22 +233,28 @@ export const ProjectPreviews = ({
         className="
           pointer-events-auto
           absolute
-          left-[5.2%]
-          top-[55px]
+          left-[2%]
+          top-[8%]
           z-20
           flex
-          w-[320px]
+          w-[clamp(160px,18vw,340px)]
           flex-col
-          gap-[14px]
+          gap-[clamp(8px,1.2vh,16px)]
+          sm:left-[3%]
+          md:left-[4%]
+          lg:left-[5%]
+          xl:left-[6%]
+          2xl:left-[7%]
         "
       >
         {leftProjects.map((p) => (
           <PreviewCard
             key={p.number}
             project={p}
+            compact={false}
             onActivate={
-              p.number === "03" && onOpenCropBlueprint
-                ? onOpenCropBlueprint
+              p.number === "03" && onOpenCropCircleBlueprint
+                ? onOpenCropCircleBlueprint
                 : () => onNavigate(p.target)
             }
           />
@@ -157,19 +266,25 @@ export const ProjectPreviews = ({
         className="
           pointer-events-auto
           absolute
-          right-[5.2%]
-          top-[55px]
+          right-[2%]
+          top-[8%]
           z-20
           flex
-          w-[320px]
+          w-[clamp(160px,18vw,340px)]
           flex-col
-          gap-[14px]
+          gap-[clamp(8px,1.2vh,16px)]
+          sm:right-[3%]
+          md:right-[4%]
+          lg:right-[5%]
+          xl:right-[6%]
+          2xl:right-[7%]
         "
       >
         {rightProjects.map((p) => (
           <PreviewCard
             key={p.number}
             project={p}
+            compact={false}
             onActivate={() => onNavigate(p.target)}
           />
         ))}

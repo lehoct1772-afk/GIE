@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ViewMode, GlobeLayers, MathConstant } from '../../types';
 import { soundManager } from '../../utils/audio';
 import {
@@ -21,7 +21,8 @@ import {
   Grid,
   Sparkles,
   Map,
-  Network
+  Network,
+  Database
 } from 'lucide-react';
 
 interface CompactLeftToolbarProps {
@@ -36,6 +37,7 @@ interface CompactLeftToolbarProps {
   audioEnabled: boolean;
   onToggleAudio: () => void;
   onSelectConstant?: (c: MathConstant) => void;
+  hasUploadedData?: boolean;
 }
 
 type CategoryId =
@@ -75,10 +77,15 @@ export const CompactLeftToolbar: React.FC<CompactLeftToolbarProps> = ({
   onOpenMathVisualizer,
   onOpenActivityLog,
   audioEnabled,
-  onToggleAudio
+  onToggleAudio,
+  onSelectConstant,
+  hasUploadedData = false,
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isPinned, setIsPinned] = useState(false);
+
+  // Touch support: only toggled from header area
+  const [isTouchExpanded, setIsTouchExpanded] = useState(false);
 
   const [expandedCategories, setExpandedCategories] = useState<
     Record<CategoryId, boolean>
@@ -93,7 +100,23 @@ export const CompactLeftToolbar: React.FC<CompactLeftToolbarProps> = ({
     settings: false
   });
 
-  const isExpanded = isHovered || isPinned;
+  // Calculate responsive height based on viewport
+  const [toolbarHeight, setToolbarHeight] = useState(620);
+  const toolbarRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const updateHeight = () => {
+      const vh = window.innerHeight;
+      const calculatedHeight = Math.min(Math.max(vh * 0.7, 360), 720);
+      setToolbarHeight(calculatedHeight);
+    };
+
+    updateHeight();
+    window.addEventListener('resize', updateHeight);
+    return () => window.removeEventListener('resize', updateHeight);
+  }, []);
+
+  const isExpanded = isHovered || isPinned || isTouchExpanded;
 
   const toggleCategory = (id: CategoryId) => {
     soundManager.playClick();
@@ -103,16 +126,39 @@ export const CompactLeftToolbar: React.FC<CompactLeftToolbarProps> = ({
     }));
   };
 
+  // Touch toggle — single onClick handler on header
+  const handleTouchToggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if ('ontouchstart' in window) {
+      setIsTouchExpanded((prev) => !prev);
+    }
+  };
+
+  // Responsive widths
+  const expandedWidth = Math.min(Math.max(window.innerWidth * 0.18, 220), 280);
+  const collapsedWidth = Math.min(Math.max(window.innerWidth * 0.04, 48), 64);
+  const currentWidth = isExpanded ? expandedWidth : collapsedWidth;
+
+  // Panel max height: responsive to available space
+  const panelMaxHeight = Math.max(toolbarHeight - 110, 180);
+
   return (
     <div
+      ref={toolbarRef}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className={`pointer-events-auto z-30 flex h-[620px] max-h-[calc(100vh-150px)] select-none flex-col rounded-r-lg border border-cyan-500/30 bg-slate-950/90 font-mono shadow-[0_0_25px_rgba(0,240,255,0.15)] backdrop-blur-md transition-all duration-300 ease-in-out ${
-        isExpanded ? 'w-[280px]' : 'w-[72px]'
-      }`}
+      className={`pointer-events-auto z-30 flex select-none flex-col rounded-r-lg border border-cyan-500/30 bg-slate-950/90 font-mono shadow-[0_0_25px_rgba(0,240,255,0.15)] backdrop-blur-md transition-all duration-300 ease-in-out`}
+      style={{
+        height: `${toolbarHeight}px`,
+        width: `${currentWidth}px`,
+        maxHeight: `calc(100vh - 20px)`,
+      }}
     >
       {/* HEADER */}
-      <div className="flex min-h-[58px] items-center justify-between border-b border-cyan-500/20 p-2">
+      <div
+        className="flex min-h-[58px] cursor-pointer items-center justify-between border-b border-cyan-500/20 p-2 flex-shrink-0 touch:active:bg-cyan-950/30"
+        onClick={handleTouchToggle}
+      >
         {isExpanded ? (
           <div className="flex w-full items-center justify-between px-2">
             <span className="truncate text-[13px] font-bold tracking-wider text-cyan-300">
@@ -121,7 +167,8 @@ export const CompactLeftToolbar: React.FC<CompactLeftToolbarProps> = ({
 
             <button
               type="button"
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation();
                 soundManager.playClick();
                 setIsPinned(!isPinned);
               }}
@@ -140,8 +187,24 @@ export const CompactLeftToolbar: React.FC<CompactLeftToolbarProps> = ({
         )}
       </div>
 
+      {/* DATA STATUS BADGE */}
+      {hasUploadedData && (
+        <div className="mx-2 mt-2 flex items-center justify-center gap-2 rounded border border-emerald-500/40 bg-emerald-950/40 px-3 py-1.5 flex-shrink-0">
+          <Database className="h-3.5 w-3.5 text-emerald-400" />
+          <span className="text-[9px] font-bold tracking-wider text-emerald-300">
+            DATA LOADED
+          </span>
+        </div>
+      )}
+
       {/* CATEGORIES */}
-      <div className="custom-scrollbar flex-1 space-y-2 overflow-y-auto p-2">
+      <div
+        className="custom-scrollbar flex-1 space-y-2 overflow-y-auto p-2"
+        style={{
+          maxHeight: `${panelMaxHeight}px`,
+          minHeight: `${Math.min(panelMaxHeight, 200)}px`,
+        }}
+      >
         {CATEGORIES.map((cat) => {
           const catExpanded = expandedCategories[cat.id];
 
@@ -186,7 +249,6 @@ export const CompactLeftToolbar: React.FC<CompactLeftToolbarProps> = ({
 
               {isExpanded && catExpanded && (
                 <div className="space-y-1.5 border-t border-cyan-500/15 bg-slate-950/60 p-2 text-[10px]">
-
                   {/* GLOBE */}
                   {cat.id === 'globe' && (
                     <div className="space-y-1">
@@ -334,6 +396,15 @@ export const CompactLeftToolbar: React.FC<CompactLeftToolbarProps> = ({
                         <span>GIE Activity Log</span>
                         <Activity className="h-3.5 w-3.5 text-emerald-400" />
                       </button>
+
+                      {hasUploadedData && (
+                        <div className="mt-1 rounded border border-emerald-500/30 bg-emerald-950/20 p-2 text-[9px] text-emerald-300">
+                          <div className="flex items-center gap-2">
+                            <Database className="h-3.5 w-3.5 text-emerald-400" />
+                            <span>Custom dataset active on globe</span>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
 
@@ -422,8 +493,17 @@ export const CompactLeftToolbar: React.FC<CompactLeftToolbarProps> = ({
                       </div>
 
                       <div className="text-slate-300">
-                        Analyzing 12 geodesic data points... Harmonic sync 99.4%.
+                        {hasUploadedData
+                          ? `Analyzing ${layers.gieNodes ? 'active' : 'inactive'} data... Harmonic sync 99.4%.`
+                          : 'Upload data to enable AI analysis.'}
                       </div>
+
+                      {hasUploadedData && (
+                        <div className="mt-1 flex items-center gap-2 text-emerald-300">
+                          <Check className="h-3 w-3" />
+                          <span>Dataset loaded</span>
+                        </div>
+                      )}
                     </div>
                   )}
 
@@ -437,6 +517,12 @@ export const CompactLeftToolbar: React.FC<CompactLeftToolbarProps> = ({
                       <div className="rounded border border-slate-700/50 bg-slate-900/80 p-2 text-slate-300">
                         📐 Sacred_Geometry_Blueprint.svg
                       </div>
+
+                      {hasUploadedData && (
+                        <div className="rounded border border-emerald-500/30 bg-emerald-950/20 p-2 text-emerald-300">
+                          📊 Uploaded dataset ready
+                        </div>
+                      )}
                     </div>
                   )}
 
@@ -460,6 +546,12 @@ export const CompactLeftToolbar: React.FC<CompactLeftToolbarProps> = ({
                       <div className="px-1 text-[9px] text-slate-500">
                         Status: ONLINE • Latency: 12ms
                       </div>
+
+                      {hasUploadedData && (
+                        <div className="mt-1 rounded border border-cyan-500/30 bg-cyan-950/20 p-1.5 text-[8px] text-cyan-300">
+                          DATA MODE ACTIVE
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -470,8 +562,12 @@ export const CompactLeftToolbar: React.FC<CompactLeftToolbarProps> = ({
       </div>
 
       {/* FOOTER */}
-      <div className="border-t border-cyan-500/20 p-2 text-center text-[9px] text-slate-500">
-        {isExpanded ? <span>GIE GIS SYSTEM v4.2</span> : <span>v4.2</span>}
+      <div className="border-t border-cyan-500/20 p-2 text-center text-[9px] text-slate-500 flex-shrink-0">
+        {isExpanded ? (
+          <span>GIE GIS SYSTEM {hasUploadedData ? '• DATA ACTIVE' : 'v4.2'}</span>
+        ) : (
+          <span>{hasUploadedData ? '📊' : 'v4.2'}</span>
+        )}
       </div>
     </div>
   );
