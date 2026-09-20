@@ -1,1 +1,0 @@
-﻿export const BUILD_INFO = { version: "GIE", buildNumber: "1.0", buildTimestamp: new Date().toISOString() }; export function formatBuildTimestamp(value?: string) { return (value ? new Date(value) : new Date()).toLocaleString(); }

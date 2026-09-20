@@ -1,5 +1,0 @@
-import { createHash, randomUUID } from "node:crypto";
-function canonical(value){if(Array.isArray(value))return `[${value.map(canonical).join(",")}]`;if(value&&typeof value==="object")return `{${Object.keys(value).sort().map(k=>`${JSON.stringify(k)}:${canonical(value[k])}`).join(",")}}`;return JSON.stringify(value);}
-export function sha256(value){return createHash("sha256").update(typeof value==="string"?value:canonical(value)).digest("hex");}
-export function createAuditEvent({analysisId=randomUUID(),operation,module,inputs,result,status="VERIFIED",source="GIE"}){if(!operation||!module)throw new Error("operation and module are required.");const timestamp=new Date().toISOString();const payload={analysisId,timestamp,operation,module,status,source,inputHash:sha256(inputs),resultHash:sha256(result)};return Object.freeze({...payload,eventHash:sha256(payload)});}
-export function verifyAuditEvent(event){if(!event?.eventHash)return false;const {eventHash,...payload}=event;return sha256(payload)===eventHash;}
