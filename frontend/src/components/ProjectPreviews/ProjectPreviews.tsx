@@ -14,19 +14,19 @@ const leftProjects: Project[] = [
   {
     number: "01",
     title: "ARCHITECTURAL BLUEPRINT",
-    image: "/images/architectural-blueprint.svg",
+    image: "/images/architectural-blueprint.jpg",
     target: "BLUEPRINT_LIBRARY",
   },
   {
     number: "02",
     title: "CITY / INFRASTRUCTURE BLUEPRINT",
-    image: "/images/city-infrastructure.svg",
+    image: "/images/city-infrastructure.jpg",
     target: "PROJECTS",
   },
   {
     number: "03",
     title: "CROP-CIRCLE SITE ANALYSIS",
-    image: "/images/crop-circle-analysis.svg",
+    image: "/images/crop-circle-analysis.jpg",
     target: "RESEARCH",
   },
 ];
@@ -35,19 +35,19 @@ const rightProjects: Project[] = [
   {
     number: "04",
     title: "GEOMETRIC RECONSTRUCTION",
-    image: "/images/geometric-reconstruction.svg",
+    image: "/images/geometric-reconstruction.jpg",
     target: "ENGINE",
   },
   {
     number: "05",
     title: "TERRAIN / EARTH MAPPING",
-    image: "/images/terrain-mapping.svg",
+    image: "/images/terrain-mapping.jpg",
     target: "RESEARCH",
   },
   {
     number: "06",
     title: "ENGINEERING / STRUCTURAL ANALYSIS",
-    image: "/images/structural-analysis.svg",
+    image: "/images/structural-analysis.jpg",
     target: "PROJECTS",
   },
 ];
@@ -99,7 +99,7 @@ function PreviewCard({
           src={project.image}
           alt=""
           draggable={false}
-          className="h-full w-full object-contain opacity-80 transition-opacity group-hover:opacity-100"
+          className="h-full w-full object-cover"
         />
       </div>
 

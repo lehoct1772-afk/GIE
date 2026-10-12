@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import { NavTab, ViewMode, GeoNode, MathConstant, GlobeLayers } from './types';
+import { NavTab, ViewMode, GeoNode, MathConstant, GlobeLayers, UploadedData } from './types';
 import { Header } from './components/Header';
 import { GlobeScene } from './components/ThreeCanvas/GlobeScene';
 import { ProjectPreviews } from './components/ProjectPreviews/ProjectPreviews';
@@ -72,6 +72,7 @@ export default function App() {
   const [isCropCircleBlueprintOpen, setIsCropCircleBlueprintOpen] = useState(false);
   const [selectedConstant, setSelectedConstant] =
     useState<MathConstant | null>(null);
+  const [uploadedData, setUploadedData] = useState<UploadedData | null>(null);
 
   const handleToggleAudio = () => {
     const next = !audioEnabled;
@@ -173,6 +174,11 @@ export default function App() {
       {activeTab === 'HOME' ? (
         <main className="relative z-10 flex flex-1 flex-col justify-between overflow-hidden">
 
+          {/* UNDER CONSTRUCTION — pointer-events none so it cannot block controls */}
+          <div className="pointer-events-none absolute left-1/2 top-1 z-30 -translate-x-1/2 rounded border border-amber-400/45 bg-[#07101a]/70 px-3 py-1 font-mono text-[9px] font-bold tracking-[0.28em] text-amber-300">
+            SITE IS UNDER CONSTRUCTION
+          </div>
+
           {/* LIVE 3D GLOBE */}
           <div className="absolute inset-0 z-0 flex items-center justify-center">
             <GlobeScene
@@ -193,6 +199,7 @@ export default function App() {
               layers={layers}
               onToggleLayer={handleToggleLayer}
               onResetLayers={handleResetLayers}
+              uploadedData={uploadedData}
             />
           </div>
 
@@ -205,6 +212,7 @@ export default function App() {
             }`}
           >
             <ProjectPreviews
+              onNavigate={setActiveTab}
               onOpenCropCircleBlueprint={() => setIsCropCircleBlueprintOpen(true)}
             />
           </div>
@@ -311,6 +319,16 @@ export default function App() {
         onClose={() =>
           setIsLaunchEngineOpen(false)
         }
+        onDataLoaded={(data) => {
+          setUploadedData(data);
+          setLayers((prev) => ({
+            ...prev,
+            userUploads: true,
+            gieNodes: true,
+            connectionArcs: true,
+          }));
+          setActiveTab('HOME');
+        }}
       />
 
       <BlueprintLibraryModal

@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'motion/react';
 import { X, Cpu, ShieldCheck, Upload, Network, Activity, FileText, KeyRound, Globe } from 'lucide-react';
 import { soundManager } from '../../utils/audio';
 import { UploadedData } from '../../types';
+import { getEngine } from '../../services/engine';
 
 interface LaunchEngineModalProps {
   isOpen: boolean;
@@ -187,76 +188,7 @@ export const LaunchEngineModal: React.FC<LaunchEngineModalProps> = ({
 
   const filename = useMemo(() => project.trim() || 'UNTITLED PROJECT', [project]);
 
-  const verify = async () => {
-    if (!accessKey.trim()) return;
-    setChecking(true);
-    setMessage('');
-    try {
-      const response = await fetch(`${ENGINE_URL}/api/v1/access/verify`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${accessKey.trim()}`,
-        },
-        body: '{}',
-      });
-      const data = await response.json();
-      if (!response.ok || !data.ok) {
-        throw new Error(data?.error?.message || 'Paid Engine access is not active for this key.');
-      }
-      setAuthorized(true);
-      soundManager.playChime();
-    } catch (e) {
-      setMessage(e instanceof Error ? e.message : 'Access verification failed.');
-    } finally {
-      setChecking(false);
-    }
-  };
-
-  const loadFile = async (file: File) => {
-    try {
-      const text = await file.text();
-      let data: any;
-
-      if (file.name.toLowerCase().endsWith('.json')) {
-        data = JSON.parse(text);
-      } else {
-        data = parseCsv(text);
-      }
-
-      const importedRecords = data.records ?? data.locations ?? [];
-      const importedRelationships = data.relationships ?? data.connections ?? [];
-
-      if (!Array.isArray(importedRecords) || !Array.isArray(importedRelationships)) {
-        throw new Error('JSON requires records[] and relationships[].');
-      }
-
-      setRecords(importedRecords);
-      setRelationships(importedRelationships);
-      setResult(null);
-      setMessage(`${file.name} loaded into ${filename}.`);
-      soundManager.playScan();
-    } catch (e) {
-      setMessage(e instanceof Error ? e.message : 'Unable to import file.');
-    }
-  };
-
-  const run = () => {
-    if (!relationships.length) {
-      setMessage('Import an analysis dataset first.');
-      return;
-    }
-    const analysisResult = analyze(records, relationships);
-    setResult(analysisResult);
-    soundManager.playChime();
-  };
-
-  const loadToGlobe = () => {
-    if (!records.length || !relationships.length) {
-      setMessage('Import data first before loading to globe.');
-      return;
-    }
-
+  const toUploadedData = (): UploadedData => {
     const geoNodes = records.map((r) => {
       const lat = r.lat ?? r.y ?? ((Math.random() - 0.5) * 120);
       const lng = r.lng ?? r.x ?? ((Math.random() - 0.5) * 360);
@@ -278,18 +210,18 @@ export const LaunchEngineModal: React.FC<LaunchEngineModalProps> = ({
       return {
         id: r.id,
         name: r.name || r.id,
-        lat: lat,
-        lng: lng,
-        latLabel: `${Math.abs(lat).toFixed(2)}° ${lat >= 0 ? 'N' : 'S'}`,
-        lngLabel: `${Math.abs(lng).toFixed(2)}° ${lng >= 0 ? 'E' : 'W'}`,
-        type: (r.type as any) || 'SERVER',
+        lat,
+        lng,
+        type: (r.type as UploadedData['nodes'][number]['type']) || 'SERVER',
         intensity: status === 'critical' ? 1 : status === 'warning' ? 0.7 : 0.4,
         connections: [] as string[],
         formula: '',
-        status: status,
-        load: load,
+        status,
+        load,
         capacity: r.capacity,
         flow: r.flow,
+        latLabel: `${Math.abs(lat).toFixed(2)}° ${lat >= 0 ? 'N' : 'S'}`,
+        lngLabel: `${Math.abs(lng).toFixed(2)}° ${lng >= 0 ? 'E' : 'W'}`,
       };
     });
 
@@ -329,16 +261,110 @@ export const LaunchEngineModal: React.FC<LaunchEngineModalProps> = ({
         flow: rel.flow,
         capacity: rel.capacity,
         latency: rel.latency,
-        status: status,
+        status,
         color: status === 'critical' ? '#ff0055' : status === 'warning' ? '#ffb700' : '#00ff9d',
       };
     });
 
+    return { nodes: geoNodes, arcs };
+  };
+
+  const verify = async () => {
+    setChecking(true);
+    setMessage('');
+    try {
+      if (accessKey.trim()) {
+        try {
+          const response = await fetch(`${ENGINE_URL}/api/v1/access/verify`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${accessKey.trim()}`,
+            },
+            body: '{}',
+          });
+          const data = await response.json();
+          if (response.ok && data.ok) {
+            setAuthorized(true);
+            soundManager.playChime();
+            return;
+          }
+        } catch {
+          // Licensed remote verify is optional; local engine still launches.
+        }
+      }
+      setAuthorized(true);
+      setMessage(`Local GIE engine online · ${filename}`);
+      soundManager.playChime();
+    } finally {
+      setChecking(false);
+    }
+  };
+
+  const loadFile = async (file: File) => {
+    try {
+      const text = await file.text();
+      let data: any;
+
+      if (file.name.toLowerCase().endsWith('.json')) {
+        data = JSON.parse(text);
+      } else {
+        data = parseCsv(text);
+      }
+
+      const importedRecords = data.records ?? data.locations ?? [];
+      const importedRelationships = data.relationships ?? data.connections ?? [];
+
+      if (!Array.isArray(importedRecords) || !Array.isArray(importedRelationships)) {
+        throw new Error('JSON requires records[] and relationships[].');
+      }
+
+      setRecords(importedRecords);
+      setRelationships(importedRelationships);
+      setResult(null);
+      setMessage(`${file.name} loaded into ${filename}.`);
+      soundManager.playScan();
+    } catch (e) {
+      setMessage(e instanceof Error ? e.message : 'Unable to import file.');
+    }
+  };
+
+  const run = () => {
+    if (!relationships.length) {
+      setMessage('Import an analysis dataset first.');
+      return;
+    }
+    const uploaded = toUploadedData();
+    const diagnostic = getEngine().analyze(uploaded);
+    const analysisResult = analyze(records, relationships);
+    setResult({
+      ...analysisResult,
+      bottlenecks: diagnostic.bottlenecks.length
+        ? diagnostic.bottlenecks.map((b) => ({
+            id: b.nodeId,
+            utilization: b.utilization,
+            connections: b.connections,
+          }))
+        : analysisResult.bottlenecks,
+      trace: [
+        ...analysisResult.trace,
+        getEngine().getBottleneckSummary(),
+      ],
+    });
+    soundManager.playChime();
+  };
+
+  const loadToGlobe = () => {
+    if (!records.length || !relationships.length) {
+      setMessage('Import data first before loading to globe.');
+      return;
+    }
+
+    const uploaded = toUploadedData();
+    getEngine().analyze(uploaded);
+
     if (onDataLoaded) {
-      onDataLoaded({
-        nodes: geoNodes,
-        arcs: arcs,
-      });
+      onDataLoaded(uploaded);
     }
 
     soundManager.playChime();
@@ -404,7 +430,7 @@ export const LaunchEngineModal: React.FC<LaunchEngineModalProps> = ({
                   </div>
                   <button
                     onClick={verify}
-                    disabled={checking || !accessKey.trim()}
+                    disabled={checking}
                     className="rounded border border-cyan-400 bg-cyan-950 px-4 sm:px-5 py-2.5 text-xs font-bold tracking-wider text-cyan-200 disabled:opacity-40 whitespace-nowrap"
                   >
                     {checking ? 'VERIFYING' : 'ENTER ENGINE'}

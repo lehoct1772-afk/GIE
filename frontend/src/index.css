@@ -26,10 +26,27 @@
   background: #00f0ff88;
 }
 
-/* Base body background */
+/* Base body background — crisp Windows system fonts, HUD mono for labels */
+:root {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, system-ui, sans-serif;
+}
+
 body {
   background-color: #020710;
   color: #e2e8f0;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, system-ui, sans-serif;
+  -webkit-font-smoothing: auto;
+  -moz-osx-font-smoothing: auto;
+  text-rendering: geometricPrecision;
   overflow-x: hidden;
+}
+
+.font-mono,
+code,
+kbd,
+pre,
+samp {
+  font-family: Consolas, "Cascadia Mono", "Courier New", ui-monospace, monospace;
+  -webkit-font-smoothing: auto;
+  text-rendering: geometricPrecision;
 }

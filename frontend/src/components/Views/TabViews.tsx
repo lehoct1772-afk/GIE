@@ -3,8 +3,7 @@ import { MilkHillResearch } from "./MilkHillResearch";
 import { NavTab } from '../../types';
 import { BLUEPRINT_PRESETS, MATH_CONSTANTS } from '../../data/mockData';
 import { soundManager } from '../../utils/audio';
-import { BookOpen, Cpu, Layers, FileText, Globe, Heart, Search, ArrowRight, ShieldCheck, Sparkles } from 'lucide-react';
-import { milkHillPdfs } from "../../milkHillPdfs";
+import { BookOpen, Cpu, Layers, Globe, Heart } from 'lucide-react';
 interface TabViewsProps {
   activeTab: NavTab;
   onLaunchEngine: () => void;
@@ -140,73 +139,7 @@ export const TabViews: React.FC<TabViewsProps> = ({
       )}
       {/* RESEARCH TAB */}
       {activeTab === 'RESEARCH' && (
-        <div className="max-w-6xl mx-auto space-y-6">
-          <div className="border-b border-cyan-500/30 pb-4">
-            <h1 className="text-3xl font-bold text-cyan-300 flex items-center space-x-3">
-              <FileText className="w-8 h-8 text-cyan-400" />
-              <span>MILK HILL 2001 — RESEARCH RECORD</span>
-            </h1>
-            <p className="text-xs text-slate-400 mt-2">
-              Complete GIE mathematical research archive and supporting evidence.
-            </p>
-          </div>
-
-          <div className="rounded border border-cyan-500/30 bg-slate-950/80 p-5">
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <div className="text-[10px] font-bold tracking-[0.25em] text-cyan-400">
-                  CROP-CIRCLE SITE ANALYSIS
-                </div>
-                <h2 className="mt-2 text-xl font-bold text-white">
-                  MILK HILL — 2001
-                </h2>
-                <p className="mt-1 text-xs text-slate-400">
-                  Mathematical reconstruction, spiral analysis, binary analysis,
-                  letter permutation, supporting records and final conclusions.
-                </p>
-              </div>
-              <div className="shrink-0 rounded border border-cyan-400/40 bg-cyan-950/30 px-4 py-2 text-[10px] font-bold tracking-widest text-cyan-200">
-                12 PDF RECORDS
-              </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {milkHillPdfs.slice(0, 12).map((pdf, index) => (
-              <div
-                key={pdf.file}
-                className="flex min-h-[205px] flex-col justify-between rounded border border-cyan-500/30 bg-slate-900/80 p-5 transition hover:border-cyan-300/70"
-              >
-                <div>
-                  <div className="flex items-center justify-between">
-                    <FileText className="h-6 w-6 text-cyan-300" />
-                    <span className="text-[9px] font-bold tracking-widest text-slate-500">
-                      DOCUMENT {String(index + 1).padStart(2, '0')}
-                    </span>
-                  </div>
-
-                  <h3 className="mt-4 text-sm font-bold leading-5 text-cyan-100">
-                    {pdf.title}
-                  </h3>
-
-                  <div className="mt-3 text-[9px] font-bold tracking-widest text-slate-500">
-                    GIE · READ-ONLY RESEARCH RECORD · PDF
-                  </div>
-                </div>
-
-                <a
-                  href={`${pdf.file}#toolbar=1&navpanes=0&view=FitH`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => soundManager.playClick()}
-                  className="mt-5 block w-full rounded border border-cyan-400/40 bg-cyan-950/30 px-4 py-3 text-center text-[10px] font-bold tracking-[0.18em] text-cyan-200 transition hover:border-cyan-300 hover:bg-cyan-950/60"
-                >
-                  OPEN DOCUMENT
-                </a>
-              </div>
-            ))}
-          </div>
-        </div>
+        <MilkHillResearch />
       )}
 
 

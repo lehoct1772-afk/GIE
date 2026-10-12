@@ -38,7 +38,7 @@ export const Header: React.FC<HeaderProps> = ({
           onClick={() => onTabChange("HOME")}
           className="flex flex-col items-center bg-transparent"
         >
-          <div className="text-center text-[clamp(20px,4vw,31px)] font-black leading-none tracking-[0.30em] text-cyan-300 drop-shadow-[0_0_10px_rgba(0,245,255,.55)]">
+          <div className="text-center text-[clamp(20px,4vw,31px)] font-black leading-none tracking-[0.30em] text-cyan-300">
             GIE
           </div>
 
@@ -67,10 +67,10 @@ export const Header: React.FC<HeaderProps> = ({
                     onTabChange(item.id);
                   }}
                   onMouseEnter={() => soundManager.playHover()}
-                  className={`bg-transparent px-1 py-0.5 font-mono text-[clamp(6px,0.9vw,9px)] font-bold tracking-[0.14em] transition-all duration-200 whitespace-nowrap ${
+                  className={`bg-transparent px-1 py-0.5 font-mono text-[clamp(6px,0.9vw,9px)] font-bold tracking-[0.14em] transition-colors duration-200 whitespace-nowrap ${
                     active
-                      ? "text-cyan-200 drop-shadow-[0_0_7px_rgba(0,245,255,.8)]"
-                      : "text-cyan-100/55 hover:text-cyan-200"
+                      ? "text-cyan-200"
+                      : "text-cyan-100/80 hover:text-cyan-200"
                   }`}
                 >
                   {item.label}

@@ -1,19 +1,4 @@
-﻿const milkHillDocuments = [
-  { title: "01 Milk Hill 2001 Measurement Basis 787FT COMPLETE", url: "/evidence/crop-circles/milk-hill-2001/01_Milk_Hill_2001_Measurement_Basis_787FT_COMPLETE.pdf" },
-  { title: "02 Milk Hill 2001 409 COMPLETE Physical Reconstruction", url: "/evidence/crop-circles/milk-hill-2001/02_Milk_Hill_2001_409_COMPLETE_Physical_Reconstruction.pdf" },
-  { title: "03 Milk Hill 2001 Fibonacci Golden Spiral Full Test", url: "/evidence/crop-circles/milk-hill-2001/03_Milk_Hill_2001_Fibonacci_Golden_Spiral_Full_Test.pdf" },
-  { title: "04 Milk Hill 2001 409 Binary and FiveBit Full Record", url: "/evidence/crop-circles/milk-hill-2001/04_Milk_Hill_2001_409_Binary_and_FiveBit_Full_Record.pdf" },
-  { title: "05 Milk Hill 2001 Letter Permutation Test", url: "/evidence/crop-circles/milk-hill-2001/05_Milk_Hill_2001_Letter_Permutation_Test.pdf" },
-  { title: "06 Milk Hill 2001 FINAL MATHEMATICAL CONCLUSION", url: "/evidence/crop-circles/milk-hill-2001/06_Milk_Hill_2001_FINAL_MATHEMATICAL_CONCLUSION.pdf" },
-  { title: "GIE Milk Hill 2001 Mathematical Supporting Record PREVIEW", url: "/evidence/crop-circles/milk-hill-2001/GIE_Milk_Hill_2001_Mathematical_Supporting_Record_PREVIEW.pdf" },
-  { title: "GIE Milk Hill Blueprint 001 Analysis Record PREVIEW", url: "/evidence/crop-circles/milk-hill-2001/GIE_Milk_Hill_Blueprint_001_Analysis_Record_PREVIEW.pdf" },
-  { title: "GIE Milk Hill Spiral Arm Boundary Analysis 20260816", url: "/evidence/crop-circles/milk-hill-2001/GIE_Milk_Hill_Spiral_Arm_Boundary_Analysis_20260816.pdf" },
-  { title: "GIE Milk Hill Spiral Arm Boundary Analysis CONTINUED 20260816", url: "/evidence/crop-circles/milk-hill-2001/GIE_Milk_Hill_Spiral_Arm_Boundary_Analysis_CONTINUED_20260816.pdf" },
-  { title: "GIE Milk Hill Spiral Arm Boundary Analysis PHASE RING 20260816", url: "/evidence/crop-circles/milk-hill-2001/GIE_Milk_Hill_Spiral_Arm_Boundary_Analysis_PHASE_RING_20260816.pdf" },
-  { title: "Milk Hill 2001 MATHEMATICAL RESULT FINAL WITH VISUALS", url: "/evidence/crop-circles/milk-hill-2001/Milk_Hill_2001_MATHEMATICAL_RESULT_FINAL_WITH_VISUALS.pdf" }
-];
-
-import React, { useMemo, useState } from 'react';
+﻿import React, { useMemo, useState } from 'react';
 import {
   X,
   ChevronLeft,
@@ -26,6 +11,7 @@ import {
 } from 'lucide-react';
 import { soundManager } from '../../utils/audio';
 import { MILK_HILL_POINTS } from '../../data/milkHillBlueprint';
+import { milkHillPdfs } from '../../milkHillPdfs';
 
 type Props = {
   isOpen: boolean;
@@ -34,17 +20,10 @@ type Props = {
 
 type ViewMode = 'blueprint' | 'record' | 'evidence' | 'pdf';
 
-const MILK_HILL_PDFS = [
-{ title:'01 · MEASUREMENT BASIS · 787 FT', path:'/evidence/crop-circles/milk-hill-2001/01_Milk_Hill_2001_Measurement_Basis_787FT_COMPLETE.pdf' },
-{ title:'02 · 409 COMPLETE PHYSICAL RECONSTRUCTION', path:'/evidence/crop-circles/milk-hill-2001/02_Milk_Hill_2001_409_COMPLETE_Physical_Reconstruction.pdf' },
-{ title:'03 · FIBONACCI / GOLDEN SPIRAL FULL TEST', path:'/evidence/crop-circles/milk-hill-2001/03_Milk_Hill_2001_Fibonacci_Golden_Spiral_Full_Test.pdf' },
-{ title:'04 · 409 BINARY & FIVE-BIT FULL RECORD', path:'/evidence/crop-circles/milk-hill-2001/04_Milk_Hill_2001_409_Binary_and_FiveBit_Full_Record.pdf' },
-{ title:'05 · LETTER PERMUTATION TEST', path:'/evidence/crop-circles/milk-hill-2001/05_Milk_Hill_2001_Letter_Permutation_Test.pdf' },
-{ title:'06 · FINAL MATHEMATICAL CONCLUSION', path:'/evidence/crop-circles/milk-hill-2001/06_Milk_Hill_2001_FINAL_MATHEMATICAL_CONCLUSION.pdf' },
-{ title:'07 · MATHEMATICAL SUPPORTING RECORD', path:'/evidence/crop-circles/milk-hill-2001/GIE_Milk_Hill_2001_Mathematical_Supporting_Record_PREVIEW.pdf' },
-{ title:'08 · BLUEPRINT 001 ANALYSIS RECORD', path:'/evidence/crop-circles/milk-hill-2001/GIE_Milk_Hill_Blueprint_001_Analysis_Record_PREVIEW.pdf' },
-{ title:'09 · SPIRAL ARM BOUNDARY ANALYSIS', path:'/evidence/crop-circles/milk-hill-2001/GIE_Milk_Hill_Spiral_Arm_Boundary_Analysis_20260816.pdf' }
-];
+const MILK_HILL_PDFS = milkHillPdfs.map((pdf) => ({
+  title: pdf.title,
+  path: pdf.file,
+}));
 
 const steps = [
   {
@@ -133,6 +112,9 @@ export const CropCircleBlueprintModal: React.FC<Props> = ({
             <h2 className="text-base font-bold tracking-wider text-cyan-200 sm:text-lg">
               MILK HILL 2001 · MEASURED GEOMETRIC RECONSTRUCTION
             </h2>
+            <div className="mt-1 text-[8px] tracking-wider text-slate-400 sm:text-[9px]">
+              787 FT OVERALL DIAMETER · 409 CIRCLES/SPHERES ACCOUNTED FOR · LARGEST 72 FT · SMALLEST 40 INCHES
+            </div>
           </div>
 
           <button
@@ -447,10 +429,11 @@ export const CropCircleBlueprintModal: React.FC<Props> = ({
               </div>
 
               <div className="border-t border-cyan-400/20 pt-3 text-[8px] leading-4 text-slate-500 sm:text-[9px]">
-                GIE ANALYSIS RECORD · Reconstructed from the available measured
-                image dataset. The source image yielded 361 measurable
-                components; this blueprint does not represent those as an
-                independently verified 409-circle survey.
+                GIE ANALYSIS RECORD · Authoritative result: 787 ft overall
+                diameter, 409 circles/spheres accounted for, largest circle 72 ft,
+                smallest circle 40 inches. Source image was a web-page thumbnail;
+                automated segmentation recovered 361 measurable bright components
+                rather than claiming all 409 were extracted from the image.
               </div>
             </aside>
           </div>
@@ -582,43 +565,53 @@ export const CropCircleBlueprintModal: React.FC<Props> = ({
             </div>
           </div>
         )}
-        {/* PDF EVIDENCE */}
-        {view === 'evidence' && (
-          <div className="min-h-0 flex-1 overflow-y-auto bg-[#03101a] p-4 sm:p-5">
-            <div className="mx-auto max-w-[1080px]">
-              <div className="border-b border-cyan-400/25 pb-4">
-                <div className="text-[9px] tracking-[.28em] text-cyan-400 sm:text-[10px]">GIE · DOCUMENT EVIDENCE LIBRARY</div>
-                <h3 className="mt-1 text-xl font-bold text-white">MILK HILL 2001 · PDF EVIDENCE</h3>
-                <p className="mt-2 text-xs leading-5 text-slate-400">Nine read-only supporting documents associated with the Milk Hill 2001 geometric reconstruction and mathematical analysis.</p>
+        {/* PDF EVIDENCE — compact list + viewer */}
+        {(view === 'evidence' || view === 'pdf') && (
+          <div className="grid min-h-0 flex-1 grid-cols-1 overflow-hidden bg-[#03101a] lg:grid-cols-[280px_minmax(0,1fr)]">
+            <div className="min-h-0 overflow-y-auto border-b border-cyan-400/20 p-3 lg:border-b-0 lg:border-r">
+              <div className="mb-3 px-1 text-[9px] tracking-[.28em] text-cyan-400 sm:text-[10px]">
+                GIE · DOCUMENT EVIDENCE
               </div>
-              <div className="mt-5 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
-                {MILK_HILL_PDFS.map((pdf,index)=>(
-                  <div key={pdf.path} className="flex flex-col justify-between rounded border border-cyan-400/30 bg-[#020812] p-4">
-                    <div className="flex items-start gap-3">
-                      <FileText size={22} className="mt-0.5 shrink-0 text-cyan-300"/>
-                      <div><div className="text-sm font-bold leading-5 text-white">{pdf.title}</div><div className="mt-2 text-[9px] text-slate-500 sm:text-[10px]">GIE SUPPORTING EVIDENCE · PDF</div></div>
-                    </div>
-                    <button type="button" onClick={()=>{soundManager.playClick();setSelectedPdf(index);setView('pdf');}} className="mt-4 rounded border border-cyan-400/40 bg-cyan-950/25 px-4 py-2 text-[9px] font-bold tracking-wider text-cyan-200 transition hover:border-cyan-300 hover:bg-cyan-950/50 sm:text-[10px]">OPEN DOCUMENT</button>
-                  </div>
-                ))}
+              <div className="space-y-1.5">
+                {MILK_HILL_PDFS.map((pdf, index) => {
+                  const active = selectedPdf === index;
+                  return (
+                    <button
+                      key={pdf.path}
+                      type="button"
+                      onClick={() => {
+                        soundManager.playClick();
+                        setSelectedPdf(index);
+                        setView('pdf');
+                      }}
+                      className={`flex w-full items-start gap-2 rounded border px-2.5 py-2 text-left ${
+                        active
+                          ? 'border-cyan-300 bg-cyan-950/50 text-cyan-100'
+                          : 'border-cyan-500/20 bg-[#020812] text-slate-300 hover:border-cyan-400/40'
+                      }`}
+                    >
+                      <FileText size={14} className="mt-0.5 shrink-0 text-cyan-300" />
+                      <span className="text-[10px] font-bold leading-4">{pdf.title}</span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
-          </div>
-        )}
-
-        {/* INTERNAL READ-ONLY PDF VIEWER */}
-        {view === 'pdf' && (
-          <div className="flex min-h-0 flex-1 flex-col bg-[#03101a]">
-            <div className="flex items-center justify-between gap-3 border-b border-cyan-400/25 px-4 py-3 sm:px-5">
-              <div>
-                <div className="text-[9px] tracking-[.24em] text-cyan-400 sm:text-[10px]">GIE · READ-ONLY DOCUMENT VIEWER</div>
-                <div className="mt-1 text-sm font-bold text-white">{MILK_HILL_PDFS[selectedPdf].title}</div>
-                <div className="mt-1 text-[8px] text-slate-500 sm:text-[9px]">DOCUMENT {String(selectedPdf+1).padStart(2,'0')} OF {String(MILK_HILL_PDFS.length).padStart(2,'0')}</div>
+            <div className="flex min-h-0 flex-col">
+              <div className="flex items-center justify-between gap-3 border-b border-cyan-400/25 px-4 py-2.5">
+                <div className="min-w-0">
+                  <div className="text-[9px] tracking-[.24em] text-cyan-400 sm:text-[10px]">GIE · READ-ONLY DOCUMENT VIEWER</div>
+                  <div className="mt-1 truncate text-sm font-bold text-white">{MILK_HILL_PDFS[selectedPdf].title}</div>
+                  <div className="mt-1 text-[8px] text-slate-500 sm:text-[9px]">DOCUMENT {String(selectedPdf + 1).padStart(2, '0')} OF {String(MILK_HILL_PDFS.length).padStart(2, '0')}</div>
+                </div>
               </div>
-              <button type="button" onClick={()=>{soundManager.playClick();setView('evidence');}} className="flex shrink-0 items-center gap-2 rounded border border-cyan-400/40 bg-cyan-950/25 px-3 py-2 text-[9px] font-bold tracking-wider text-cyan-200 transition hover:border-cyan-300 hover:bg-cyan-950/50 sm:text-[10px]"><ChevronLeft size={14}/>BACK TO EVIDENCE</button>
-            </div>
-            <div className="min-h-0 flex-1 p-3">
-              <iframe src={`${MILK_HILL_PDFS[selectedPdf].path}#toolbar=1&navpanes=0&view=FitH`} title={MILK_HILL_PDFS[selectedPdf].title} className="h-full min-h-[60vh] w-full rounded border border-cyan-400/25 bg-white sm:min-h-[70vh]"/>
+              <div className="min-h-0 flex-1 p-3">
+                <iframe
+                  src={`${MILK_HILL_PDFS[selectedPdf].path}#toolbar=1&navpanes=0&view=FitH`}
+                  title={MILK_HILL_PDFS[selectedPdf].title}
+                  className="h-full min-h-[60vh] w-full rounded border border-cyan-400/25 bg-white sm:min-h-[70vh]"
+                />
+              </div>
             </div>
           </div>
         )}

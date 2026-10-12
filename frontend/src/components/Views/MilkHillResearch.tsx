@@ -1,64 +1,9 @@
 ﻿import React, { useState } from "react";
 import { FileText, ExternalLink } from "lucide-react";
-
-interface ResearchPdf {
-  title: string;
-  file: string;
-}
-
-const RESEARCH_PDFS: ResearchPdf[] = [
-  {
-    title: "01 — Milk Hill 2001 Measurement Basis — 787 FT",
-    file: "/research/milk-hill/01_Milk_Hill_2001_Measurement_Basis_787FT_COMPLETE.pdf",
-  },
-  {
-    title: "02 — Milk Hill 2001 — 409 Physical Reconstruction",
-    file: "/research/milk-hill/02_Milk_Hill_2001_409_COMPLETE_Physical_Reconstruction.pdf",
-  },
-  {
-    title: "03 — Milk Hill 2001 — Fibonacci / Golden Spiral Full Test",
-    file: "/research/milk-hill/03_Milk_Hill_2001_Fibonacci_Golden_Spiral_Full_Test.pdf",
-  },
-  {
-    title: "04 — Milk Hill 2001 — 409 Binary and Five-Bit Full Record",
-    file: "/research/milk-hill/04_Milk_Hill_2001_409_Binary_and_FiveBit_Full_Record.pdf",
-  },
-  {
-    title: "05 — Milk Hill 2001 — Letter Permutation Test",
-    file: "/research/milk-hill/05_Milk_Hill_2001_Letter_Permutation_Test.pdf",
-  },
-  {
-    title: "06 — Milk Hill 2001 — Final Mathematical Conclusion",
-    file: "/research/milk-hill/06_Milk_Hill_2001_FINAL_MATHEMATICAL_CONCLUSION.pdf",
-  },
-  {
-    title: "07 — GIE Milk Hill 2001 — Mathematical Supporting Record",
-    file: "/research/milk-hill/GIE_Milk_Hill_2001_Mathematical_Supporting_Record_PREVIEW.pdf",
-  },
-  {
-    title: "08 — GIE Milk Hill — Blueprint 001 Analysis Record",
-    file: "/research/milk-hill/GIE_Milk_Hill_Blueprint_001_Analysis_Record_PREVIEW.pdf",
-  },
-  {
-    title: "09 — GIE Milk Hill — Spiral Arm Boundary Analysis",
-    file: "/research/milk-hill/GIE_Milk_Hill_Spiral_Arm_Boundary_Analysis_20260816.pdf",
-  },
-  {
-    title: "10 — GIE Milk Hill — Spiral Arm Boundary Analysis Continued",
-    file: "/research/milk-hill/GIE_Milk_Hill_Spiral_Arm_Boundary_Analysis_CONTINUED_20260816.pdf",
-  },
-  {
-    title: "11 — GIE Milk Hill — Spiral Arm Boundary Analysis Phase Ring",
-    file: "/research/milk-hill/GIE_Milk_Hill_Spiral_Arm_Boundary_Analysis_PHASE_RING_20260816.pdf",
-  },
-  {
-    title: "12 — Milk Hill 2001 — Actual Math Binary Analysis",
-    file: "/research/milk-hill/Milk_Hill_2001_actual_math_binary_analysis.pdf",
-  },
-];
+import { milkHillPdfs } from "../../milkHillPdfs";
 
 export const MilkHillResearch: React.FC = () => {
-  const [selectedPdf, setSelectedPdf] = useState(RESEARCH_PDFS[0]);
+  const [selectedPdf, setSelectedPdf] = useState(milkHillPdfs[0]);
 
   return (
     <div className="mx-auto flex h-full max-w-6xl flex-col space-y-5 overflow-hidden">
@@ -69,29 +14,36 @@ export const MilkHillResearch: React.FC = () => {
         </h1>
 
         <p className="mt-1 text-xs text-slate-400">
-          GIE Research Archive • 12 authoritative documents • Read-only
+          GIE Research Archive • {milkHillPdfs.length} authoritative documents • Read-only
         </p>
 
         <div className="mt-3 flex flex-wrap gap-2 text-[10px] font-mono uppercase tracking-wider">
           <span className="rounded border border-cyan-500/30 bg-cyan-950/30 px-3 py-1 text-cyan-300">
-            787 FT FORMATION
+            787 FT OVERALL DIAMETER
           </span>
           <span className="rounded border border-cyan-500/30 bg-cyan-950/30 px-3 py-1 text-cyan-300">
-            409 CIRCLES
+            409 CIRCLES/SPHERES ACCOUNTED FOR
           </span>
           <span className="rounded border border-cyan-500/30 bg-cyan-950/30 px-3 py-1 text-cyan-300">
-            72 FT LARGEST
+            LARGEST CIRCLE 72 FT
           </span>
           <span className="rounded border border-cyan-500/30 bg-cyan-950/30 px-3 py-1 text-cyan-300">
-            40 IN SMALLEST
+            SMALLEST CIRCLE 40 INCHES
           </span>
         </div>
+
+        <p className="mt-3 max-w-4xl text-[10px] leading-4 text-slate-500">
+          Source image was a web-page thumbnail. Automated segmentation recovered
+          361 measurable bright components. The authoritative accounting remains
+          409 circles/spheres; this viewer does not claim all 409 were extracted
+          from the thumbnail.
+        </p>
       </div>
 
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-5 lg:grid-cols-[360px_minmax(0,1fr)]">
         <div className="min-h-0 overflow-y-auto pr-1">
           <div className="space-y-2">
-            {RESEARCH_PDFS.map((pdf) => {
+            {milkHillPdfs.map((pdf) => {
               const active = selectedPdf.file === pdf.file;
 
               return (
@@ -101,7 +53,7 @@ export const MilkHillResearch: React.FC = () => {
                   onClick={() => setSelectedPdf(pdf)}
                   className={`group w-full rounded border p-3 text-left transition-all ${
                     active
-                      ? "border-cyan-300 bg-cyan-950/50 shadow-[0_0_16px_rgba(0,245,255,.15)]"
+                      ? "border-cyan-300 bg-cyan-950/50"
                       : "border-cyan-500/20 bg-slate-900/70 hover:border-cyan-400/50 hover:bg-slate-900"
                   }`}
                 >
@@ -150,9 +102,9 @@ export const MilkHillResearch: React.FC = () => {
 
           <iframe
             key={selectedPdf.file}
-            src={selectedPdf.file}
+            src={`${selectedPdf.file}#toolbar=1&navpanes=0&view=FitH`}
             title={selectedPdf.title}
-            className="min-h-0 w-full flex-1 bg-slate-950"
+            className="min-h-[60vh] w-full flex-1 bg-slate-950 lg:min-h-0"
           />
         </div>
       </div>
