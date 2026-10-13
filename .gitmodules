@@ -1,0 +1,3 @@
+[submodule "globe-app"]
+    path = globe-app
+      url = https://github.com
