@@ -20,9 +20,7 @@ export interface TerrainMapData {
   metadata: Record<string, string>;
 }
 
-export interface GISZoomLevel {
-  'GLOBAL' | 'REGIONAL' | 'GEOLOGICAL' | 'RESEARCH' | 'LOCAL';
-}
+export type GISZoomLevel = 'GLOBAL' | 'REGIONAL' | 'GEOLOGICAL' | 'RESEARCH' | 'LOCAL';
 
 export const defaultTerrainMap: TerrainMapData = {
   id: 'default-terrain',
@@ -57,5 +55,5 @@ export function calculateDistance(
 export function formatCoordinates(lat: number, lng: number): string {
   const latDir = lat >= 0 ? 'N' : 'S';
   const lngDir = lng >= 0 ? 'E' : 'W';
-  return `${Math.abs(lat).toFixed(4)}° ${latDir}, ${Math.abs(lng).toFixed(4)}° ${lngDir}`;
+  return `${Math.abs(lat).toFixed(4)}Â° ${latDir}, ${Math.abs(lng).toFixed(4)}Â° ${lngDir}`;
 }
