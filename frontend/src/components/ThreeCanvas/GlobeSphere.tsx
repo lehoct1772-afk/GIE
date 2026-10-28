@@ -64,7 +64,6 @@ const PulsingDataMarker: React.FC<{
   onClick: (event: any) => void;
 }> = ({ position, isSelected, type, onClick }) => {
   const coreRef = useRef<THREE.Mesh>(null);
-  const haloRef = useRef<THREE.Mesh>(null);
   const pulseRef = useRef<THREE.Mesh>(null);
 
   const color = isSelected
@@ -83,38 +82,36 @@ const PulsingDataMarker: React.FC<{
 
   useFrame(({ clock }) => {
     const elapsed = clock.getElapsedTime();
-    const pulse = Math.sin(elapsed * 2.1);
+    const pulse = Math.sin(elapsed * 2.5);
 
     if (coreRef.current) {
-      coreRef.current.scale.setScalar(1 + pulse * 0.12);
-      (coreRef.current.material as THREE.MeshBasicMaterial).opacity = 0.92 + pulse * 0.08;
-    }
-    if (haloRef.current) {
-      haloRef.current.scale.setScalar(1.05 + pulse * 0.1);
+      coreRef.current.scale.setScalar(1 + pulse * 0.05);
     }
     if (pulseRef.current) {
-      const cycle = (elapsed * 0.5) % 1;
-      pulseRef.current.scale.setScalar(0.8 + cycle * 2.25);
-      (pulseRef.current.material as THREE.MeshBasicMaterial).opacity = (1 - cycle) * 0.65;
+      const cycle = (elapsed * 0.8) % 1;
+      pulseRef.current.scale.setScalar(1 + cycle * 1.5);
+      (pulseRef.current.material as THREE.MeshBasicMaterial).opacity = (1 - cycle) * 0.6;
     }
   });
 
   return (
     <group position={position}>
       <mesh ref={coreRef} onClick={onClick} renderOrder={30}>
-        <sphereGeometry args={[isSelected ? 0.085 : 0.055, 16, 16]} />
-        <meshBasicMaterial color={color} transparent opacity={1} blending={THREE.AdditiveBlending} depthWrite={false} depthTest={false} toneMapped={false} />
-      </mesh>
-
-      <mesh ref={haloRef} renderOrder={29}>
-        <sphereGeometry args={[isSelected ? 0.15 : 0.105, 16, 16]} />
-        <meshBasicMaterial color={color} transparent opacity={0.42} blending={THREE.AdditiveBlending} depthWrite={false} depthTest={false} toneMapped={false} />
+        <sphereGeometry args={[isSelected ? 0.035 : 0.02, 16, 16]} />
+        <meshBasicMaterial color={color} transparent opacity={1} depthWrite={false} depthTest={false} toneMapped={false} />
       </mesh>
 
       <mesh ref={pulseRef} quaternion={quaternion} renderOrder={31}>
-        <ringGeometry args={[0.06, 0.078, 24]} />
-        <meshBasicMaterial color={color} transparent opacity={0.6} side={THREE.DoubleSide} blending={THREE.AdditiveBlending} depthWrite={false} depthTest={false} toneMapped={false} />
+        <ringGeometry args={[0.04, 0.045, 32]} />
+        <meshBasicMaterial color={color} transparent opacity={0.8} side={THREE.DoubleSide} depthWrite={false} depthTest={false} toneMapped={false} />
       </mesh>
+
+      {isSelected && (
+        <mesh quaternion={quaternion} renderOrder={31}>
+          <ringGeometry args={[0.06, 0.065, 32]} />
+          <meshBasicMaterial color="#ffd400" transparent opacity={1} side={THREE.DoubleSide} depthWrite={false} depthTest={false} toneMapped={false} />
+        </mesh>
+      )}
     </group>
   );
 };
@@ -131,7 +128,6 @@ export const GlobeSphere: React.FC<GlobeSphereProps> = ({
 
   const radius = 2.1;
 
-  // Load the NASA texture directly from the public folder
   const earthTexture = useTexture("/images/earth-map.jpg");
 
   useMemo(() => {
@@ -154,7 +150,6 @@ export const GlobeSphere: React.FC<GlobeSphereProps> = ({
     }
   });
 
-  // Using real lat/lng from your data so nodes stay over their actual countries
   const nodePositions = useMemo(() => {
     return GEO_NODES.map((node) => ({
       ...node,
@@ -232,7 +227,6 @@ export const GlobeSphere: React.FC<GlobeSphereProps> = ({
 
   return (
     <group ref={globeRef}>
-      {/* NASA TEXTURE EARTH */}
       <mesh renderOrder={1}>
         <sphereGeometry args={[radius, 48, 48]} />
         <meshBasicMaterial map={earthTexture} color="#ffffff" transparent opacity={1} side={THREE.FrontSide} depthWrite={true} depthTest={true} toneMapped={false} />
@@ -250,42 +244,53 @@ export const GlobeSphere: React.FC<GlobeSphereProps> = ({
       {showWireframe && (
         <mesh renderOrder={3}>
           <sphereGeometry args={[radius * 1.004, 32, 32]} />
-          <meshBasicMaterial color="#00ffff" wireframe transparent opacity={0.18} blending={THREE.AdditiveBlending} depthWrite={false} toneMapped={false} />
+          <meshBasicMaterial color="#00ffff" wireframe transparent opacity={0.18} depthWrite={false} toneMapped={false} />
         </mesh>
       )}
 
-      {latitudeGeometries.map((ring, index) => (
-        <line key={`lat-${index}`} geometry={ring.geometry} renderOrder={8}>
-          <lineBasicMaterial color={ring.equator ? "#ffd400" : "#00ffff"} transparent opacity={ring.equator ? 1 : 0.72} blending={THREE.AdditiveBlending} depthWrite={false} toneMapped={false} />
-        </line>
-      ))}
+      {latitudeGeometries.map((ring, index) => {
+        const mat = new THREE.LineBasicMaterial({
+          color: ring.equator ? "#ffd400" : "#00ffff",
+          transparent: true,
+          opacity: ring.equator ? 0.5 : 0.12,
+          depthWrite: false,
+          toneMapped: false,
+        });
+        const lineObj = new THREE.Line(ring.geometry, mat);
+        return <primitive key={`lat-${index}`} object={lineObj} renderOrder={8} />;
+      })}
 
-      {longitudeGeometries.map((geometry, index) => (
-        <line key={`lng-${index}`} geometry={geometry} renderOrder={8}>
-          <lineBasicMaterial color="#00ffff" transparent opacity={0.68} blending={THREE.AdditiveBlending} depthWrite={false} toneMapped={false} />
-        </line>
-      ))}
+      {longitudeGeometries.map((geometry, index) => {
+        const mat = new THREE.LineBasicMaterial({
+          color: "#00ffff",
+          transparent: true,
+          opacity: 0.12,
+          depthWrite: false,
+          toneMapped: false,
+        });
+        const lineObj = new THREE.Line(geometry, mat);
+        return <primitive key={`lng-${index}`} object={lineObj} renderOrder={8} />;
+      })}
 
       <group ref={goldRingRef}>
         <mesh rotation={[Math.PI / 2, 0, 0]} renderOrder={12}>
-          <ringGeometry args={[radius * 1.16, radius * 1.17, 64]} />
-          <meshBasicMaterial color="#ffd400" transparent opacity={1} side={THREE.DoubleSide} blending={THREE.AdditiveBlending} depthWrite={false} toneMapped={false} />
-        </mesh>
-        <mesh rotation={[Math.PI / 2, 0, 0]} renderOrder={11}>
-          <ringGeometry args={[radius * 1.14, radius * 1.19, 64]} />
-          <meshBasicMaterial color="#ffb700" transparent opacity={0.22} side={THREE.DoubleSide} blending={THREE.AdditiveBlending} depthWrite={false} toneMapped={false} />
+          <ringGeometry args={[radius * 1.15, radius * 1.155, 64]} />
+          <meshBasicMaterial color="#ffd400" transparent opacity={0.6} side={THREE.DoubleSide} depthWrite={false} toneMapped={false} />
         </mesh>
       </group>
 
       <Globe3DLayers layers={layers} radius={radius} />
 
       {arcs.map((arc) => {
-        const geometry = new THREE.BufferGeometry().setFromPoints(arc.points);
-        return (
-          <line key={arc.id} geometry={geometry} renderOrder={14}>
-            <lineBasicMaterial color={arc.isSelected ? "#ffd400" : "#00ff9d"} transparent opacity={arc.isSelected ? 1 : 0.82} blending={THREE.AdditiveBlending} depthWrite={false} toneMapped={false} />
-          </line>
-        );
+        const g = new THREE.BufferGeometry().setFromPoints(arc.points);
+        const m = new THREE.LineBasicMaterial({ 
+          color: arc.isSelected ? "#ffd400" : "#00d9ff", 
+          transparent: true, 
+          opacity: arc.isSelected ? 0.9 : 0.25, 
+          depthWrite: false, 
+          toneMapped: false 
+        });
+        return <primitive key={arc.id} object={new THREE.Line(g, m)} renderOrder={14} />;
       })}
 
       {showNodes && nodePositions.map((node) => (
