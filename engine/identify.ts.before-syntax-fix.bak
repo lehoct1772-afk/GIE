@@ -1,0 +1,156 @@
+=== FILE: engine/identify.ts ===
+import type { SystemSnapshot, Identification, Evidence } from "./types";
+
+const OS_SIGNATURES: Array<{
+  os: Identification["os"];
+  match: (s: SystemSnapshot) => Evidence | null;
+}> = [
+  {
+    os: "windows",
+    match: (s) => {
+      const f = s.files.find((x) =>
+        /(^|\/)Windows\/(System32|SysWOW64)\//i.test(x.path) ||
+        /\.(exe|dll|sys)$/i.test(x.path)
+      );
+      return f ? { kind: "file", path: f.path, reason: "Windows system path or PE binary" } : null;
+    },
+  },
+  {
+    os: "linux",
+    match: (s) => {
+      const f = s.files.find(
+        (x) =>
+          x.path.startsWith("etc/") ||
+          x.path.startsWith("proc/") ||
+          x.path.startsWith("var/log/") ||
+          x.path.endsWith(".service")
+      );
+      return f ? { kind: "file", path: f.path, reason: "Linux FHS path or systemd unit" } : null;
+    },
+  },
+  {
+    os: "macos",
+    match: (s) => {
+      const f = s.files.find(
+        (x) => x.path.includes(".app/") || x.path.startsWith("Library/") || x.path.endsWith(".dmg")
+      );
+      return f ? { kind: "file", path: f.path, reason: "macOS bundle or Library path" } : null;
+    },
+  },
+  {
+    os: "unix",
+    match: (s) => {
+      const f = s.files.find(
+        (x) => x.path.startsWith("usr/") || x.path.startsWith("bin/") || x.path.startsWith("sbin/")
+      );
+      return f ? { kind: "file", path: f.path, reason: "Unix FHS path" } : null;
+    },
+  },
+];
+
+const RUNTIME_SIGNATURES: Array<{
+  runtime: Identification["runtime"];
+  match: (s: SystemSnapshot) => Evidence | null;
+}> = [
+  {
+    runtime: "java",
+    match: (s) => {
+      const f = s.files.find(
+        (x) => x.path.endsWith(".jar") || x.path.endsWith(".class") || x.path === "pom.xml" || x.path === "build.gradle"
+      );
+      return f ? { kind: "file", path: f.path, reason: "Java artifact or build manifest" } : null;
+    },
+  },
+  {
+    runtime: "python",
+    match: (s) => {
+      const f = s.files.find(
+        (x) =>
+          x.path.endsWith(".py") ||
+          x.path === "requirements.txt" ||
+          x.path === "pyproject.toml" ||
+          x.path === "Pipfile"
+      );
+      return f ? { kind: "file", path: f.path, reason: "Python source or dependency manifest" } : null;
+    },
+  },
+  {
+    runtime: "node",
+    match: (s) => {
+      const f = s.files.find((x) => x.path === "package.json" || x.path.endsWith(".js") || x.path.endsWith(".ts"));
+      return f ? { kind: "file", path: f.path, reason: "Node manifest or JS/TS source" } : null;
+    },
+  },
+  {
+    runtime: "dotnet",
+    match: (s) => {
+      const f = s.files.find((x) => x.path.endsWith(".csproj") || x.path.endsWith(".dll") || x.path === "web.config");
+      return f ? { kind: "file", path: f.path, reason: ".NET project or assembly" } : null;
+    },
+  },
+];
+
+const SCRIPT_SIGNATURES: Array<{
+  layer: string;
+  match: (s: SystemSnapshot) => Evidence | null;
+}> = [
+  {
+    layer: "shell",
+    match: (s) => {
+      const f = s.files.find((x) => x.path.endsWith(".sh") || x.path.endsWith(".bash"));
+      return f ? { kind: "file", path: f.path, reason: "shell script" } : null;
+    },
+  },
+  {
+    layer: "batch",
+    match: (s) => {
+      const f = s.files.find((x) => x.path.endsWith(".bat") || x.path.endsWith(".cmd"));
+      return f ? { kind: "file", path: f.path, reason: "batch script" } : null;
+    },
+  },
+  {
+    layer: "powershell",
+    match: (s) => {
+      const f = s.files.find((x) => x.path.endsWith(".ps1"));
+      return f ? { kind: "file", path: f.path, reason: "PowerShell script" } : null;
+    },
+  },
+];
+
+export function identify(snapshot: SystemSnapshot): Identification {
+  const evidence: Evidence[] = [];
+
+  let os: Identification["os"] = "unknown";
+  for (const sig of OS_SIGNATURES) {
+    const e = sig.match(snapshot);
+    if (e) {
+      os = sig.os;
+      evidence.push(e);
+      break;
+    }
+  }
+
+  let runtime: Identification["runtime"] = null;
+  for (const sig of RUNTIME_SIGNATURES) {
+    const e = sig.match(snapshot);
+    if (e) {
+      runtime = sig.runtime;
+      evidence.push(e);
+      break;
+    }
+  }
+
+  const scriptLayer: string[] = [];
+  for (const sig of SCRIPT_SIGNATURES) {
+    const e = sig.match(snapshot);
+    if (e) {
+      scriptLayer.push(sig.layer);
+      evidence.push(e);
+    }
+  }
+
+  const state: Identification["state"] = os === "unknown" && runtime === null ? "insufficient" : "certain";
+
+  return { os, runtime, scriptLayer, state, evidence };
+}
+=== END FILE ===
